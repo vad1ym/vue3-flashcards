@@ -1,9 +1,4 @@
-import interact from '@interactjs/interact'
-import { computed, reactive, ref } from 'vue'
-import '@interactjs/actions/drag'
-import '@interactjs/inertia'
-import '@interactjs/modifiers'
-import '@interactjs/auto-start'
+import { computed, onUnmounted, reactive, ref } from 'vue'
 
 export enum DragType {
   APPROVE = 'approve',
@@ -13,7 +8,6 @@ export enum DragType {
 export interface DragSetupOptions {
   maxRotation?: number
   threshold?: number
-
   onDragStart?: () => void
   onDragMove?: (type: DragType | null, delta: number) => void
   onDragEnd?: () => void
@@ -42,8 +36,11 @@ function parseOptions(options: DragSetupOptions) {
 export function useDragSetup(options: DragSetupOptions) {
   const { maxRotation, threshold, onDragStart, onDragMove, onDragEnd, onComplete } = parseOptions(options)
 
+  const sourceEl = ref<HTMLElement | null>(null)
   const isDragging = ref(false)
   const isAnimating = ref(false)
+  let startX = 0
+  let startY = 0
 
   const position = reactive<DragPosition>({
     x: 0,
@@ -63,110 +60,120 @@ export function useDragSetup(options: DragSetupOptions) {
     })
   }
 
+  function handleDragStart(event: MouseEvent | TouchEvent) {
+    event.preventDefault()
+
+    isAnimating.value = false
+    isDragging.value = true
+
+    if (event instanceof MouseEvent) {
+      startX = event.clientX - position.x
+      startY = event.clientY - position.y
+    }
+    else {
+      startX = event.touches[0].clientX - position.x
+      startY = event.touches[0].clientY - position.y
+    }
+
+    onDragStart()
+  }
+
+  function handleDragMove(event: MouseEvent | TouchEvent) {
+    if (!isDragging.value || isAnimating.value)
+      return
+
+    event.preventDefault()
+    event.stopPropagation()
+
+    const clientX = event instanceof MouseEvent ? event.clientX : event.touches[0].clientX
+    const clientY = event instanceof MouseEvent ? event.clientY : event.touches[0].clientY
+
+    const x = clientX - startX
+    const y = clientY - startY
+
+    let rotate = maxRotation * (x / threshold)
+    rotate = Math.max(-maxRotation, Math.min(maxRotation, rotate))
+
+    position.x = x
+    position.y = y
+    position.rotation = rotate
+    position.type = rotate > 0 ? DragType.APPROVE : rotate < 0 ? DragType.REJECT : null
+
+    const opacityAmount = Math.abs(rotate) / maxRotation
+    position.delta = opacityAmount
+
+    onDragMove(position.type, opacityAmount)
+  }
+
+  function handleDragEnd() {
+    if (!isDragging.value) {
+      return
+    }
+
+    isAnimating.value = true
+    setTimeout(() => {
+      isDragging.value = false
+    }, 100)
+
+    if (position.x > threshold) {
+      onComplete(true)
+      position.delta = 1
+    }
+    else if (position.x < -threshold) {
+      onComplete(false)
+      position.delta = 1
+    }
+    else {
+      restore()
+    }
+
+    onDragEnd()
+  }
+
   function setupInteract(el: HTMLElement) {
+    sourceEl.value = el
     restore()
 
-    interact(el).draggable({
-      inertia: false,
-      onstart() {
-        isAnimating.value = false
-        isDragging.value = true
-        onDragStart()
-      },
-      onmove(event) {
-        event.preventDefault()
-        const x = (position.x || 0) + event.dx
-        const y = (position.y || 0) + event.dy
+    // Mouse events
+    el.addEventListener('mousedown', handleDragStart)
+    window.addEventListener('mousemove', handleDragMove)
+    window.addEventListener('mouseup', handleDragEnd)
 
-        let rotate = maxRotation * (x / threshold)
-
-        if (rotate > maxRotation) {
-          rotate = maxRotation
-        }
-        else if (rotate < -maxRotation) {
-          rotate = -maxRotation
-        }
-
-        position.x = x
-        position.y = y
-        position.rotation = rotate
-
-        if (rotate > 0) {
-          position.type = DragType.APPROVE
-        }
-        else if (rotate < 0) {
-          position.type = DragType.REJECT
-        }
-
-        const opacityAmount = Math.abs(rotate) / maxRotation
-
-        position.delta = opacityAmount
-        onDragMove(position.type, opacityAmount)
-      },
-      onend() {
-        isAnimating.value = true
-
-        setTimeout(() => {
-          isDragging.value = false
-        }, 100)
-
-        if (position.x > threshold) {
-          onComplete(true)
-          position.delta = 1
-        }
-        else if (position.x < -threshold) {
-          onComplete(false)
-          position.delta = 1
-        }
-        else {
-          restore()
-        }
-
-        onDragEnd()
-      },
-    })
+    // Touch events
+    el.addEventListener('touchstart', handleDragStart)
+    window.addEventListener('touchmove', handleDragMove)
+    window.addEventListener('touchend', handleDragEnd)
   }
 
-  /**
-   * Simulate rejection
-   */
-  function reject() {
+  function complete(type: DragType, threshold: number) {
     isAnimating.value = true
     isDragging.value = false
     Object.assign(position, {
-      x: -threshold - 1, // Move past threshold to trigger rejection
-      y: 0,
-      rotation: -maxRotation,
-      type: DragType.REJECT,
-      delta: 1,
-    })
-    onComplete(false)
-  }
-
-  /**
-   * Simulate approval
-   */
-  function approve() {
-    isAnimating.value = true
-    isDragging.value = false
-    Object.assign(position, {
-      x: threshold + 1,
+      x: threshold,
       y: 0,
       rotation: maxRotation,
-      type: DragType.APPROVE,
+      type,
       delta: 1,
     })
-    onComplete(true)
+    onComplete(type === DragType.APPROVE)
   }
 
   const getTransformString = computed(() => {
     if (isAnimating.value === false || position.type !== null) {
-      const x = position.x
-      const y = position.y
-      const rotate = position.rotation
+      const { x, y, rotation: rotate } = position
       return `translate3D(${x}px, ${y}px, 0) rotate(${rotate}deg)`
     }
     return ''
+  })
+
+  onUnmounted(() => {
+    sourceEl.value?.removeEventListener('mousedown', handleDragStart)
+    window.removeEventListener('mousemove', handleDragMove)
+    window.removeEventListener('mouseup', handleDragEnd)
+
+    sourceEl.value?.removeEventListener('touchstart', handleDragStart)
+    window.removeEventListener('touchmove', handleDragMove)
+    window.removeEventListener('touchend', handleDragEnd)
   })
 
   return {
@@ -176,7 +183,7 @@ export function useDragSetup(options: DragSetupOptions) {
     isAnimating,
     restore,
     getTransformString,
-    reject,
-    approve,
+    reject: () => complete(DragType.REJECT, -threshold - 1),
+    approve: () => complete(DragType.APPROVE, threshold + 1),
   }
 }
