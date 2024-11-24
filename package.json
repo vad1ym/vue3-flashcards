@@ -1,0 +1,76 @@
+{
+  "name": "vue3-flashcards",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Tinder-like flashcards component with dragging and flipping",
+  "author": "vad1ym",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vad1ym/vue3-flashcards"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "component",
+    "cards",
+    "flashcards",
+    "tinder",
+    "dating",
+    "dragging",
+    "flipping",
+    "vue3-flashcards"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/flashcards.js",
+      "require": "./dist/flashcards.js"
+    },
+    "./dist/*": "./dist/*"
+  },
+  "main": "./dist/flashcards.umd.js",
+  "module": "./dist/flashcards.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --fix",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "dependencies": {
+    "@interactjs/actions": "^1.10.27",
+    "@interactjs/auto-start": "^1.10.27",
+    "@interactjs/inertia": "^1.10.27",
+    "@interactjs/interact": "^1.10.27",
+    "@interactjs/modifiers": "^1.10.27",
+    "interactjs": "^1.10.27"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^3.9.2",
+    "@types/node": "^22.9.3",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "autoprefixer": "^10.4.20",
+    "daisyui": "^4.12.14",
+    "eslint": "^9.15.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "typescript": "~5.6.2",
+    "vite": "^5.4.10",
+    "vite-plugin-css-injected-by-js": "^3.5.2",
+    "vite-plugin-dts": "^4.3.0",
+    "vitepress": "^1.5.0",
+    "vue": "^3.5.12",
+    "vue-tsc": "^2.1.8"
+  }
+}
