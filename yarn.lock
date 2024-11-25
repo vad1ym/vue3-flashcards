@@ -532,75 +532,6 @@
   resolved "https://registry.yarnpkg.com/@iconify/types/-/types-2.0.0.tgz#ab0e9ea681d6c8a1214f30cd741fe3a20cc57f57"
   integrity sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==
 
-"@interactjs/actions@^1.10.27":
-  version "1.10.27"
-  resolved "https://registry.yarnpkg.com/@interactjs/actions/-/actions-1.10.27.tgz#61514412edd01a962ad82875b06347d49be1b770"
-  integrity sha512-FCRg5KwB+stkPcAMx/Cn0fgGP6p4LyMX9S/Upcn/W+hpYme31bPi54PCqmOebzz6myTthN6zFf9jMyLOqtI/gg==
-  optionalDependencies:
-    "@interactjs/interact" "1.10.27"
-
-"@interactjs/auto-start@^1.10.27":
-  version "1.10.27"
-  resolved "https://registry.yarnpkg.com/@interactjs/auto-start/-/auto-start-1.10.27.tgz#1bad1b073b005db06ea12d75a21685d89e8b8fc4"
-  integrity sha512-ECLBO/nxmaF1knncJKIE5F7la3KKRgEkn0Cu2JTPOYj9xy/LpfYElo3wkRHsodgOqF651nR70GK2/IzPR2lO9A==
-  optionalDependencies:
-    "@interactjs/interact" "1.10.27"
-
-"@interactjs/core@1.10.27":
-  version "1.10.27"
-  resolved "https://registry.yarnpkg.com/@interactjs/core/-/core-1.10.27.tgz#dc39d0a8ebf933ea356bb0da53abef990b32c6dd"
-  integrity sha512-SliUr/3ZbLAdED8LokzYzWHWMdCB5Cq+UnpXuRy+BIod1j97m4IUFf/D1iIKUBBjBcucgXbz28z96WnenVCB7Q==
-
-"@interactjs/inertia@^1.10.27":
-  version "1.10.27"
-  resolved "https://registry.yarnpkg.com/@interactjs/inertia/-/inertia-1.10.27.tgz#e641df4996f6b6468ddae5e939bec2a1337b7037"
-  integrity sha512-S/SVj/M0D+wWWPVXHcXN/YUWOK51LFJsEA+CTgVnFhlSU04+1FUvNLwilCZcHgECu1RJxZNKDwZysDATg+r8jQ==
-  dependencies:
-    "@interactjs/offset" "1.10.27"
-  optionalDependencies:
-    "@interactjs/interact" "1.10.27"
-
-"@interactjs/interact@1.10.27", "@interactjs/interact@^1.10.27":
-  version "1.10.27"
-  resolved "https://registry.yarnpkg.com/@interactjs/interact/-/interact-1.10.27.tgz#962afc2674dd0164450b3f370b7eebd48017bfc2"
-  integrity sha512-XdH3A2UUzjEFGGJgFuJlhiz99tE8jB8xNh/DmnoMuL6uOQPxNA+sWRnzEVjG0+zY2P3/dbhEpi4Cn3FLPzydwA==
-  dependencies:
-    "@interactjs/core" "1.10.27"
-    "@interactjs/utils" "1.10.27"
-
-"@interactjs/modifiers@^1.10.27":
-  version "1.10.27"
-  resolved "https://registry.yarnpkg.com/@interactjs/modifiers/-/modifiers-1.10.27.tgz#980cb9201c59e1761949006339076ec44dc771b7"
-  integrity sha512-ei/qfoQ+9/8k6WzNzdNqHI6cWkIV576N4Ap16r5CoqOWwhA6Xzj3OMHf1g0t1O4eSq2HdJsVJn3eLNfw9HsbeQ==
-  dependencies:
-    "@interactjs/snappers" "1.10.27"
-  optionalDependencies:
-    "@interactjs/interact" "1.10.27"
-
-"@interactjs/offset@1.10.27":
-  version "1.10.27"
-  resolved "https://registry.yarnpkg.com/@interactjs/offset/-/offset-1.10.27.tgz#9d4c392957b1ddca04d5dd5f1b6bd16bba22f3bb"
-  integrity sha512-AezsLiuK+Qv4jXdYuRa65HJ2pMFMZPlqiAep6ZRLwhP9HE7O75c0EAm+gfx+dpPrHNHs6J9LaiKSZl+B+A2qAw==
-  optionalDependencies:
-    "@interactjs/interact" "1.10.27"
-
-"@interactjs/snappers@1.10.27":
-  version "1.10.27"
-  resolved "https://registry.yarnpkg.com/@interactjs/snappers/-/snappers-1.10.27.tgz#046e65ea30bfa75aa80879e4701e600c5dfc41d8"
-  integrity sha512-HZLZ0XSi6HI08OmTv/HKG6AltQoaKAALLQ+KDW92utj3XSgw7oren0KsWUKPhaPg3Av7R1jFQd08s+uafqIlLw==
-  optionalDependencies:
-    "@interactjs/interact" "1.10.27"
-
-"@interactjs/types@1.10.27":
-  version "1.10.27"
-  resolved "https://registry.yarnpkg.com/@interactjs/types/-/types-1.10.27.tgz#10afd71cef2498e2b5192cf0d46f937d8ceb767f"
-  integrity sha512-BUdv0cvs4H5ODuwft2Xp4eL8Vmi3LcihK42z0Ft/FbVJZoRioBsxH+LlsBdK4tAie7PqlKGy+1oyOncu1nQ6eA==
-
-"@interactjs/utils@1.10.27":
-  version "1.10.27"
-  resolved "https://registry.yarnpkg.com/@interactjs/utils/-/utils-1.10.27.tgz#bc867b252b1a25400d1c5c2393c99b267d69bbca"
-  integrity sha512-+qfLOio2OxQqg1cXSnRaCl+N8MQDQLDS9w+aOGxH8YLAhIMyt7Asxx/46//sT8orgsi16pmlBPtngPHT9s8zKw==
-
 "@isaacs/cliui@^8.0.2":
   version "8.0.2"
   resolved "https://registry.yarnpkg.com/@isaacs/cliui/-/cliui-8.0.2.tgz#b37667b7bc181c168782259bab42474fbf52b550"
@@ -2463,13 +2394,6 @@ indent-string@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/indent-string/-/indent-string-4.0.0.tgz#624f8f4497d619b2d9768531d58f4122854d7251"
   integrity sha512-EdDDZu4A2OyIK7Lr/2zG+w5jmbuk1DVBnEwREQvBzspBJkCEbRa8GxU1lghYcaGJCnRWibjDXlq779X1/y5xwg==
-
-interactjs@^1.10.27:
-  version "1.10.27"
-  resolved "https://registry.yarnpkg.com/interactjs/-/interactjs-1.10.27.tgz#16499aba4987a5ccfdaddca7d1ba7bb1118e14d0"
-  integrity sha512-y/8RcCftGAF24gSp76X2JS3XpHiUvDQyhF8i7ujemBz77hwiHDuJzftHx7thY8cxGogwGiPJ+o97kWB6eAXnsA==
-  dependencies:
-    "@interactjs/types" "1.10.27"
 
 is-arrayish@^0.2.1:
   version "0.2.1"

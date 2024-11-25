@@ -5,6 +5,7 @@
   "description": "Tinder-like flashcards component with dragging and flipping",
   "author": "vad1ym",
   "license": "MIT",
+  "homepage": "https://vad1ym.github.io/vue3-flashcards",
   "repository": {
     "type": "git",
     "url": "https://github.com/vad1ym/vue3-flashcards"
@@ -47,14 +48,6 @@
   },
   "peerDependencies": {
     "vue": "^3.0.0"
-  },
-  "dependencies": {
-    "@interactjs/actions": "^1.10.27",
-    "@interactjs/auto-start": "^1.10.27",
-    "@interactjs/inertia": "^1.10.27",
-    "@interactjs/interact": "^1.10.27",
-    "@interactjs/modifiers": "^1.10.27",
-    "interactjs": "^1.10.27"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.9.2",
