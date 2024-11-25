@@ -6,6 +6,8 @@ import FlashCardFlip from './FlashCardFlip.vue'
 const props = defineProps<{
   items: T[]
   flip?: boolean
+  threshold?: number
+  maxRotation?: number
 }>()
 
 const emit = defineEmits<{
@@ -87,6 +89,8 @@ function rejectCurrent() {
               :ref="el => cards[index] = el"
               :current="index === currentIndex"
               #="{ isDragging }"
+              :threshold="props.threshold"
+              :max-rotation="props.maxRotation"
               @complete="setApproval(index, $event)"
             >
               <FlashCardFlip :disabled="isDragging || !props.flip">
