@@ -64,6 +64,12 @@ function approveCurrent() {
 function rejectCurrent() {
   cards.value?.[currentIndex.value]?.reject()
 }
+
+defineExpose({
+  restore: restoreLast,
+  approve: approveCurrent,
+  reject: rejectCurrent,
+})
 </script>
 
 <template>
