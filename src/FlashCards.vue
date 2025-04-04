@@ -38,7 +38,7 @@ const currentIndex = ref(0)
 const isFirstCard = computed(() => currentIndex.value === 0)
 
 const visibleItems = computed(() => {
-  const buffer = props.virtualBuffer ?? 1
+  const buffer = props.virtualBuffer ?? 2
   const start = Math.max(0, currentIndex.value - 1)
   const end = Math.min(props.items.length - 1, currentIndex.value + buffer)
 
@@ -47,6 +47,7 @@ const visibleItems = computed(() => {
     return {
       item: props.items[index],
       index,
+      key: i,
       state: history.get(index),
     }
   })
@@ -114,14 +115,14 @@ defineExpose({
       </div>
       <TransitionGroup name="list">
         <div
-          v-for="{ item, index, state } in visibleItems"
+          v-for="{ item, index, state, key } in visibleItems"
           v-show="!state?.done"
           :key="index"
           class="flashcard-item"
           :class="{
             'left': state?.approved === false,
             'right': state?.approved === true,
-            'animate-card': index === currentIndex || index === currentIndex - 1,
+            'animate-card': key <= 2,
           }"
           :style="{ zIndex: props.items.length - index }"
         >
