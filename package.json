@@ -47,7 +47,7 @@
     "docs:preview": "vitepress preview docs",
     "changelog": "conventional-changelog -p conventionalcommits -i ./docs/changelog.md -s -r 0",
     "changelog:first": "conventional-changelog -p conventionalcommits -i ./docs/changelog.md -s -r 0 -n ./.changelog.config.cjs",
-    "version": "yarn changelog && git add CHANGELOG.md"
+    "version": "yarn changelog && git add changelog.md"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
