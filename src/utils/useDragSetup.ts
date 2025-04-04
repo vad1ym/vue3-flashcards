@@ -153,10 +153,11 @@ export function useDragSetup(options: DragSetupOptions) {
     isAnimating.value = true
     isDragging.value = false
     isDrag.value = false
+    const sign = type === DragType.APPROVE ? 1 : -1
     Object.assign(position, {
-      x: threshold,
+      x: sign * Math.abs(threshold),
       y: 0,
-      rotation: maxRotation,
+      rotation: sign * maxRotation,
       type,
       delta: 1,
     })
