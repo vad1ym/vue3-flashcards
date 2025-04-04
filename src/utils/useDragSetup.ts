@@ -25,7 +25,7 @@ export interface DragPosition {
 function parseOptions(options: DragSetupOptions) {
   return {
     maxRotation: options.maxRotation ?? 20,
-    threshold: options.threshold ?? 200,
+    threshold: options.threshold ?? 150,
     onDragStart: options.onDragStart || (() => {}),
     onDragMove: options.onDragMove || (() => {}),
     onDragEnd: options.onDragEnd || (() => {}),

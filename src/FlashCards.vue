@@ -18,11 +18,13 @@ const emit = defineEmits<{
 
 defineSlots<{
   default: (props: { item: T }) => any
-  back: (props: { item: T }) => any
-  actions: (props: { restore: () => void, reject: () => void, approve: () => void }) => any
+  back?: (props: { item: T }) => any
+  reject?: (props: { item: T }) => any
+  approve?: (props: { item: T }) => any
+  actions?: (props: { restore: () => void, reject: () => void, approve: () => void }) => any
 }>()
 
-const cards = ref<any[]>([])
+const cards = ref<InstanceType<typeof FlashCard>[]>([])
 
 interface CardState {
   approved?: boolean
@@ -36,7 +38,7 @@ const isFirstCard = computed(() => currentIndex.value === 0)
 
 const visibleItems = computed(() => {
   const buffer = props.virtualBuffer ?? 1
-  const start = Math.max(0, currentIndex.value - 1) // Always keep previous card for restore
+  const start = Math.max(0, currentIndex.value - 1)
   const end = Math.min(props.items.length - 1, currentIndex.value + buffer)
 
   return Array.from({ length: end - start + 1 }, (_, i) => {
@@ -76,6 +78,7 @@ function restoreLast() {
 function approveCurrent() {
   cards.value?.[currentIndex.value]?.approve()
 }
+
 function rejectCurrent() {
   cards.value?.[currentIndex.value]?.reject()
 }
@@ -108,40 +111,36 @@ defineExpose({
         >
           <div class="flashcard-content">
             <FlashCard
-              :ref="el => cards[index] = el"
+              :ref="el => (cards[index] = el as InstanceType<typeof FlashCard>)"
               :current="index === currentIndex"
-              #="{ isDragging }"
               :threshold="props.threshold"
               :max-rotation="props.maxRotation"
               @complete="setApproval(index, $event)"
             >
-              <FlashCardFlip :disabled="isDragging || !props.flip">
-                <template #front>
-                  <slot :item="item" />
-                </template>
-                <template #back>
-                  <slot name="back" :item="item" />
-                </template>
-              </FlashCardFlip>
+              <template #default="{ isDragging }">
+                <FlashCardFlip :disabled="isDragging || !props.flip">
+                  <template #front>
+                    <slot :item="item" />
+                  </template>
+                  <template #back>
+                    <slot name="back" :item="item" />
+                  </template>
+                </FlashCardFlip>
+              </template>
+
+              <template #reject>
+                <slot name="reject" :item="item" />
+              </template>
+              <template #approve>
+                <slot name="approve" :item="item" />
+              </template>
             </FlashCard>
           </div>
         </div>
       </TransitionGroup>
     </div>
 
-    <slot name="actions" :restore="restoreLast" :reject="rejectCurrent" :approve="approveCurrent">
-      <div class="flashcards-actions">
-        <div class="flashcards-action" @click="restoreLast">
-          Return
-        </div>
-        <div class="flashcards-action" @click="rejectCurrent">
-          Reject
-        </div>
-        <div class="flashcards-action" @click="approveCurrent">
-          Approve
-        </div>
-      </div>
-    </slot>
+    <slot name="actions" :restore="restoreLast" :reject="rejectCurrent" :approve="approveCurrent" />
   </div>
 </template>
 
@@ -199,25 +198,5 @@ defineExpose({
 
 .list-leave-active {
   position: absolute;
-}
-
-.flashcards-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px;
-}
-
-.flashcards-action {
-  flex: 1;
-  cursor: pointer;
-
-  &:nth-child(2) {
-    text-align: center;
-  }
-
-  &:nth-child(3) {
-    text-align: right;
-  }
 }
 </style>

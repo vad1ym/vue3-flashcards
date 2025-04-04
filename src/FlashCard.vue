@@ -14,7 +14,13 @@ const emit = defineEmits<{
   complete: [approved: boolean]
 }>()
 
-const el = ref<HTMLElement | null>(null)
+defineSlots<{
+  default: (props: { isDragging: boolean }) => any
+  reject?: (props: { delta: number }) => any
+  approve?: (props: { delta: number }) => any
+}>()
+
+const el = ref<HTMLElement>()
 
 const {
   setupInteract,
@@ -35,10 +41,7 @@ const {
 
 onMounted(async () => {
   await nextTick()
-
-  if (el.value) {
-    setupInteract(el.value)
-  }
+  el.value && setupInteract(el.value)
 })
 
 defineExpose({
@@ -95,5 +98,15 @@ defineExpose({
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

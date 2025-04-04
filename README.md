@@ -49,7 +49,8 @@ const cards = ref([
 | items | `T[]` | Yes | - | Array of items to display as cards. Each item will be passed to the default and back slots. |
 | flip | `boolean` | No | `false` | Enable card flipping functionality. When enabled, cards can be flipped to reveal content in the `back` slot. |
 | maxRotation | `number` | No | `20` | Maximum rotation angle in degrees. |
-| threshold | `number` | No | `window.innerWidth / 3` | Threshold in pixels for swipe actions. |
+| threshold | `number` | No | `150` | Threshold in pixels for swipe actions. |
+| virtualBuffer | `number` | No | `1` | Number of cards to render before/after the current card. Used for virtual rendering with large datasets. A value of 2 means 5 cards total will be rendered (current + 2 before + 2 after). |
 
 ## Slots
 
@@ -58,6 +59,8 @@ const cards = ref([
 | default | `{ item: T }` | Main content of the card (front side) |
 | back | `{ item: T }` | Content shown when card is flipped (requires `flip` prop) |
 | actions | `{ restore: () => void, reject: () => void, approve: () => void }` | Custom actions UI. `restore` returns to previous card, `reject`/`approve` trigger swipe animations |
+| approve | `{ item: T }` | Content shown when swiping right (approval indicator) |
+| reject | `{ item: T }` | Content shown when swiping left (rejection indicator) |
 
 ## Events
 
