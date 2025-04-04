@@ -6,6 +6,7 @@ outline: deep
 import BasicUsage from '../example/BasicUsage.vue'
 import FlipUsage from '../example/FlipUsage.vue'
 import CustomActionsUsage from '../example/CustomActionsUsage.vue'
+import VirtualUsage from '../example/VirtualUsage.vue'
 </script>
 
 # Examples
@@ -40,4 +41,16 @@ Click on card to flip
 
 :::details Source
 <<< ../example/CustomActionsUsage.vue
+:::
+
+## Virtual rendering with many cards
+
+Efficiently handles large datasets by only rendering visible cards
+
+<ClientOnly>
+  <VirtualUsage />
+</ClientOnly>
+
+:::details Source
+<<< ../example/VirtualUsage.vue
 :::

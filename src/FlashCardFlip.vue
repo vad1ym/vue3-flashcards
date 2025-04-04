@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const props = defineProps<{
+const { disabled } = defineProps<{
   disabled: boolean
 }>()
 
@@ -9,7 +9,7 @@ const isFlipped = ref(false)
 const isAnimating = ref(false)
 
 function flip() {
-  if (isAnimating.value || props.disabled)
+  if (isAnimating.value || disabled)
     return
 
   isAnimating.value = true

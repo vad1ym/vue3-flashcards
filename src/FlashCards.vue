@@ -2,12 +2,14 @@
 import { computed, reactive, ref } from 'vue'
 import FlashCard from './FlashCard.vue'
 import FlashCardFlip from './FlashCardFlip.vue'
+import { useVisibleRange } from './utils/useVisibleRange'
 
 const props = defineProps<{
   items: T[]
   flip?: boolean
   threshold?: number
   maxRotation?: number
+  virtualBuffer?: number
 }>()
 
 const emit = defineEmits<{
@@ -32,7 +34,16 @@ const history = reactive<Map<number, CardState>>(new Map())
 const currentIndex = ref(0)
 
 const isFirstCard = computed(() => currentIndex.value === 0)
-// const hasMoreCards = computed(() => currentIndex.value < props.items.length - 1)
+
+const visibleRange = useVisibleRange(currentIndex, () => props.items.length, () => props.virtualBuffer ?? 1)
+
+const visibleItems = computed(() =>
+  visibleRange.value.items.map(index => ({
+    item: props.items[index],
+    index,
+    state: history.get(index),
+  })),
+)
 
 function setApproval(index: number, approved: boolean) {
   history.set(index, { approved, done: true })
@@ -76,17 +87,17 @@ defineExpose({
   <div>
     <div class="flashcards-container">
       <div class="flashcards-container-height-item">
-        <slot :item="{} as T" />
+        <slot :item="({} as T)" />
       </div>
       <TransitionGroup name="list">
         <div
-          v-for="(item, index) in props.items"
-          v-show="!history.get(index)?.done"
+          v-for="{ item, index, state } in visibleItems"
+          v-show="!state?.done"
           :key="index"
           class="flashcard-item"
           :class="{
-            left: history.get(index)?.approved === false,
-            right: history.get(index)?.approved === true,
+            left: state?.approved === false,
+            right: state?.approved === true,
           }"
           :style="{ zIndex: props.items.length - index }"
         >
