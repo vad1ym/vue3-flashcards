@@ -44,7 +44,10 @@
     "lint": "eslint src --fix",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "changelog": "conventional-changelog -p conventionalcommits -i ./docs/changelog.md -s -r 0",
+    "changelog:first": "conventional-changelog -p conventionalcommits -i ./docs/changelog.md -s -r 0 -n ./.changelog.config.cjs",
+    "version": "yarn changelog && git add CHANGELOG.md"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
@@ -54,6 +57,8 @@
     "@types/node": "^22.9.3",
     "@vitejs/plugin-vue": "^5.1.4",
     "autoprefixer": "^10.4.20",
+    "conventional-changelog-cli": "^5.0.0",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
     "daisyui": "^4.12.14",
     "eslint": "^9.15.0",
     "postcss": "^8.4.49",

@@ -1,0 +1,20 @@
+module.exports = {
+  preset: 'conventionalcommits',
+  releaseCount: 5,
+  packageFiles: ['package.json'],
+  bumpFiles: ['package.json'],
+  header: '# Changelog\n\nAll notable changes to this project will be documented in this file.\n',
+  types: [
+    { type: 'feat', section: '✨ Features' },
+    { type: 'fix', section: '🐛 Bug Fixes' },
+    { type: 'docs', section: '📝 Documentation' },
+    { type: 'style', section: '💄 Styles' },
+    { type: 'refactor', section: '♻️ Code Refactoring' },
+    { type: 'perf', section: '⚡️ Performance Improvements' },
+    { type: 'test', section: '✅ Tests' },
+    { type: 'build', section: '👷 Build System' },
+    { type: 'ci', section: '🔧 CI Configuration' },
+    { type: 'chore', section: '🔨 Chores' },
+    { type: 'revert', section: '⏪️ Reverts' },
+  ],
+}

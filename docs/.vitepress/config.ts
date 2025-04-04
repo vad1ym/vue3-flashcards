@@ -11,6 +11,7 @@ export default defineConfig({
       { text: 'Home', link: '/' },
       { text: 'Docs', link: '/docs' },
       { text: 'Examples', link: '/examples' },
+      { text: 'Changelog', link: '/changelog' },
     ],
 
     sidebar: [
