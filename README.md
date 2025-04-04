@@ -58,9 +58,10 @@ const cards = ref([
 |-----------|-------|-------------|
 | default | `{ item: T }` | Main content of the card (front side) |
 | back | `{ item: T }` | Content shown when card is flipped (requires `flip` prop) |
-| actions | `{ restore: () => void, reject: () => void, approve: () => void }` | Custom actions UI. `restore` returns to previous card, `reject`/`approve` trigger swipe animations |
+| actions | `{ restore: () => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }` | Custom actions UI. `restore` returns to previous card, `reject`/`approve` trigger swipe animations, `isEnd` whether all cards have been swiped, `canRestore` whether there is a previous card to restore to |
 | approve | `{ item: T }` | Content shown when swiping right (approval indicator) |
 | reject | `{ item: T }` | Content shown when swiping left (rejection indicator) |
+| empty | - | Content shown when all cards have been swiped |
 
 ## Events
 
@@ -68,3 +69,12 @@ const cards = ref([
 |------------|---------|-------------|
 | approve | `item: T` | Emitted when a card is approved (swiped right or approved via actions) |
 | reject | `item: T` | Emitted when a card is rejected (swiped left or rejected via actions) |
+
+## Exposed
+| Method/Property | Type | Description |
+|----------------|------|-------------|
+| restore | `() => void` | Returns to the previous card if available |
+| approve | `() => void` | Triggers approval animation on current card |
+| reject | `() => void` | Triggers rejection animation on current card |
+| canRestore | `boolean` | Whether there is a previous card to restore to |
+| isEnd | `boolean` | Whether all cards have been swiped |

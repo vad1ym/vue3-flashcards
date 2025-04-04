@@ -21,7 +21,8 @@ defineSlots<{
   back?: (props: { item: T }) => any
   reject?: (props: { item: T }) => any
   approve?: (props: { item: T }) => any
-  actions?: (props: { restore: () => void, reject: () => void, approve: () => void }) => any
+  actions?: (props: { restore: () => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }) => any
+  empty?: () => any
 }>()
 
 const cards = ref<InstanceType<typeof FlashCard>[]>([])
@@ -61,7 +62,7 @@ function setApproval(index: number, approved: boolean) {
     emit('reject', props.items[index])
 }
 
-function restoreLast() {
+function restore() {
   if (isFirstCard.value)
     return
 
@@ -75,24 +76,39 @@ function restoreLast() {
   }
 }
 
-function approveCurrent() {
+function approve() {
   cards.value?.[currentIndex.value]?.approve()
 }
 
-function rejectCurrent() {
+function reject() {
   cards.value?.[currentIndex.value]?.reject()
 }
 
+const isEnd = computed(() => {
+  return currentIndex.value >= props.items.length
+})
+
+const canRestore = computed(() => !isFirstCard.value)
+
 defineExpose({
-  restore: restoreLast,
-  approve: approveCurrent,
-  reject: rejectCurrent,
+  restore,
+  approve,
+  reject,
+  canRestore,
+  isEnd,
 })
 </script>
 
 <template>
   <div>
     <div class="flashcards-container">
+      <div class="empty-state">
+        <slot name="empty">
+          <div>
+            No more cards!
+          </div>
+        </slot>
+      </div>
       <div class="flashcards-container-height-item">
         <slot :item="({} as T)" />
       </div>
@@ -140,7 +156,14 @@ defineExpose({
       </TransitionGroup>
     </div>
 
-    <slot name="actions" :restore="restoreLast" :reject="rejectCurrent" :approve="approveCurrent" />
+    <slot
+      name="actions"
+      :restore="restore"
+      :reject="reject"
+      :approve="approve"
+      :is-end="isEnd"
+      :can-restore="canRestore"
+    />
   </div>
 </template>
 
@@ -149,6 +172,15 @@ defineExpose({
   position: relative;
   width: 100%;
   height: 100%;
+}
+
+.empty-state {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
 }
 
 .flashcards-container-height-item {
