@@ -1,3 +1,12 @@
+## [0.6.1](https://github.com/vad1ym/vue3-flashcards/compare/v0.6.0...v0.6.1) (2025-04-04)
+
+### Features
+
+* Add changelog generation ([ef1ca64](https://github.com/vad1ym/vue3-flashcards/commit/ef1ca64f40eae41a91d688ff7fcef01cbe922b5b))
+
+### Bug Fixes
+
+* Fix fast restore animation ([74c2751](https://github.com/vad1ym/vue3-flashcards/commit/74c2751863f7b418dfd466ef3eac74035e1d4c7f))
 ## [0.6.0](https://github.com/vad1ym/vue3-flashcards/compare/v0.5.6...v0.6.0) (2025-04-04)
 
 ### Features
