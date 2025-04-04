@@ -37,6 +37,7 @@ export function useDragSetup(options: DragSetupOptions) {
   const { maxRotation, threshold, onDragStart, onDragMove, onDragEnd, onComplete } = parseOptions(options)
 
   const sourceEl = ref<HTMLElement | null>(null)
+  const isDrag = ref(false)
   const isDragging = ref(false)
   const isAnimating = ref(false)
   let startX = 0
@@ -64,7 +65,7 @@ export function useDragSetup(options: DragSetupOptions) {
     event.preventDefault()
 
     isAnimating.value = false
-    isDragging.value = true
+    isDrag.value = true
 
     if (event instanceof MouseEvent) {
       startX = event.clientX - position.x
@@ -79,8 +80,10 @@ export function useDragSetup(options: DragSetupOptions) {
   }
 
   function handleDragMove(event: MouseEvent | TouchEvent) {
-    if (!isDragging.value || isAnimating.value)
+    if (!isDrag.value || isAnimating.value)
       return
+
+    isDragging.value = true
 
     event.preventDefault()
     event.stopPropagation()
@@ -106,12 +109,13 @@ export function useDragSetup(options: DragSetupOptions) {
   }
 
   function handleDragEnd() {
-    if (!isDragging.value) {
+    if (!isDrag.value) {
       return
     }
 
     isAnimating.value = true
     setTimeout(() => {
+      isDrag.value = false
       isDragging.value = false
     }, 100)
 
@@ -148,6 +152,7 @@ export function useDragSetup(options: DragSetupOptions) {
   function complete(type: DragType, threshold: number) {
     isAnimating.value = true
     isDragging.value = false
+    isDrag.value = false
     Object.assign(position, {
       x: threshold,
       y: 0,
