@@ -2,7 +2,6 @@
 import { computed, reactive, ref } from 'vue'
 import FlashCard from './FlashCard.vue'
 import FlashCardFlip from './FlashCardFlip.vue'
-import { useVisibleRange } from './utils/useVisibleRange'
 
 const props = defineProps<{
   items: T[]
@@ -163,7 +162,6 @@ defineExpose({
   position: absolute;
   left: 50%;
   top: 50%;
-  /* height: 95%; */
   width: 100%;
   transform: translate(-50%, -50%);
 }
@@ -191,12 +189,12 @@ defineExpose({
 
 .list-enter-from.left.animate-card,
 .list-leave-to.left.animate-card {
-  transform: translateX(-300px) !important;
+  transform: translate(-50%, -50%) translateX(-300px) rotate(-20deg) !important;
 }
 
 .list-enter-from.right.animate-card,
 .list-leave-to.right.animate-card {
-  transform: translateX(300px) !important;
+  transform: translate(-50%, -50%) translateX(300px) rotate(20deg) !important;
 }
 
 .list-leave-active {
