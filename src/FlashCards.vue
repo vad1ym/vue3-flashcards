@@ -35,15 +35,20 @@ const currentIndex = ref(0)
 
 const isFirstCard = computed(() => currentIndex.value === 0)
 
-const visibleRange = useVisibleRange(currentIndex, () => props.items.length, () => props.virtualBuffer ?? 1)
+const visibleItems = computed(() => {
+  const buffer = props.virtualBuffer ?? 1
+  const start = Math.max(0, currentIndex.value - 1) // Always keep previous card for restore
+  const end = Math.min(props.items.length - 1, currentIndex.value + buffer)
 
-const visibleItems = computed(() =>
-  visibleRange.value.items.map(index => ({
-    item: props.items[index],
-    index,
-    state: history.get(index),
-  })),
-)
+  return Array.from({ length: end - start + 1 }, (_, i) => {
+    const index = start + i
+    return {
+      item: props.items[index],
+      index,
+      state: history.get(index),
+    }
+  })
+})
 
 function setApproval(index: number, approved: boolean) {
   history.set(index, { approved, done: true })
@@ -96,8 +101,9 @@ defineExpose({
           :key="index"
           class="flashcard-item"
           :class="{
-            left: state?.approved === false,
-            right: state?.approved === true,
+            'left': state?.approved === false,
+            'right': state?.approved === true,
+            'animate-card': index === currentIndex || index === currentIndex - 1,
           }"
           :style="{ zIndex: props.items.length - index }"
         >
@@ -168,9 +174,13 @@ defineExpose({
   /* height: 100%; */
 }
 
-.list-move,
-.list-enter-active,
-.list-leave-active {
+.list-move {
+  transition: none;
+}
+
+.animate-card.list-move,
+.animate-card.list-enter-active,
+.animate-card.list-leave-active {
   transition: all 0.5s ease;
 }
 
@@ -179,13 +189,13 @@ defineExpose({
   opacity: 0;
 }
 
-.list-enter-from.left,
-.list-leave-to.left {
+.list-enter-from.left.animate-card,
+.list-leave-to.left.animate-card {
   transform: translateX(-300px) !important;
 }
 
-.list-enter-from.right,
-.list-leave-to.right {
+.list-enter-from.right.animate-card,
+.list-leave-to.right.animate-card {
   transform: translateX(300px) !important;
 }
 
