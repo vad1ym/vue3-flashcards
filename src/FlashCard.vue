@@ -60,17 +60,17 @@ defineExpose({
   >
     <slot :is-dragging="isDragging" />
 
-    <div class="indicator" :style="{ opacity: position.delta }">
-      <transition name="fade" mode="out-in">
-        <slot v-if="position.type === DragType.REJECT" name="reject" :delta="position.delta">
-          <RejectIcon />
-        </slot>
+    <slot v-if="position.type === DragType.REJECT" name="reject" :delta="position.delta">
+      <div class="indicator" :style="{ opacity: position.delta }">
+        <RejectIcon />
+      </div>
+    </slot>
 
-        <slot v-else-if="position.type === DragType.APPROVE" name="approve" :delta="position.delta">
-          <ApproveIcon />
-        </slot>
-      </transition>
-    </div>
+    <slot v-else-if="position.type === DragType.APPROVE" name="approve" :delta="position.delta">
+      <div class="indicator" :style="{ opacity: position.delta }">
+        <ApproveIcon />
+      </div>
+    </slot>
   </div>
 </template>
 
@@ -98,15 +98,5 @@ defineExpose({
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>
