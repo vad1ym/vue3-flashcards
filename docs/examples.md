@@ -8,6 +8,7 @@ import FlipUsage from '../example/FlipUsage.vue'
 import CustomActionsUsage from '../example/CustomActionsUsage.vue'
 import VirtualUsage from '../example/VirtualUsage.vue'
 import TinderUsage from '../example/TinderUsage.vue'
+import DeltaUsage from '../example/DeltaUsage.vue'
 </script>
 
 # Examples
@@ -67,4 +68,17 @@ See how to use extra state for actions
 
 :::details Source
 <<< ../example/TinderUsage.vue
+:::
+
+## Word study with delta feedback
+
+Language learning cards with visual feedback for known and unknown words.
+Shows how to use delta prop for smooth opacity transitions with custom approje/reject state.
+
+<ClientOnly>
+  <DeltaUsage />
+</ClientOnly>
+
+:::details Source
+<<< ../example/DeltaUsage.vue
 :::
