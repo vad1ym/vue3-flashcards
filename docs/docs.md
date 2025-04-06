@@ -58,8 +58,8 @@ const cards = ref([
 | default | `{ item: T }` | Main content of the card (front side) |
 | back | `{ item: T }` | Content shown when card is flipped (requires `flip` prop) |
 | actions | `{ restore: () => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }` | Custom actions UI. `restore` returns to previous card, `reject`/`approve` trigger swipe animations, `isEnd` whether all cards have been swiped, `canRestore` whether there is a previous card to restore to |
-| approve | `{ item: T }` | Content shown when swiping right (approval indicator) |
-| reject | `{ item: T }` | Content shown when swiping left (rejection indicator) |
+| approve | `{ item: T, delta: number }` | Content shown when swiping right (approval indicator). `delta` is a value from 0 to 1, where 0 means the card is static and 1 means the card is at the approval threshold. Used for opacity transitions. Based on `threshold` prop |
+| reject | `{ item: T, delta: number }` | Content shown when swiping left (rejection indicator). `delta` is a value from 0 to 1, where 0 means the card is static and 1 means the card is at the rejection threshold. Used for opacity transitions. Based on `threshold` prop |
 | empty | - | Content shown when all cards have been swiped |
 
 ## Events
