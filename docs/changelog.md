@@ -1,3 +1,9 @@
+## [0.6.2](https://github.com/vad1ym/vue3-flashcards/compare/0.6.1...0.6.2) (2025-04-06)
+
+### Bug Fixes
+
+* Correct animation for approving/rejecting states ([0a8cfae](https://github.com/vad1ym/vue3-flashcards/commit/0a8cfae9af105ebf1684c7b761274fc99b2d7641))
+* Delta passing for approve/reject props ([31e53d7](https://github.com/vad1ym/vue3-flashcards/commit/31e53d7274575043496a9a260c49a8d57c6e3635))
 ## [0.6.1](https://github.com/vad1ym/vue3-flashcards/compare/v0.6.0...v0.6.1) (2025-04-04)
 
 ### Features
