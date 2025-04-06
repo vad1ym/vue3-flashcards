@@ -19,8 +19,8 @@ const emit = defineEmits<{
 defineSlots<{
   default: (props: { item: T }) => any
   back?: (props: { item: T }) => any
-  reject?: (props: { item: T }) => any
-  approve?: (props: { item: T }) => any
+  reject?: (props: { item: T, delta: number }) => any
+  approve?: (props: { item: T, delta: number }) => any
   actions?: (props: { restore: () => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }) => any
   empty?: () => any
 }>()
@@ -145,11 +145,11 @@ defineExpose({
                 </FlashCardFlip>
               </template>
 
-              <template #reject>
-                <slot name="reject" :item="item" />
+              <template #reject="{ delta }">
+                <slot name="reject" :item="item" :delta="delta" />
               </template>
-              <template #approve>
-                <slot name="approve" :item="item" />
+              <template #approve="{ delta }">
+                <slot name="approve" :item="item" :delta="delta" />
               </template>
             </FlashCard>
           </div>
