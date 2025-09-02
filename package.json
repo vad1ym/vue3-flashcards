@@ -26,11 +26,11 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/flashcards.js",
-      "require": "./dist/flashcards.js"
+      "require": "./dist/flashcards.umd.cjs"
     },
     "./dist/*": "./dist/*"
   },
-  "main": "./dist/flashcards.umd.js",
+  "main": "./dist/flashcards.umd.cjs",
   "module": "./dist/flashcards.js",
   "types": "./dist/index.d.ts",
   "files": [
