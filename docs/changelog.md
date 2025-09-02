@@ -1,3 +1,12 @@
+## [0.6.3](https://github.com/vad1ym/vue3-flashcards/compare/v0.6.2...v0.6.3) (2025-09-02)
+
+### Features
+
+* Added prepare build script ([aa6aed9](https://github.com/vad1ym/vue3-flashcards/commit/aa6aed98b3428e2fe5dcc47f12bd5ec659c27831))
+
+### Bug Fixes
+
+* update package.json exports & main ([68c6b29](https://github.com/vad1ym/vue3-flashcards/commit/68c6b299cc434d202cb283b7bf65bcbeab501314))
 ## [0.6.2](https://github.com/vad1ym/vue3-flashcards/compare/0.6.1...0.6.2) (2025-04-06)
 
 ### Bug Fixes
