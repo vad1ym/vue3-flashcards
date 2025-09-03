@@ -86,6 +86,7 @@ The `FlipCard` component provides card flipping functionality and can be used in
 | Prop Name | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | disabled | `boolean` | No | `false` | Disable card flipping functionality |
+| waitAnimationEnd | `boolean` | No | `true` | Wait for animation to end before allowing another flip |
 
 ### Slots
 

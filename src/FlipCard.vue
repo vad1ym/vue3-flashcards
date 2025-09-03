@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const { disabled = false } = defineProps<{
+const { disabled = false, waitAnimationEnd = true } = defineProps<{
   // Disable card flipping functionality
   disabled?: boolean
+
+  // Wait for animation to end before can flip card again
+  waitAnimationEnd?: boolean
 }>()
 
 defineSlots<{
@@ -15,7 +18,7 @@ const isFlipped = ref(false)
 const isAnimating = ref(false)
 
 function flip() {
-  if (disabled || isAnimating.value)
+  if (disabled || (waitAnimationEnd && isAnimating.value))
     return
 
   isAnimating.value = true
