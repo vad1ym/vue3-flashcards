@@ -1,18 +1,15 @@
 <script lang="ts" setup generic="T extends Record<string, unknown>">
 import { computed, reactive, ref } from 'vue'
 import FlashCard from './FlashCard.vue'
-import FlashCardFlip from './FlashCardFlip.vue'
 
 const {
   items = [],
-  flip,
   threshold,
   dragThreshold,
   maxRotation,
   virtualBuffer = 2,
 } = defineProps<{
   items?: T[]
-  flip?: boolean
   threshold?: number
   dragThreshold?: number
   maxRotation?: number
@@ -26,7 +23,6 @@ const emit = defineEmits<{
 
 defineSlots<{
   default: (props: { item: T }) => any
-  back?: (props: { item: T }) => any
   reject?: (props: { item: T, delta: number }) => any
   approve?: (props: { item: T, delta: number }) => any
   actions?: (props: { restore: () => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }) => any
@@ -143,15 +139,8 @@ defineExpose({
               :class="{ 'flashcards__card--interactive': index === currentIndex }"
               @complete="setApproval(index, $event)"
             >
-              <template #default="{ isDragging }">
-                <FlashCardFlip :disabled="isDragging || !flip">
-                  <template #front>
-                    <slot :item="item" />
-                  </template>
-                  <template #back>
-                    <slot name="back" :item="item" />
-                  </template>
-                </FlashCardFlip>
+              <template #default>
+                <slot :item="item" />
               </template>
 
               <template #reject="{ delta }">

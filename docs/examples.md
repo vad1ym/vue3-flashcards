@@ -23,9 +23,9 @@ import DeltaUsage from '../example/DeltaUsage.vue'
 <<< ../example/BasicUsage.vue
 :::
 
-## With flip usage
+## With FlipCard component
 
-Click on card to flip
+Shows how to use the separate FlipCard component within FlashCards. Click on card to flip
 
 <ClientOnly>
   <FlipUsage />

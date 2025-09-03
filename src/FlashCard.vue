@@ -50,7 +50,7 @@ defineExpose({
   <div
     ref="el"
     class="flash-card"
-    :class="{ 'flash-card--animated': isAnimating }"
+    :class="{ 'flash-card--animated': isAnimating, 'flash-card--dragging': isDragging }"
     :style="{ transform: getTransformString }"
   >
     <slot :is-dragging="isDragging" />
@@ -87,5 +87,9 @@ defineExpose({
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+}
+
+.flash-card--dragging :deep(.flip-card[flash-card]) {
+  pointer-events: none;
 }
 </style>

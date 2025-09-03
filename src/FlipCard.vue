@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const props = defineProps<{
-  disabled: boolean
+const { disabled = false } = defineProps<{
+  // Disable card flipping functionality
+  disabled?: boolean
 }>()
 
 defineSlots<{
@@ -14,7 +15,7 @@ const isFlipped = ref(false)
 const isAnimating = ref(false)
 
 function flip() {
-  if (isAnimating.value || props.disabled)
+  if (disabled || isAnimating.value)
     return
 
   isAnimating.value = true
@@ -27,7 +28,7 @@ function onTransitionEnd() {
 </script>
 
 <template>
-  <div class="flip-card" @click="flip">
+  <div class="flip-card" flash-card @click="flip">
     <div
       class="flip-card__inner"
       :class="{ 'flip-card__inner--flipped': isFlipped }"

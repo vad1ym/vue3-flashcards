@@ -46,7 +46,6 @@ const cards = ref([
 | Prop Name | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | items | `T[]` | Yes | - | Array of items to display as cards. Each item will be passed to the default and back slots. |
-| flip | `boolean` | No | `false` | Enable card flipping functionality. When enabled, cards can be flipped to reveal content in the `back` slot. |
 | maxRotation | `number` | No | `20` | Maximum rotation angle in degrees. |
 | threshold | `number` | No | `150` | Threshold in pixels for swipe actions. |
 | dragThreshold | `number` | No | `5` | Minimum distance in pixels the card must be dragged to start swiping. Helps prevent false positives from small movements. |
@@ -57,7 +56,6 @@ const cards = ref([
 | Slot Name | Props | Description |
 |-----------|-------|-------------|
 | default | `{ item: T }` | Main content of the card (front side) |
-| back | `{ item: T }` | Content shown when card is flipped (requires `flip` prop) |
 | actions | `{ restore: () => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }` | Custom actions UI. `restore` returns to previous card, `reject`/`approve` trigger swipe animations, `isEnd` whether all cards have been swiped, `canRestore` whether there is a previous card to restore to |
 | approve | `{ item: T, delta: number }` | Content shown when swiping right (approval indicator). `delta` is a value from 0 to 1, where 0 means the card is static and 1 means the card is at the approval threshold. Used for opacity transitions. Based on `threshold` prop |
 | reject | `{ item: T, delta: number }` | Content shown when swiping left (rejection indicator). `delta` is a value from 0 to 1, where 0 means the card is static and 1 means the card is at the rejection threshold. Used for opacity transitions. Based on `threshold` prop |
@@ -78,3 +76,77 @@ const cards = ref([
 | reject | `() => void` | Triggers rejection animation on current card |
 | canRestore | `boolean` | Whether there is a previous card to restore to |
 | isEnd | `boolean` | Whether all cards have been swiped |
+
+## FlipCard Component
+
+The `FlipCard` component provides card flipping functionality and can be used independently or within FlashCards.
+
+### Props
+
+| Prop Name | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| disabled | `boolean` | No | `false` | Disable card flipping functionality |
+
+### Slots
+
+| Slot Name | Props | Description |
+|-----------|-------|-----------|
+| front | - | Content shown on the front of the card |
+| back | - | Content shown on the back of the card (optional) |
+
+### FlipCard Usage Example
+
+```vue
+<script setup>
+import { FlipCard } from 'vue3-flashcards'
+</script>
+
+<template>
+  <FlipCard>
+    <template #front>
+      <div class="card-front">
+        Front Content
+      </div>
+    </template>
+    <template #back>
+      <div class="card-back">
+        Back Content
+      </div>
+    </template>
+  </FlipCard>
+</template>
+```
+
+### Using FlipCard with FlashCards
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import { FlashCards, FlipCard } from 'vue3-flashcards'
+
+const cards = ref([
+  { text: 'Front 1', back: 'Back 1' },
+  { text: 'Front 2', back: 'Back 2' },
+  { text: 'Front 3', back: 'Back 3' },
+])
+</script>
+
+<template>
+  <FlashCards :items="cards">
+    <template #default="{ item }">
+      <FlipCard>
+        <template #front>
+          <div class="card-content">
+            {{ item.text }}
+          </div>
+        </template>
+        <template #back>
+          <div class="card-content">
+            {{ item.back }}
+          </div>
+        </template>
+      </FlipCard>
+    </template>
+  </FlashCards>
+</template>
+```
