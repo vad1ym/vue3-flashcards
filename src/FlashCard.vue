@@ -2,13 +2,9 @@
 import { nextTick, onMounted, ref } from 'vue'
 import ApproveIcon from './components/ApproveIcon.vue'
 import RejectIcon from './components/RejectIcon.vue'
-import { DragType, useDragSetup } from './utils/useDragSetup'
+import { type DragSetupParams, DragType, useDragSetup } from './utils/useDragSetup'
 
-const props = defineProps<{
-  current: boolean
-  maxRotation?: number
-  threshold?: number
-}>()
+const props = defineProps<DragSetupParams>()
 
 const emit = defineEmits<{
   complete: [approved: boolean]
@@ -34,6 +30,7 @@ const {
 } = useDragSetup({
   maxRotation: props.maxRotation,
   threshold: props.threshold,
+  dragThreshold: props.dragThreshold,
   onComplete(approved) {
     emit('complete', approved)
   },
@@ -55,7 +52,7 @@ defineExpose({
   <div
     ref="el"
     class="card"
-    :class="{ animated: isAnimating, current: props.current }"
+    :class="{ animated: isAnimating }"
     :style="{ transform: getTransformString }"
   >
     <slot :is-dragging="isDragging" />

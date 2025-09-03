@@ -49,6 +49,7 @@ const cards = ref([
 | flip | `boolean` | No | `false` | Enable card flipping functionality. When enabled, cards can be flipped to reveal content in the `back` slot. |
 | maxRotation | `number` | No | `20` | Maximum rotation angle in degrees. |
 | threshold | `number` | No | `150` | Threshold in pixels for swipe actions. |
+| dragThreshold | `number` | No | `5` | Minimum distance in pixels the card must be dragged to start swiping. Helps prevent false positives from small movements. |
 | virtualBuffer | `number` | No | `2` | Number of cards to render before/after the current card. Used for virtual rendering with large datasets. A value of 2 means 5 cards total will be rendered (current + 2 before + 2 after). |
 
 ## Slots

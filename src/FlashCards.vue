@@ -3,10 +3,18 @@ import { computed, reactive, ref } from 'vue'
 import FlashCard from './FlashCard.vue'
 import FlashCardFlip from './FlashCardFlip.vue'
 
-const props = defineProps<{
-  items: T[]
+const {
+  items = [],
+  flip,
+  threshold,
+  dragThreshold,
+  maxRotation,
+  virtualBuffer = 2,
+} = defineProps<{
+  items?: T[]
   flip?: boolean
   threshold?: number
+  dragThreshold?: number
   maxRotation?: number
   virtualBuffer?: number
 }>()
@@ -38,14 +46,13 @@ const currentIndex = ref(0)
 const isFirstCard = computed(() => currentIndex.value === 0)
 
 const visibleItems = computed(() => {
-  const buffer = props.virtualBuffer ?? 2
   const start = Math.max(0, currentIndex.value - 1)
-  const end = Math.min(props.items.length - 1, currentIndex.value + buffer)
+  const end = Math.min(items.length - 1, currentIndex.value + virtualBuffer)
 
   return Array.from({ length: end - start + 1 }, (_, i) => {
     const index = start + i
     return {
-      item: props.items[index],
+      item: items[index],
       index,
       key: i,
       state: history.get(index),
@@ -58,9 +65,9 @@ function setApproval(index: number, approved: boolean) {
   currentIndex.value++
 
   if (approved)
-    emit('approve', props.items[index])
+    emit('approve', items[index])
   else
-    emit('reject', props.items[index])
+    emit('reject', items[index])
 }
 
 function restore() {
@@ -86,7 +93,7 @@ function reject() {
 }
 
 const isEnd = computed(() => {
-  return currentIndex.value >= props.items.length
+  return currentIndex.value >= items.length
 })
 
 const canRestore = computed(() => !isFirstCard.value)
@@ -124,18 +131,19 @@ defineExpose({
             'right': state?.approved === true,
             'animate-card': key <= 2,
           }"
-          :style="{ zIndex: props.items.length - index }"
+          :style="{ zIndex: items.length - index }"
         >
           <div class="flashcard-content">
             <FlashCard
               :ref="el => (cards[index] = el as InstanceType<typeof FlashCard>)"
               :current="index === currentIndex"
-              :threshold="props.threshold"
-              :max-rotation="props.maxRotation"
+              :threshold="threshold"
+              :drag-threshold="dragThreshold"
+              :max-rotation="maxRotation"
               @complete="setApproval(index, $event)"
             >
               <template #default="{ isDragging }">
-                <FlashCardFlip :disabled="isDragging || !props.flip">
+                <FlashCardFlip :disabled="isDragging || !flip">
                   <template #front>
                     <slot :item="item" />
                   </template>

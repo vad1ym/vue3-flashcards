@@ -5,14 +5,27 @@ export enum DragType {
   REJECT = 'reject',
 }
 
-export interface DragSetupOptions {
+export interface DragSetupParams {
+  // Max rotation in degrees the card can be rotated on swipe
   maxRotation?: number
+
+  // Distance in pixels the card must be dragged to complete swiping
+  // If the card is dragged less than this distance, it will be restored to its original position
   threshold?: number
+
+  // Distance in pixels the card must be dragged to start swiping, small value
+  // Is need to prevent false positives (e.x. for card fliping feature)
+  dragThreshold?: number
+}
+
+export interface DragSetupCallbacks {
   onDragStart?: () => void
   onDragMove?: (type: DragType | null, delta: number) => void
   onDragEnd?: () => void
   onComplete?: (approved: boolean) => void
 }
+
+export type DragSetupOptions = DragSetupParams & DragSetupCallbacks
 
 export interface DragPosition {
   x: number
@@ -26,6 +39,7 @@ function parseOptions(options: DragSetupOptions) {
   return {
     maxRotation: options.maxRotation ?? 20,
     threshold: options.threshold ?? 150,
+    dragThreshold: options.dragThreshold ?? 5,
     onDragStart: options.onDragStart || (() => {}),
     onDragMove: options.onDragMove || (() => {}),
     onDragEnd: options.onDragEnd || (() => {}),
@@ -34,7 +48,7 @@ function parseOptions(options: DragSetupOptions) {
 }
 
 export function useDragSetup(options: DragSetupOptions) {
-  const { maxRotation, threshold, onDragStart, onDragMove, onDragEnd, onComplete } = parseOptions(options)
+  const { maxRotation, threshold, dragThreshold, onDragStart, onDragMove, onDragEnd, onComplete } = parseOptions(options)
 
   const sourceEl = ref<HTMLElement | null>(null)
   const isDrag = ref(false)
@@ -83,16 +97,21 @@ export function useDragSetup(options: DragSetupOptions) {
     if (!isDrag.value || isAnimating.value)
       return
 
-    isDragging.value = true
-
-    event.preventDefault()
-    event.stopPropagation()
-
     const clientX = event instanceof MouseEvent ? event.clientX : event.touches[0].clientX
     const clientY = event instanceof MouseEvent ? event.clientY : event.touches[0].clientY
 
     const x = clientX - startX
     const y = clientY - startY
+
+    const distance = Math.sqrt(x * x + y * y)
+    if (!isDragging.value && distance < dragThreshold) {
+      return
+    }
+
+    isDragging.value = true
+
+    event.preventDefault()
+    event.stopPropagation()
 
     let rotate = maxRotation * (x / threshold)
     rotate = Math.max(-maxRotation, Math.min(maxRotation, rotate))
