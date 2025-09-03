@@ -28,9 +28,7 @@ const {
   reject,
   approve,
 } = useDragSetup({
-  maxRotation: props.maxRotation,
-  threshold: props.threshold,
-  dragThreshold: props.dragThreshold,
+  ...props,
   onComplete(approved) {
     emit('complete', approved)
   },
@@ -51,20 +49,20 @@ defineExpose({
 <template>
   <div
     ref="el"
-    class="card"
-    :class="{ animated: isAnimating }"
+    class="flash-card"
+    :class="{ 'flash-card--animated': isAnimating }"
     :style="{ transform: getTransformString }"
   >
     <slot :is-dragging="isDragging" />
 
     <slot v-if="position.type === DragType.REJECT" name="reject" :delta="position.delta">
-      <div class="indicator" :style="{ opacity: position.delta }">
+      <div class="flash-card__indicator" :style="{ opacity: position.delta }">
         <RejectIcon />
       </div>
     </slot>
 
     <slot v-else-if="position.type === DragType.APPROVE" name="approve" :delta="position.delta">
-      <div class="indicator" :style="{ opacity: position.delta }">
+      <div class="flash-card__indicator" :style="{ opacity: position.delta }">
         <ApproveIcon />
       </div>
     </slot>
@@ -72,25 +70,19 @@ defineExpose({
 </template>
 
 <style scoped>
-.card {
+.flash-card {
   width: 100%;
-  /* height: 100%; */
-  pointer-events: none;
   border-radius: 8px;
   transform-origin: 50%, 100%;
   will-change: transform, opacity;
   position: relative;
 }
 
-.card.current {
-  pointer-events: auto;
-}
-
-.card.animated {
+.flash-card--animated {
   transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.indicator {
+.flash-card__indicator {
   position: absolute;
   left: 50%;
   top: 50%;

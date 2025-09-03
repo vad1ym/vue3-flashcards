@@ -33,7 +33,7 @@ defineSlots<{
   empty?: () => any
 }>()
 
-const cards = ref<InstanceType<typeof FlashCard>[]>([])
+const cardRefs = ref<Map<number, InstanceType<typeof FlashCard>>>(new Map())
 
 interface CardState {
   approved?: boolean
@@ -54,7 +54,6 @@ const visibleItems = computed(() => {
     return {
       item: items[index],
       index,
-      key: i,
       state: history.get(index),
     }
   })
@@ -80,16 +79,16 @@ function restore() {
   if (previousCard) {
     previousCard.done = false
     currentIndex.value = previousIndex
-    cards.value?.[previousIndex]?.restore()
+    cardRefs.value.get(currentIndex.value)?.restore()
   }
 }
 
 function approve() {
-  cards.value?.[currentIndex.value]?.approve()
+  cardRefs.value.get(currentIndex.value)?.approve()
 }
 
 function reject() {
-  cards.value?.[currentIndex.value]?.reject()
+  cardRefs.value.get(currentIndex.value)?.reject()
 }
 
 const isEnd = computed(() => {
@@ -109,37 +108,39 @@ defineExpose({
 
 <template>
   <div>
-    <div class="flashcards-container">
-      <div class="empty-state">
+    <div class="flashcards">
+      <div class="flashcards__empty-state">
         <slot name="empty">
           <div>
             No more cards!
           </div>
         </slot>
       </div>
-      <div class="flashcards-container-height-item">
+
+      <!-- This invisible card is needed to keep the height of the cards -->
+      <div class="flashcards__height-reference">
         <slot :item="({} as T)" />
       </div>
-      <TransitionGroup name="list">
-        <div
-          v-for="{ item, index, state, key } in visibleItems"
-          v-show="!state?.done"
-          :key="index"
-          class="flashcard-item"
-          :class="{
-            'left': state?.approved === false,
-            'right': state?.approved === true,
-            'animate-card': key <= 2,
-          }"
-          :style="{ zIndex: items.length - index }"
-        >
-          <div class="flashcard-content">
+
+      <template v-for="{ item, index, state } in visibleItems" :key="index">
+        <Transition name="card-transition" mode="out-in">
+          <div
+            v-show="!state?.done"
+            class="flashcards__card-wrapper"
+            :class="{
+              'flashcards__card-wrapper--rejected': state?.approved === false,
+              'flashcards__card-wrapper--approved': state?.approved === true,
+              'flashcards__card-wrapper--current': index === currentIndex,
+            }"
+            :style="{ zIndex: items.length - index }"
+          >
             <FlashCard
-              :ref="el => (cards[index] = el as InstanceType<typeof FlashCard>)"
-              :current="index === currentIndex"
+              :ref="el => el && cardRefs.set(index, el as InstanceType<typeof FlashCard>)"
               :threshold="threshold"
               :drag-threshold="dragThreshold"
               :max-rotation="maxRotation"
+              class="flashcards__card"
+              :class="{ 'flashcards__card--interactive': index === currentIndex }"
               @complete="setApproval(index, $event)"
             >
               <template #default="{ isDragging }">
@@ -161,8 +162,8 @@ defineExpose({
               </template>
             </FlashCard>
           </div>
-        </div>
-      </TransitionGroup>
+        </Transition>
+      </template>
     </div>
 
     <slot
@@ -177,13 +178,13 @@ defineExpose({
 </template>
 
 <style scoped>
-.flashcards-container {
+.flashcards {
   position: relative;
   width: 100%;
   height: 100%;
 }
 
-.empty-state {
+.flashcards__empty-state {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -192,52 +193,47 @@ defineExpose({
   text-align: center;
 }
 
-.flashcards-container-height-item {
+.flashcards__height-reference {
   opacity: 0;
   pointer-events: none;
 }
 
-.flashcard-item {
+.flashcards__card-wrapper {
   pointer-events: none;
   position: absolute;
   left: 50%;
   top: 50%;
   width: 100%;
-  transform: translate(-50%, -50%);
+  transform: translate3d(-50%, -50%, 0);
+  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.3s ease;
+  will-change: transform, opacity;
 }
 
-.flashcard-content {
+.flashcards__card {
+  pointer-events: none;
+}
+
+.flashcards__card-wrapper--current .flashcards__card {
   pointer-events: all;
-  width: 100%;
-  /* height: 100%; */
 }
 
-.list-move {
-  transition: none;
+.card-transition-enter-active,
+.card-transition-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
-.animate-card.list-move,
-.animate-card.list-enter-active,
-.animate-card.list-leave-active {
-  transition: all 0.5s ease;
-}
-
-.list-enter-from,
-.list-leave-to {
+.card-transition-enter-from,
+.card-transition-leave-to {
   opacity: 0;
 }
 
-.list-enter-from.left.animate-card,
-.list-leave-to.left.animate-card {
-  transform: translate(-50%, -50%) translateX(-300px) rotate(-20deg) !important;
+.card-transition-enter-from.flashcards__card-wrapper--rejected,
+.card-transition-leave-to.flashcards__card-wrapper--rejected {
+  transform: translate(-50%, -50%) translateX(-300px) rotate(-20deg);
 }
 
-.list-enter-from.right.animate-card,
-.list-leave-to.right.animate-card {
-  transform: translate(-50%, -50%) translateX(300px) rotate(20deg) !important;
-}
-
-.list-leave-active {
-  position: absolute;
+.card-transition-enter-from.flashcards__card-wrapper--approved,
+.card-transition-leave-to.flashcards__card-wrapper--approved {
+  transform: translate(-50%, -50%) translateX(300px) rotate(20deg);
 }
 </style>

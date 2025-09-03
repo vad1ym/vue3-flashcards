@@ -29,14 +29,14 @@ function onTransitionEnd() {
 <template>
   <div class="flip-card" @click="flip">
     <div
-      class="flip-card-inner"
-      :class="{ 'is-flipped': isFlipped }"
+      class="flip-card__inner"
+      :class="{ 'flip-card__inner--flipped': isFlipped }"
       @transitionend="onTransitionEnd"
     >
-      <div class="flip-card-front">
+      <div class="flip-card__front">
         <slot name="front" />
       </div>
-      <div class="flip-card-back">
+      <div class="flip-card__back">
         <slot name="back" />
       </div>
     </div>
@@ -50,7 +50,7 @@ function onTransitionEnd() {
   cursor: pointer;
 }
 
-.flip-card-inner {
+.flip-card__inner {
   position: relative;
   width: 100%;
   text-align: center;
@@ -58,21 +58,21 @@ function onTransitionEnd() {
   transform-style: preserve-3d;
 }
 
-.flip-card-inner.is-flipped {
+.flip-card__inner--flipped {
   transform: rotateY(180deg);
 }
 
-.flip-card-front,
-.flip-card-back {
+.flip-card__front,
+.flip-card__back {
   width: 100%;
   backface-visibility: hidden;
 }
 
-.flip-card-front {
+.flip-card__front {
   transform: rotateY(0deg);
 }
 
-.flip-card-back {
+.flip-card__back {
   position: absolute;
   top: 0;
   left: 0;
