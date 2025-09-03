@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { FlashCards } from '../src'
-import './assets/index.css'
+
 
 interface Card {
   id: number
