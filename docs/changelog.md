@@ -1,3 +1,22 @@
+## [0.7.0](https://github.com/vad1ym/vue3-flashcards/compare/v0.6.3...v0.7.0) (2025-09-03)
+
+### ⚠ BREAKING CHANGES
+
+* separate flash and flip cards to be used independently
+
+### Features
+
+* add dragThreshold prop to prevent false positives from small movements ([ba62242](https://github.com/vad1ym/vue3-flashcards/commit/ba62242bf408738929f79630bd5ac08bf1a17786))
+* add waitAnimationEnd feature for flip card ([c47e8be](https://github.com/vad1ym/vue3-flashcards/commit/c47e8be256c4adc2c375608a01e7db5d91fda1b5))
+* separate flash and flip cards to be used independently ([14fd5aa](https://github.com/vad1ym/vue3-flashcards/commit/14fd5aaefe47ea0968ff07d6ecb553b02627633c))
+
+### New FlipCard component
+
+The `FlipCard` component provides card flipping functionality and now can be used independently without flashcards wrapper.
+
+For those who used the `:flip="true"` feature, you can now use the separate [FlipCard](/docs.html#flipcard-component) component instead.
+
+For usage with flash cards together, see the [example](/examples.html#with-flipcard-component)
 ## [0.6.3](https://github.com/vad1ym/vue3-flashcards/compare/v0.6.2...v0.6.3) (2025-09-02)
 
 ### Features
