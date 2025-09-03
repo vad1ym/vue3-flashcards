@@ -1,58 +1,98 @@
 # Vue 3 Flashcards
 
-A Tinder-like flashcards component for Vue 3 with dragging and flipping animations. Built with TypeScript and Vue 3 Composition API.
+<div align="center">
 
-> ⚠️ **Development Notice**: This package is currently in development. The API may change between minor versions until v1.0.0 is released
+**A Tinder-like flashcards component for Vue 3 with smooth animations and intuitive gestures**
 
-[Docs](https://vad1ym.github.io/vue3-flashcards) | [Examples](https://vad1ym.github.io/vue3-flashcards/examples)
+> ⚠️ **Development Notice**: This package is currently in development. The API may change between minor versions until v1.0.0 is released.
 
-## Features
+[![NPM Version](https://img.shields.io/npm/v/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://www.npmjs.com/package/vue3-flashcards)
+[![NPM Downloads](https://img.shields.io/npm/dm/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://www.npmjs.com/package/vue3-flashcards)
+[![Bundle Size](https://img.shields.io/bundlephobia/minzip/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://bundlephobia.com/package/vue3-flashcards)
+[![License](https://img.shields.io/npm/l/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://github.com/vad1ym/vue3-flashcards/blob/main/LICENSE)
 
-- 🎯 Tinder-style swipe interactions
-- 🔄 Cards flipping
-- 🎨 Customizable
+[**📚 Documentation**](https://vad1ym.github.io/vue3-flashcards) • [**🎮 Examples**](https://vad1ym.github.io/vue3-flashcards/examples) • [**🚀 Getting Started**](https://vad1ym.github.io/vue3-flashcards/guide/getting-started)
 
-## Installation
+</div>
+
+---
+
+## ✨ Features
+
+- **🎯 Tinder-style interactions** - Intuitive swipe gestures with smooth animations
+- **🔄 Card flipping** - Two-sided cards with beautiful flip animations
+- **⚡ Zero dependencies** - Lightweight and performant, built purely with Vue 3 and CSS
+
+## 📦 Installation
 
 ```bash
+# npm
 npm install vue3-flashcards
+
+# yarn
+yarn add vue3-flashcards
+
+# pnpm
+pnpm add vue3-flashcards
 ```
 
-## Basic Usage Example
+## 🚀 Quick Start
 
 ```vue
 <script setup>
+import { ref } from 'vue'
+import { FlashCards } from 'vue3-flashcards'
+
 const cards = ref([
-  { text: 'Front 1' },
-  { text: 'Front 2' },
-  { text: 'Front 3' },
+  { id: 1, title: 'First Card' },
+  { id: 2, title: 'Second Card' },
+  { id: 3, title: 'Third Card' },
 ])
+
+function handleApprove(item) {
+  console.log('Liked:', item.title)
+}
+
+function handleReject(item) {
+  console.log('Passed:', item.title)
+}
 </script>
 
 <template>
-  <div class="w-full flex justify-center items-center min-h-screen">
-    <div class="max-w-sm w-full">
-      <FlashCards :items="cards" #="{ item }">
-        <div class="p-5 bg-base-200 border border-base-300 shadow-lg rounded-lg h-40 flex justify-center items-center">
-          <div>{{ item.text }}</div>
+  <div class="flashcards-container">
+    <FlashCards
+      :items="cards"
+      @approve="handleApprove"
+      @reject="handleReject"
+    >
+      <template #default="{ item }">
+        <div class="card">
+          <h2>{{ item.title }}</h2>
         </div>
-      </FlashCards>
-    </div>
+      </template>
+    </FlashCards>
   </div>
 </template>
+
 ```
 
-## Props
+---
 
-| Prop Name | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| items | `T[]` | Yes | - | Array of items to display as cards. Each item will be passed to the default and back slots. |
-| maxRotation | `number` | No | `20` | Maximum rotation angle in degrees. |
-| threshold | `number` | No | `150` | Threshold in pixels for swipe actions. |
-| dragThreshold | `number` | No | `5` | Minimum distance in pixels the card must be dragged to start swiping. Helps prevent false positives from small movements. |
-| virtualBuffer | `number` | No | `2` | Number of cards to render before/after the current card. Used for virtual rendering with large datasets. A value of 2 means 5 cards total will be rendered (current + 2 before + 2 after). |
+## 📖 API Reference
 
-## Slots
+For complete documentation, visit **[documentation](https://vad1ym.github.io/vue3-flashcards)**
+
+### FlashCards Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `items` | `T[]` | **required** | Array of items to display as cards |
+| `maxRotation` | `number` | `20` | Maximum rotation angle in degrees |
+| `threshold` | `number` | `150` | Swipe threshold in pixels |
+| `dragThreshold` | `number` | `5` | Minimum drag distance to start swiping |
+| `virtualBuffer` | `number` | `2` | Cards to render for virtual scrolling |
+
+### Key Slots
 
 | Slot Name | Props | Description |
 |-----------|-------|-------------|

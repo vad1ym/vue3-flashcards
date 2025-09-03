@@ -1,153 +1,51 @@
 # Vue 3 Flashcards Documentation
 
-A Tinder-like flashcards component for Vue 3 with dragging and flipping animations. Built with TypeScript and Vue 3 Composition API.
+::: warning Moved
+This page has been reorganized! The documentation is now split into focused sections for better navigation.
+:::
 
-> ⚠️ **Development Notice**: This package is currently in development. The API may change between minor versions until v1.0.0 is released
+## Quick Navigation
 
-## Installation
+### 🚀 **[Getting Started →](/guide/getting-started)**
+Installation, quick start guide, and first steps.
 
-```bash
-npm install vue3-flashcards
-```
+### ⚙️ **[Configuration →](/guide/configuration)**
+Comprehensive guide to props, performance optimization, and customization.
 
-## Usage
+### 📚 **[API Reference →](/api/flashcards)**
+Complete API documentation for FlashCards and FlipCard components.
 
-### Basic Example
+### 💡 **[Examples →](/examples)**
+Interactive examples and use cases.
 
-Here's a simple example showing how to create a basic flashcards component:
 
-```vue
-<script setup>
-import { ref } from 'vue'
-import { FlashCards } from 'vue3-flashcards'
+---
 
-const cards = ref([
-  { text: 'Front 1' },
-  { text: 'Front 2' },
-  { text: 'Front 3' },
-])
-</script>
+## What is Vue3 Flashcards?
 
-<template>
-  <div class="w-full flex justify-center items-center min-h-screen">
-    <div class="max-w-sm w-full">
-      <FlashCards :items="cards" #="{ item }">
-        <div class="p-5 bg-base-200 border border-base-300 shadow-lg rounded-lg h-40 flex justify-center items-center">
-          <div>{{ item.text }}</div>
-        </div>
-      </FlashCards>
-    </div>
-  </div>
-</template>
-```
+A powerful, flexible Vue 3 component library for creating Tinder-like card interfaces. Perfect for:
 
-## Props
+- 📚 **Learning apps** - Flashcards, vocabulary training
+- 🎮 **Gaming** - Card matching, swiping mechanics  
+- 📱 **Dating apps** - Profile browsing, matching interfaces
+- 🛍️ **E-commerce** - Product discovery, wishlists
+- 📊 **Data presentation** - Interactive card-based layouts
 
-| Prop Name | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| items | `T[]` | Yes | - | Array of items to display as cards. Each item will be passed to the default and back slots. |
-| maxRotation | `number` | No | `20` | Maximum rotation angle in degrees. |
-| threshold | `number` | No | `150` | Threshold in pixels for swipe actions. |
-| dragThreshold | `number` | No | `5` | Minimum distance in pixels the card must be dragged to start swiping. Helps prevent false positives from small movements. |
-| virtualBuffer | `number` | No | `2` | Number of cards to render before/after the current card. Used for virtual rendering with large datasets. A value of 2 means 5 cards total will be rendered (current + 2 before + 2 after). |
+## Key Features
 
-## Slots
+- **🎯 Intuitive Gestures** - Natural swipe interactions
+- **🔄 Flip Animations** - Beautiful two-sided cards
+- **⚡ High Performance** - Virtual rendering for large datasets
+- **📱 Mobile Optimized** - Touch-first design
+- **🎨 Fully Customizable** - Flexible slot system
+- **🔧 TypeScript Ready** - Complete type definitions
 
-| Slot Name | Props | Description |
-|-----------|-------|-------------|
-| default | `{ item: T }` | Main content of the card (front side) |
-| actions | `{ restore: () => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }` | Custom actions UI. `restore` returns to previous card, `reject`/`approve` trigger swipe animations, `isEnd` whether all cards have been swiped, `canRestore` whether there is a previous card to restore to |
-| approve | `{ item: T, delta: number }` | Content shown when swiping right (approval indicator). `delta` is a value from 0 to 1, where 0 means the card is static and 1 means the card is at the approval threshold. Used for opacity transitions. Based on `threshold` prop |
-| reject | `{ item: T, delta: number }` | Content shown when swiping left (rejection indicator). `delta` is a value from 0 to 1, where 0 means the card is static and 1 means the card is at the rejection threshold. Used for opacity transitions. Based on `threshold` prop |
-| empty | - | Content shown when all cards have been swiped |
+## Development Status
 
-## Events
+::: warning
+This package is currently in active development. The API may change between minor versions until v1.0.0 is released.
+:::
 
-| Event Name | Payload | Description |
-|------------|---------|-------------|
-| approve | `item: T` | Emitted when a card is approved (swiped right or approved via actions) |
-| reject | `item: T` | Emitted when a card is rejected (swiped left or rejected via actions) |
-
-## Exposed
-| Method/Property | Type | Description |
-|----------------|------|-------------|
-| restore | `() => void` | Returns to the previous card if available |
-| approve | `() => void` | Triggers approval animation on current card |
-| reject | `() => void` | Triggers rejection animation on current card |
-| canRestore | `boolean` | Whether there is a previous card to restore to |
-| isEnd | `boolean` | Whether all cards have been swiped |
-
-## FlipCard Component
-
-The `FlipCard` component provides card flipping functionality and can be used independently or within FlashCards.
-
-### Props
-
-| Prop Name | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| disabled | `boolean` | No | `false` | Disable card flipping functionality |
-| waitAnimationEnd | `boolean` | No | `true` | Wait for animation to end before allowing another flip |
-
-### Slots
-
-| Slot Name | Props | Description |
-|-----------|-------|-----------|
-| front | - | Content shown on the front of the card |
-| back | - | Content shown on the back of the card (optional) |
-
-### FlipCard Usage Example
-
-```vue
-<script setup>
-import { FlipCard } from 'vue3-flashcards'
-</script>
-
-<template>
-  <FlipCard>
-    <template #front>
-      <div class="card-front">
-        Front Content
-      </div>
-    </template>
-    <template #back>
-      <div class="card-back">
-        Back Content
-      </div>
-    </template>
-  </FlipCard>
-</template>
-```
-
-### Using FlipCard with FlashCards
-
-```vue
-<script setup>
-import { ref } from 'vue'
-import { FlashCards, FlipCard } from 'vue3-flashcards'
-
-const cards = ref([
-  { text: 'Front 1', back: 'Back 1' },
-  { text: 'Front 2', back: 'Back 2' },
-  { text: 'Front 3', back: 'Back 3' },
-])
-</script>
-
-<template>
-  <FlashCards :items="cards">
-    <template #default="{ item }">
-      <FlipCard>
-        <template #front>
-          <div class="card-content">
-            {{ item.text }}
-          </div>
-        </template>
-        <template #back>
-          <div class="card-content">
-            {{ item.back }}
-          </div>
-        </template>
-      </FlipCard>
-    </template>
-  </FlashCards>
-</template>
-```
+**Current Version:** v0.7.0  
+**Vue.js Compatibility:** ^3.0.0  
+**TypeScript Support:** ✅ Full support

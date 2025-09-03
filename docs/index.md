@@ -11,16 +11,26 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /docs
+      link: /guide/getting-started
     - theme: alt
       text: View Examples
       link: /examples
+    - theme: alt
+      text: API Reference
+      link: /api/flashcards
 
 features:
-  - title: 🎯 Tinder-style Interactions
-    details: Intuitive swipe gestures for card navigation, just like Tinder
-  - title: 🔄 Card Flipping Support
-    details: Enable two-sided cards with smooth flipping animations
-  - title: 🎨 Highly Customizable
-    details: Flexible slot system for complete control over card appearance and actions
+  - icon: 🎯
+    title: Tinder-style Interactions
+    details: Intuitive swipe gestures for card navigation with smooth animations and touch support
+  - icon: 🔄
+    title: Card Flipping Support
+    details: Two-sided cards with beautiful flip animations, perfect for flashcards and learning apps
+  - icon: ⚡
+    title: Zero Dependencies
+    details: Lightweight and performant with no external dependencies, built purely with Vue 3 and CSS
 ---
+
+::: warning Development Notice
+This package is currently in development. The API may change between minor versions until v1.0.0 is released.
+:::

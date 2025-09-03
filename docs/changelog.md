@@ -14,9 +14,9 @@
 
 The `FlipCard` component provides card flipping functionality and now can be used independently without flashcards wrapper.
 
-For those who used the `:flip="true"` feature, you can now use the separate [FlipCard](/docs.html#flipcard-component) component instead.
+For those who used the `:flip="true"` feature, you can now use the separate [FlipCard](/api/flipcard.html) component instead.
 
-For usage with flash cards together, see the [example](/examples.html#with-flipcard-component)
+For usage with flash cards together, see the [example](/api/flipcard.html#flipcard-with-flashcards)
 ## [0.6.3](https://github.com/vad1ym/vue3-flashcards/compare/v0.6.2...v0.6.3) (2025-09-02)
 
 ### Features

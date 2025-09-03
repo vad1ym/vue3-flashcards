@@ -1,0 +1,120 @@
+/**
+ * Customize default theme styling by overriding CSS variables:
+ * https://github.com/vuejs/vitepress/blob/main/src/client/theme-default/styles/vars.css
+ */
+
+/**
+ * Colors
+ * -------------------------------------------------------------------------- */
+
+:root {
+  --vp-c-brand-1: #646cff;
+  --vp-c-brand-2: #747bff;
+  --vp-c-brand-3: #8085ff;
+  
+  --vp-c-brand-soft: rgba(100, 108, 255, 0.14);
+  --vp-c-brand-lighter: rgba(100, 108, 255, 0.08);
+  
+  /* Custom accent colors */
+  --vp-c-accent-1: #10b981;
+  --vp-c-accent-2: #34d399;
+  --vp-c-accent-soft: rgba(16, 185, 129, 0.14);
+  
+  /* Warning colors for development notice */
+  --vp-c-warning-1: #f59e0b;
+  --vp-c-warning-soft: rgba(245, 158, 11, 0.14);
+}
+
+/**
+ * Component: Home
+ * -------------------------------------------------------------------------- */
+
+.VPHome .name {
+  background: linear-gradient(135deg, var(--vp-c-brand-1), var(--vp-c-brand-3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.VPHome .tagline {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: var(--vp-c-text-2);
+  margin-top: 16px;
+}
+
+/**
+ * Component: Features
+ * -------------------------------------------------------------------------- */
+
+/**
+ * Component: Code blocks
+ * -------------------------------------------------------------------------- */
+
+.vp-code-group {
+  margin: 24px 0;
+}
+
+.vp-code-group .tabs {
+  border-radius: 8px 8px 0 0;
+  background: var(--vp-code-tab-bg);
+}
+
+.vp-code-group .tabs input:checked + label {
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+}
+
+/**
+ * Component: Custom blocks
+ * -------------------------------------------------------------------------- */
+
+.custom-block {
+  margin: 28px 0;
+  border-radius: 8px;
+  padding: 20px;
+  border-left: 4px solid var(--vp-c-brand-1);
+}
+
+.custom-block.warning {
+  border-left-color: var(--vp-c-warning-1);
+  background: var(--vp-c-warning-soft);
+}
+
+.custom-block.warning .custom-block-title {
+  color: var(--vp-c-warning-1);
+}
+
+.custom-block-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-block p:last-child {
+  margin-bottom: 0;
+}
+
+
+/**
+ * Links
+ * -------------------------------------------------------------------------- */
+
+.vp-doc a,
+.VPContent a,
+.content a,
+.VPLink {
+  text-decoration: none !important;
+  color: var(--vp-c-brand-1);
+  font-weight: 500;
+}
+
+.vp-doc a:hover,
+.VPContent a:hover,
+.content a:hover,
+.VPLink:hover {
+  color: var(--vp-c-brand-2);
+  text-decoration: none !important;
+}

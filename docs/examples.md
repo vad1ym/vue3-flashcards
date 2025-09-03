@@ -3,82 +3,102 @@ outline: deep
 ---
 
 <script setup>
-import BasicUsage from '../example/BasicUsage.vue'
-import FlipUsage from '../example/FlipUsage.vue'
-import CustomActionsUsage from '../example/CustomActionsUsage.vue'
-import VirtualUsage from '../example/VirtualUsage.vue'
-import TinderUsage from '../example/TinderUsage.vue'
-import DeltaUsage from '../example/DeltaUsage.vue'
+import BasicUsage from '../example/basic-usage/index.vue'
+import FlipUsage from '../example/flip-usage/index.vue'
+import CustomActionsUsage from '../example/custom-actions/index.vue'
+import VirtualUsage from '../example/virtual-usage/index.vue'
+import TinderUsage from '../example/tinder-usage/index.vue'
+import DeltaUsage from '../example/delta-usage/index.vue'
 </script>
 
-# Examples
+# Live Examples
 
-## Basic usage
+Interactive demos showcasing different features and use cases.
+
+## 🚀 Basic Usage
+
+Simple swipeable cards with minimal setup.
 
 <ClientOnly>
   <BasicUsage />
 </ClientOnly>
 
 :::details Source
-<<< ../example/BasicUsage.vue
+::: code-group
+<<< ../example/basic-usage/index.vue [index.vue]
+<<< ../example/basic-usage/BasicCard.vue [BasicCard.vue]
 :::
 
-## With FlipCard component
+## 🔄 FlipCard Integration
 
-Shows how to use the separate FlipCard component within FlashCards. Click on card to flip
+Two-sided cards with flip animations. Click to flip, swipe to approve or reject.
 
 <ClientOnly>
   <FlipUsage />
 </ClientOnly>
 
 :::details Source
-<<< ../example/FlipUsage.vue
+::: code-group
+<<< ../example/flip-usage/index.vue [index.vue]
+<<< ../example/flip-usage/QuestionCard.vue [QuestionCard.vue]
+<<< ../example/flip-usage/AnswerCard.vue [AnswerCard.vue]
 :::
 
-## With custom actions usage
+## 🎮 Custom Actions
+
+Custom action buttons with manual card controls.
 
 <ClientOnly>
   <CustomActionsUsage />
 </ClientOnly>
 
 :::details Source
-<<< ../example/CustomActionsUsage.vue
+::: code-group
+<<< ../example/custom-actions/index.vue [index.vue]
+<<< ../example/custom-actions/LearningCard.vue [LearningCard.vue]
+<<< ../example/custom-actions/ActionButtons.vue [ActionButtons.vue]
 :::
 
-## Virtual rendering with many cards
+## ⚡ Virtual Rendering
 
-Efficiently handles large datasets by only rendering visible cards
+Efficient rendering for large datasets (10,000+ cards).
 
 <ClientOnly>
   <VirtualUsage />
 </ClientOnly>
 
 :::details Source
-<<< ../example/VirtualUsage.vue
+::: code-group
+<<< ../example/virtual-usage/index.vue [index.vue]
+<<< ../example/virtual-usage/VirtualCard.vue [VirtualCard.vue]
 :::
 
-## Tinder-like cards
+## 💖 Tinder-Style Cards
 
-Swipeable cards with beautiful images and Tinder-like interactions.
-See how to use extra state for actions
+Image-based cards with visual swipe indicators and smooth animations.
 
 <ClientOnly>
   <TinderUsage />
 </ClientOnly>
 
 :::details Source
-<<< ../example/TinderUsage.vue
+::: code-group
+<<< ../example/tinder-usage/index.vue [index.vue]
+<<< ../example/tinder-usage/TinderCard.vue [TinderCard.vue]
+<<< ../example/tinder-usage/TinderActions.vue [TinderActions.vue]
 :::
 
-## Word study with delta feedback
+## 🎯 Delta Usage
 
-Language learning cards with visual feedback for known and unknown words.
-Shows how to use delta prop for smooth opacity transitions with custom approje/reject state.
+Custom swiping indicators with dynamic opacity transitions.
 
 <ClientOnly>
   <DeltaUsage />
 </ClientOnly>
 
 :::details Source
-<<< ../example/DeltaUsage.vue
+::: code-group
+<<< ../example/delta-usage/index.vue [index.vue]
+<<< ../example/delta-usage/LanguageCard.vue [LanguageCard.vue]
+<<< ../example/delta-usage/SwipeOverlay.vue [SwipeOverlay.vue]
 :::
