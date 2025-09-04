@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import type { DragSetupParams } from './utils/useDragSetup'
 import { nextTick, onMounted, ref } from 'vue'
 import ApproveIcon from './components/ApproveIcon.vue'
 import RejectIcon from './components/RejectIcon.vue'
-import { type DragSetupParams, DragType, useDragSetup } from './utils/useDragSetup'
+import { DragType, useDragSetup } from './utils/useDragSetup'
 
 const props = defineProps<DragSetupParams>()
 
