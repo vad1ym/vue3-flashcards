@@ -4,6 +4,7 @@ outline: deep
 
 <script setup>
 import BasicUsage from '../example/basic-usage/index.vue'
+import LimitUsage from '../example/limit-usage/index.vue'
 import FlipUsage from '../example/flip-usage/index.vue'
 import CustomActionsUsage from '../example/custom-actions/index.vue'
 import VirtualUsage from '../example/virtual-usage/index.vue'
@@ -27,6 +28,20 @@ Simple swipeable cards with minimal setup.
 ::: code-group
 <<< ../example/basic-usage/index.vue [index.vue]
 <<< ../example/basic-usage/BasicCard.vue [BasicCard.vue]
+:::
+
+## 🚧 Drag Limits
+
+Demonstrate drag limits with checkboxes to toggle Y dragging (0px) and X dragging (200px) constraints.
+
+<ClientOnly>
+  <LimitUsage />
+</ClientOnly>
+
+:::details Source
+::: code-group
+<<< ../example/limit-usage/index.vue [index.vue]
+<<< ../example/limit-usage/LimitCard.vue [LimitCard.vue]
 :::
 
 ## 🔄 FlipCard Integration

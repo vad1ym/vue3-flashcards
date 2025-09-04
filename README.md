@@ -90,6 +90,8 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `maxRotation` | `number` | `20` | Maximum rotation angle in degrees |
 | `threshold` | `number` | `150` | Swipe threshold in pixels |
 | `dragThreshold` | `number` | `5` | Minimum drag distance to start swiping |
+| `maxDraggingY` | `number \| null` | `null` | Maximum Y dragging distance in pixels (null = unlimited) |
+| `maxDraggingX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |
 | `virtualBuffer` | `number` | `2` | Cards to render for virtual scrolling |
 
 ### Key Slots

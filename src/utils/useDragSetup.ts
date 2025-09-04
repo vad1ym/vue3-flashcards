@@ -16,6 +16,11 @@ export interface DragSetupParams {
   // Distance in pixels the card must be dragged to start swiping, small value
   // Is need to prevent false positives (e.x. for card fliping feature)
   dragThreshold?: number
+
+  // Max dragging in pixels, user cant drag moren than than value
+  // Disabled by default
+  maxDraggingY?: number | null
+  maxDraggingX?: number | null
 }
 
 export interface DragSetupCallbacks {
@@ -40,6 +45,8 @@ function parseOptions(options: DragSetupOptions) {
     maxRotation: options.maxRotation ?? 20,
     threshold: options.threshold ?? 150,
     dragThreshold: options.dragThreshold ?? 5,
+    maxDraggingY: options.maxDraggingY ?? null,
+    maxDraggingX: options.maxDraggingX ?? null,
     onDragStart: options.onDragStart || (() => {}),
     onDragMove: options.onDragMove || (() => {}),
     onDragEnd: options.onDragEnd || (() => {}),
@@ -48,7 +55,7 @@ function parseOptions(options: DragSetupOptions) {
 }
 
 export function useDragSetup(options: DragSetupOptions) {
-  const { maxRotation, threshold, dragThreshold, onDragStart, onDragMove, onDragEnd, onComplete } = parseOptions(options)
+  const { maxRotation, threshold, dragThreshold, maxDraggingY, maxDraggingX, onDragStart, onDragMove, onDragEnd, onComplete } = parseOptions(options)
 
   const sourceEl = ref<HTMLElement | null>(null)
   const isDrag = ref(false)
@@ -113,11 +120,23 @@ export function useDragSetup(options: DragSetupOptions) {
     event.preventDefault()
     event.stopPropagation()
 
-    let rotate = maxRotation * (x / threshold)
+    // Apply dragging limits if provided
+    let limitedX = x
+    let limitedY = y
+
+    if (maxDraggingX !== null) {
+      limitedX = Math.max(-maxDraggingX, Math.min(maxDraggingX, x))
+    }
+
+    if (maxDraggingY !== null) {
+      limitedY = Math.max(-maxDraggingY, Math.min(maxDraggingY, y))
+    }
+
+    let rotate = maxRotation * (limitedX / threshold)
     rotate = Math.max(-maxRotation, Math.min(maxRotation, rotate))
 
-    position.x = x
-    position.y = y
+    position.x = limitedX
+    position.y = limitedY
     position.rotation = rotate
     position.type = rotate > 0 ? DragType.APPROVE : rotate < 0 ? DragType.REJECT : null
 

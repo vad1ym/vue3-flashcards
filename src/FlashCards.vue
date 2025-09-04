@@ -8,12 +8,16 @@ const {
   dragThreshold,
   maxRotation,
   virtualBuffer = 2,
+  maxDraggingX,
+  maxDraggingY,
 } = defineProps<{
   items?: T[]
   threshold?: number
   dragThreshold?: number
   maxRotation?: number
   virtualBuffer?: number
+  maxDraggingX?: number | null
+  maxDraggingY?: number | null
 }>()
 
 const emit = defineEmits<{
@@ -135,6 +139,8 @@ defineExpose({
               :threshold="threshold"
               :drag-threshold="dragThreshold"
               :max-rotation="maxRotation"
+              :max-dragging-x="maxDraggingX"
+              :max-dragging-y="maxDraggingY"
               class="flashcards__card"
               :class="{ 'flashcards__card--interactive': index === currentIndex }"
               @complete="setApproval(index, $event)"

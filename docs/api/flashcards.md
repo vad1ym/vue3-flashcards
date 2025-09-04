@@ -27,6 +27,18 @@ The main component for creating swipeable card interfaces.
 - **Default:** `5`
 - **Description:** Minimum distance in pixels the card must be dragged to start swiping. Helps prevent false positives from small movements like clicks.
 
+### `maxDraggingY`
+
+- **Type:** `number | null`
+- **Default:** `null`
+- **Description:** Maximum Y dragging distance in pixels. When set, limits vertical card movement. Set to `null` for unlimited vertical dragging.
+
+### `maxDraggingX`
+
+- **Type:** `number | null`
+- **Default:** `null`
+- **Description:** Maximum X dragging distance in pixels. When set, limits horizontal card movement. Set to `null` for unlimited horizontal dragging.
+
 ### `virtualBuffer`
 
 - **Type:** `number`

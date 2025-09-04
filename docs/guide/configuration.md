@@ -47,6 +47,28 @@ The main `FlashCards` component accepts several props to control its behavior:
 <FlashCards :items="cards" :drag-threshold="10" />
 ```
 
+#### `maxDraggingY`
+
+- **Type:** `number | null`
+- **Default:** `null`
+- **Description:** Maximum Y dragging distance in pixels. Limits vertical movement.
+
+```vue
+<!-- Prevent vertical dragging -->
+<FlashCards :items="cards" :max-dragging-y="0" />
+```
+
+#### `maxDraggingX`
+
+- **Type:** `number | null`
+- **Default:** `null`
+- **Description:** Maximum X dragging distance in pixels. Limits horizontal movement.
+
+```vue
+<!-- Limit horizontal dragging to 200px -->
+<FlashCards :items="cards" :max-dragging-x="200" />
+```
+
 ### Performance Props
 
 #### `virtualBuffer`
