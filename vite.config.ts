@@ -1,4 +1,5 @@
 import { resolve } from 'node:path'
+import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
@@ -6,7 +7,7 @@ import dts from 'vite-plugin-dts'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), dts({ rollupTypes: true, tsconfigPath: 'tsconfig.app.json' }), cssInjectedByJsPlugin()],
+  plugins: [vue(), dts({ rollupTypes: true, tsconfigPath: 'tsconfig.app.json' }), cssInjectedByJsPlugin(), tailwindcss()],
   resolve: {
     alias: {
       'vue3-flashcards': resolve(__dirname, 'src/index.ts'),
