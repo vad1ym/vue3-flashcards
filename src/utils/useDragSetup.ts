@@ -115,7 +115,9 @@ export function useDragSetup(_options: MaybeRefOrGetter<DragSetupOptions>) {
       return
     }
 
-    isDragging.value = true
+    if (!isDragging.value) {
+      isDragging.value = true
+    }
 
     event.preventDefault()
     event.stopPropagation()
@@ -176,15 +178,19 @@ export function useDragSetup(_options: MaybeRefOrGetter<DragSetupOptions>) {
     sourceEl.value = el
     restore()
 
+    // Optimize for transforms
+    el.style.willChange = 'transform'
+    el.style.touchAction = 'none'
+
     // Mouse events
     el.addEventListener('mousedown', handleDragStart)
     window.addEventListener('mousemove', handleDragMove)
     window.addEventListener('mouseup', handleDragEnd)
 
-    // Touch events
-    el.addEventListener('touchstart', handleDragStart)
-    window.addEventListener('touchmove', handleDragMove)
-    window.addEventListener('touchend', handleDragEnd)
+    // Touch events with passive optimization
+    el.addEventListener('touchstart', handleDragStart, { passive: false })
+    window.addEventListener('touchmove', handleDragMove, { passive: false })
+    window.addEventListener('touchend', handleDragEnd, { passive: true })
   }
 
   function complete(type: DragType, threshold: number) {

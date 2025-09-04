@@ -77,10 +77,17 @@ defineExpose({
   transform-origin: 50%, 100%;
   will-change: transform, opacity;
   position: relative;
+  touch-action: pan-x pan-y;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000px;
+  perspective: 1000px;
 }
 
 .flash-card--animated {
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 .flash-card__indicator {
