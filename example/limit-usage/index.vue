@@ -18,11 +18,11 @@ const limitX = ref(true)
   <div class="w-full flex flex-col justify-center items-center py-20 space-y-8">
     <div class="flex space-x-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
       <label class="flex items-center space-x-2">
-        <input v-model="limitY" type="checkbox" class="toggle">
+        <input v-model="limitY" type="checkbox" class="toggle toggle-primary">
         <span class="text-gray-700 dark:text-gray-300">Limit Y (0px)</span>
       </label>
       <label class="flex items-center space-x-2">
-        <input v-model="limitX" type="checkbox" class="toggle">
+        <input v-model="limitX" type="checkbox" class="toggle toggle-primary">
         <span class="text-gray-700 dark:text-gray-300">Limit X (200px)</span>
       </label>
     </div>

@@ -10,6 +10,7 @@ const {
   virtualBuffer = 2,
   maxDraggingX,
   maxDraggingY,
+  infinite = false,
 } = defineProps<{
   items?: T[]
   threshold?: number
@@ -18,6 +19,7 @@ const {
   virtualBuffer?: number
   maxDraggingX?: number | null
   maxDraggingY?: number | null
+  infinite?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -29,7 +31,7 @@ defineSlots<{
   default: (props: { item: T }) => any
   reject?: (props: { item: T, delta: number }) => any
   approve?: (props: { item: T, delta: number }) => any
-  actions?: (props: { restore: () => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }) => any
+  actions?: (props: { restore: (animated?: boolean) => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }) => any
   empty?: () => any
 }>()
 
@@ -43,16 +45,25 @@ interface CardState {
 const history = reactive<Map<number, CardState>>(new Map())
 const currentIndex = ref(0)
 
+function getItemAtIndex(index: number) {
+  if (infinite) {
+    return items[index % items.length]
+  }
+  return items[index]
+}
+
 const isFirstCard = computed(() => currentIndex.value === 0)
 
 const visibleItems = computed(() => {
   const start = Math.max(0, currentIndex.value - 1)
-  const end = Math.min(items.length - 1, currentIndex.value + virtualBuffer)
+  const end = infinite
+    ? currentIndex.value + virtualBuffer
+    : Math.min(items.length - 1, currentIndex.value + virtualBuffer)
 
   return Array.from({ length: end - start + 1 }, (_, i) => {
     const index = start + i
     return {
-      item: items[index],
+      item: getItemAtIndex(index),
       index,
       state: history.get(index),
     }
@@ -63,10 +74,12 @@ function setApproval(index: number, approved: boolean) {
   history.set(index, { approved, done: true })
   currentIndex.value++
 
+  // Get the original item for emit
+  const originalItem = getItemAtIndex(index)
   if (approved)
-    emit('approve', items[index])
+    emit('approve', originalItem)
   else
-    emit('reject', items[index])
+    emit('reject', originalItem)
 }
 
 function restore() {
@@ -109,7 +122,7 @@ defineExpose({
 <template>
   <div>
     <div class="flashcards">
-      <div class="flashcards__empty-state">
+      <div class="flashcards__empty-state" :style="{ zIndex: -items.length - 1 }">
         <slot name="empty">
           <div>
             No more cards!
@@ -132,7 +145,7 @@ defineExpose({
               'flashcards__card-wrapper--approved': state?.approved === true,
               'flashcards__card-wrapper--current': index === currentIndex,
             }"
-            :style="{ zIndex: items.length - index }"
+            :style="{ zIndex: currentIndex - index }"
           >
             <FlashCard
               :ref="el => el && cardRefs.set(index, el as InstanceType<typeof FlashCard>)"
@@ -177,6 +190,7 @@ defineExpose({
   position: relative;
   width: 100%;
   height: 100%;
+  isolation: isolate;
 }
 
 .flashcards__empty-state {

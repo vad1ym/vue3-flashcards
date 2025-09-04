@@ -39,6 +39,12 @@ The main component for creating swipeable card interfaces.
 - **Default:** `null`
 - **Description:** Maximum X dragging distance in pixels. When set, limits horizontal card movement. Set to `null` for unlimited horizontal dragging.
 
+### `infinite`
+
+- **Type:** `boolean`
+- **Default:** `false`
+- **Description:** Enable infinite swiping mode. When enabled, cards will loop endlessly after reaching the end. Useful for small datasets where you want continuous swiping.
+
 ### `virtualBuffer`
 
 - **Type:** `number`

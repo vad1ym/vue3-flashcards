@@ -10,6 +10,7 @@ import CustomActionsUsage from '../example/custom-actions/index.vue'
 import VirtualUsage from '../example/virtual-usage/index.vue'
 import TinderUsage from '../example/tinder-usage/index.vue'
 import DeltaUsage from '../example/delta-usage/index.vue'
+import InfiniteUsage from '../example/infinite-usage/index.vue'
 </script>
 
 # Live Examples
@@ -116,4 +117,18 @@ Custom swiping indicators with dynamic opacity transitions.
 <<< ../example/delta-usage/index.vue [index.vue]
 <<< ../example/delta-usage/LanguageCard.vue [LanguageCard.vue]
 <<< ../example/delta-usage/SwipeOverlay.vue [SwipeOverlay.vue]
+:::
+
+## ♾️ Infinite Swiping
+
+Endless card swiping with only 3 cards that loop infinitely.
+
+<ClientOnly>
+  <InfiniteUsage />
+</ClientOnly>
+
+:::details Source
+::: code-group
+<<< ../example/infinite-usage/index.vue [index.vue]
+<<< ../example/infinite-usage/InfiniteCard.vue [InfiniteCard.vue]
 :::

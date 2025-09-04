@@ -69,6 +69,17 @@ The main `FlashCards` component accepts several props to control its behavior:
 <FlashCards :items="cards" :max-dragging-x="200" />
 ```
 
+#### `infinite`
+
+- **Type:** `boolean`
+- **Default:** `false`
+- **Description:** Enable infinite swiping mode. When enabled, cards will loop endlessly after reaching the end.
+
+```vue
+<!-- Enable infinite swiping -->
+<FlashCards :items="cards" :infinite="true" />
+```
+
 ### Performance Props
 
 #### `virtualBuffer`
