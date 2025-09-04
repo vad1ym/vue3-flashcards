@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { FlashCards } from 'vue3-flashcards'
 import BasicCard from './BasicCard.vue'
-import '../assets/index.css'
 
 const cards = ref([
   { text: 'Mathematics', subtitle: 'Basic algebra and geometry', color: 'from-blue-500 to-blue-600' },

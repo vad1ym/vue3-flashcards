@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { FlashCards } from 'vue3-flashcards'
 import LanguageCard from './LanguageCard.vue'
 import SwipeOverlay from './SwipeOverlay.vue'
-import '../assets/index.css'
 
 interface WordCard {
   word: string

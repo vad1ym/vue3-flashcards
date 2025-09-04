@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { FlashCards } from 'vue3-flashcards'
 import TinderActions from './TinderActions.vue'
 import TinderCard from './TinderCard.vue'
-import '../assets/index.css'
 
 interface Card {
   id: number

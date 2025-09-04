@@ -1,7 +1,11 @@
+import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  vite: {
+    plugins: [tailwindcss()],
+  },
   base: '/vue3-flashcards/',
   title: 'Vue3 Flashcards',
   description: 'A Tinder-like flashcards component for Vue 3 with dragging and flipping animations. Built with TypeScript and Vue 3 Composition API.',

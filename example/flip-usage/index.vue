@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { FlashCards, FlipCard } from 'vue3-flashcards'
 import AnswerCard from './AnswerCard.vue'
 import QuestionCard from './QuestionCard.vue'
-import '../assets/index.css'
 
 const cards = ref([
   { text: 'What is the capital of France?', back: 'Paris', difficulty: 'Easy', category: 'Geography' },

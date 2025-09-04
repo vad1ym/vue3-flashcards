@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { FlashCards } from 'vue3-flashcards'
 import ActionButtons from './ActionButtons.vue'
 import LearningCard from './LearningCard.vue'
-import '../assets/index.css'
 
 const cards = ref([
   { text: 'Business Strategy', description: 'Learn the fundamentals of strategic planning', icon: '💼' },
