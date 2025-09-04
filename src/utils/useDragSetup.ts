@@ -1,4 +1,5 @@
-import { computed, onUnmounted, reactive, ref } from 'vue'
+import type { MaybeRefOrGetter } from 'vue'
+import { computed, onUnmounted, reactive, ref, toRef } from 'vue'
 
 export enum DragType {
   APPROVE = 'approve',
@@ -40,22 +41,21 @@ export interface DragPosition {
   type: DragType | null
 }
 
-function parseOptions(options: DragSetupOptions) {
-  return {
-    maxRotation: options.maxRotation ?? 20,
-    threshold: options.threshold ?? 150,
-    dragThreshold: options.dragThreshold ?? 5,
-    maxDraggingY: options.maxDraggingY ?? null,
-    maxDraggingX: options.maxDraggingX ?? null,
-    onDragStart: options.onDragStart || (() => {}),
-    onDragMove: options.onDragMove || (() => {}),
-    onDragEnd: options.onDragEnd || (() => {}),
-    onComplete: options.onComplete || (() => {}),
-  }
-}
+export function useDragSetup(_options: MaybeRefOrGetter<DragSetupOptions>) {
+  const options = toRef(_options)
 
-export function useDragSetup(options: DragSetupOptions) {
-  const { maxRotation, threshold, dragThreshold, maxDraggingY, maxDraggingX, onDragStart, onDragMove, onDragEnd, onComplete } = parseOptions(options)
+  const {
+    onDragStart = () => {},
+    onDragMove = () => {},
+    onDragEnd = () => {},
+    onComplete = () => {},
+  } = options.value
+
+  const maxRotation = computed(() => options.value.maxRotation ?? 20)
+  const threshold = computed(() => options.value.threshold ?? 150)
+  const dragThreshold = computed(() => options.value.dragThreshold ?? 5)
+  const maxDraggingY = computed(() => options.value.maxDraggingY ?? null)
+  const maxDraggingX = computed(() => options.value.maxDraggingX ?? null)
 
   const sourceEl = ref<HTMLElement | null>(null)
   const isDrag = ref(false)
@@ -111,7 +111,7 @@ export function useDragSetup(options: DragSetupOptions) {
     const y = clientY - startY
 
     const distance = Math.sqrt(x * x + y * y)
-    if (!isDragging.value && distance < dragThreshold) {
+    if (!isDragging.value && distance < dragThreshold.value) {
       return
     }
 
@@ -124,23 +124,23 @@ export function useDragSetup(options: DragSetupOptions) {
     let limitedX = x
     let limitedY = y
 
-    if (maxDraggingX !== null) {
-      limitedX = Math.max(-maxDraggingX, Math.min(maxDraggingX, x))
+    if (maxDraggingX.value !== null) {
+      limitedX = Math.max(-maxDraggingX.value, Math.min(maxDraggingX.value, x))
     }
 
-    if (maxDraggingY !== null) {
-      limitedY = Math.max(-maxDraggingY, Math.min(maxDraggingY, y))
+    if (maxDraggingY.value !== null) {
+      limitedY = Math.max(-maxDraggingY.value, Math.min(maxDraggingY.value, y))
     }
 
-    let rotate = maxRotation * (limitedX / threshold)
-    rotate = Math.max(-maxRotation, Math.min(maxRotation, rotate))
+    let rotate = maxRotation.value * (limitedX / threshold.value)
+    rotate = Math.max(-maxRotation.value, Math.min(maxRotation.value, rotate))
 
     position.x = limitedX
     position.y = limitedY
     position.rotation = rotate
     position.type = rotate > 0 ? DragType.APPROVE : rotate < 0 ? DragType.REJECT : null
 
-    const opacityAmount = Math.abs(rotate) / maxRotation
+    const opacityAmount = Math.abs(rotate) / maxRotation.value
     position.delta = opacityAmount
 
     onDragMove(position.type, opacityAmount)
@@ -157,11 +157,11 @@ export function useDragSetup(options: DragSetupOptions) {
       isDragging.value = false
     }, 100)
 
-    if (position.x > threshold) {
+    if (position.x > threshold.value) {
       onComplete(true)
       position.delta = 1
     }
-    else if (position.x < -threshold) {
+    else if (position.x < -threshold.value) {
       onComplete(false)
       position.delta = 1
     }
@@ -195,7 +195,7 @@ export function useDragSetup(options: DragSetupOptions) {
     Object.assign(position, {
       x: sign * Math.abs(threshold),
       y: 0,
-      rotation: sign * maxRotation,
+      rotation: sign * maxRotation.value,
       type,
       delta: 1,
     })
@@ -227,7 +227,7 @@ export function useDragSetup(options: DragSetupOptions) {
     isAnimating,
     restore,
     getTransformString,
-    reject: () => complete(DragType.REJECT, -threshold - 1),
-    approve: () => complete(DragType.APPROVE, threshold + 1),
+    reject: () => complete(DragType.REJECT, -threshold.value - 1),
+    approve: () => complete(DragType.APPROVE, threshold.value + 1),
   }
 }

@@ -28,12 +28,12 @@ const {
   restore,
   reject,
   approve,
-} = useDragSetup({
+} = useDragSetup(() => ({
   ...props,
   onComplete(approved) {
     emit('complete', approved)
   },
-})
+}))
 
 onMounted(async () => {
   await nextTick()
