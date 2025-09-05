@@ -1,5 +1,5 @@
-import type { MaybeRefOrGetter } from 'vue'
-import { computed, onUnmounted, reactive, ref, toRef } from 'vue'
+import type { InjectionKey, MaybeRefOrGetter, Ref } from 'vue'
+import { computed, onUnmounted, provide, reactive, readonly, ref, toRef } from 'vue'
 
 export enum DragType {
   APPROVE = 'approve',
@@ -23,6 +23,9 @@ export interface DragSetupParams {
   maxDraggingY?: number | null
   maxDraggingX?: number | null
 }
+
+// For nested components to notify about dragging state
+export const IsDraggingStateInjectionKey = Symbol('is-dragging-key') as InjectionKey<Readonly<Ref<boolean>>>
 
 export interface DragSetupCallbacks {
   onDragStart?: () => void
@@ -63,6 +66,9 @@ export function useDragSetup(_options: MaybeRefOrGetter<DragSetupOptions>) {
   const isAnimating = ref(false)
   let startX = 0
   let startY = 0
+
+  // Provide dragging state to nested components
+  provide(IsDraggingStateInjectionKey, readonly(isDragging))
 
   const position = reactive<DragPosition>({
     x: 0,

@@ -96,8 +96,4 @@ defineExpose({
   top: 50%;
   transform: translate(-50%, -50%);
 }
-
-.flash-card--dragging :deep(.flip-card[flash-card]) {
-  pointer-events: none;
-}
 </style>

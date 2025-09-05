@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { inject, ref } from 'vue'
+import { IsDraggingStateInjectionKey } from './utils/useDragSetup'
 
 const { disabled = false, waitAnimationEnd = true } = defineProps<{
   // Disable card flipping functionality
@@ -14,11 +15,15 @@ defineSlots<{
   back?: () => any
 }>()
 
+/**
+ * Flash cards dragging state
+ */
+const isDragging = inject(IsDraggingStateInjectionKey, ref(false))
 const isFlipped = ref(false)
 const isAnimating = ref(false)
 
 function flip() {
-  if (disabled || (waitAnimationEnd && isAnimating.value))
+  if (disabled || isDragging.value || (waitAnimationEnd && isAnimating.value))
     return
 
   isAnimating.value = true
@@ -31,7 +36,7 @@ function onTransitionEnd() {
 </script>
 
 <template>
-  <div class="flip-card" flash-card @click="flip">
+  <div class="flip-card" @pointerup="flip">
     <div
       class="flip-card__inner"
       :class="{ 'flip-card__inner--flipped': isFlipped }"
