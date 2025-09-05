@@ -112,6 +112,40 @@ const customTransform = (position) => {
 `transform: rotate(${position.delta * maxRotation}deg)`
 ```
 
+#### `transitionName`
+
+- **Type:** `string`
+- **Default:** `'card-transition'`
+- **Description:** Name of the CSS transition used when cards disappear after being swiped. Allows customization of the exit animation. Direction-based transitions can be created using `{transition-name}--approved` and `{transition-name}--rejected` modifier classes.
+
+```vue
+<FlashCards :items="cards" transition-name="custom-card-exit" />
+```
+
+**Custom transition CSS example:**
+```css
+.custom-card-exit-enter-active,
+.custom-card-exit-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.custom-card-exit-enter-from,
+.custom-card-exit-leave-to {
+  opacity: 0;
+}
+
+/* Direction-based animations using modifier classes */
+.custom-card-exit-enter-from.custom-card-exit--rejected,
+.custom-card-exit-leave-to.custom-card-exit--rejected {
+  transform: translateX(-400px) rotate(-30deg);
+}
+
+.custom-card-exit-enter-from.custom-card-exit--approved,
+.custom-card-exit-leave-to.custom-card-exit--approved {
+  transform: translateX(400px) rotate(30deg);
+}
+```
+
 ### Performance Props
 
 #### `virtualBuffer`
@@ -150,5 +184,3 @@ The `FlipCard` component can be used independently or within FlashCards:
 ```vue
 <FlipCard :wait-animation-end="false" />
 ```
-
-

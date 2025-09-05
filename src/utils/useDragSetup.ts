@@ -57,6 +57,9 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
 
   const sourceEl = ref<HTMLElement | null>(null)
 
+  // Is drag started
+  const isDragStarted = ref(false)
+
   // Is dragging in progress
   const isDragging = ref(false)
 
@@ -83,9 +86,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   }
 
   function handleDragStart(event: MouseEvent | TouchEvent) {
-    event.preventDefault()
-
-    isDragging.value = true
+    isDragStarted.value = true
 
     if (event instanceof MouseEvent) {
       startX = event.clientX - position.x
@@ -100,7 +101,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   }
 
   function handleDragMove(event: MouseEvent | TouchEvent) {
-    if (!isDragging.value) {
+    if (!isDragStarted.value) {
       return
     }
 
@@ -117,6 +118,8 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
 
     event.preventDefault()
     event.stopPropagation()
+
+    isDragging.value = true
 
     // Apply dragging limits if provided
     let limitedX = x
@@ -144,19 +147,22 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   }
 
   function handleDragEnd() {
-    if (!isDragging.value) {
+    if (!isDragStarted.value) {
       return
     }
 
+    isDragStarted.value = false
     isDragging.value = false
 
     if (position.x > threshold.value) {
       onComplete(true)
       position.delta = 1
+      position.type = DragType.APPROVE
     }
     else if (position.x < -threshold.value) {
       onComplete(false)
       position.delta = -1
+      position.type = DragType.REJECT
     }
     else {
       restore()

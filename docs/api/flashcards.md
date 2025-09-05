@@ -93,6 +93,47 @@ const blurTransform = (position) => {
 </script>
 ```
 
+### `transitionName`
+
+- **Type:** `string`
+- **Default:** `'card-transition'`
+- **Description:** Name of the CSS transition used when cards disappear after being swiped or programmatically approved/rejected. This allows you to customize the exit animation by defining your own CSS transitions. Direction-based transitions can be created using `{transition-name}--approved` and `{transition-name}--rejected` modifier classes.
+
+**Usage:**
+```vue
+<FlashCards :items="cards" transition-name="my-custom-transition" />
+```
+
+**Custom transition CSS:**
+```css
+.my-custom-transition-enter-active,
+.my-custom-transition-leave-active {
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.my-custom-transition-enter-from,
+.my-custom-transition-leave-to {
+  opacity: 0;
+}
+
+/* Direction-based animations using modifier classes */
+/* Animation for rejected cards */
+.my-custom-transition-enter-from.my-custom-transition--rejected,
+.my-custom-transition-leave-to.my-custom-transition--rejected {
+  transform: translateX(-500px) rotate(-45deg) scale(0.8);
+}
+
+/* Animation for approved cards */
+.my-custom-transition-enter-from.my-custom-transition--approved,
+.my-custom-transition-leave-to.my-custom-transition--approved {
+  transform: translateX(500px) rotate(45deg) scale(0.8);
+}
+```
+
+The transition system automatically applies modifier classes based on the swipe direction:
+- `{transitionName}--approved` for approved/right swipes
+- `{transitionName}--rejected` for rejected/left swipes
+
 ## Slots
 
 ### `default`

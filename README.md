@@ -95,6 +95,7 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `infinite` | `boolean` | `false` | Enable infinite swiping mode (cards loop endlessly) |
 | `virtualBuffer` | `number` | `2` | Cards to render for virtual scrolling |
 | `transformStyle` | `(position: DragPosition) => string \| null` | `null` | Custom transform function for card movement during drag |
+| `transitionName` | `string` | `'card-transition'` | CSS transition name for card exit animations. Use `{name}--approved`/`{name}--rejected` classes for direction-based transitions |
 
 #### Transform Style Function
 

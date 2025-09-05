@@ -6,6 +6,11 @@ import RejectIcon from './components/RejectIcon.vue'
 import { DragType, useDragSetup } from './utils/useDragSetup'
 
 export interface FlashCardProps extends DragSetupParams {
+  // Transition config managed by parent stack due to virtualization
+  transitionName?: string
+  transitionShow?: boolean
+  transitionType?: DragType | null
+
   // Max rotation in degrees the card can be rotated on swipe
   // Is used for default transform string on swipe
   maxRotation?: number
@@ -19,6 +24,10 @@ export interface FlashCardProps extends DragSetupParams {
 const {
   maxRotation = 20,
   transformStyle,
+
+  transitionName = 'card-transition',
+  transitionShow = false,
+  transitionType = null,
   ...params
 } = defineProps<FlashCardProps>()
 
@@ -68,21 +77,35 @@ defineExpose({
     :class="{ 'flash-card--dragging': isDragging }"
     :style="{ transform: `translate3D(${position.x}px, ${position.y}px, 0)` }"
   >
-    <div class="flash-card__transform" :style="getTransformStyle">
-      <slot :is-dragging="isDragging" />
+    <Transition :name="transitionName" mode="out-in">
+      <div
+        v-show="transitionShow"
+        class="flash-card__transition"
+        :class="{
+          [`${transitionName}--approved`]: transitionType === DragType.APPROVE,
+          [`${transitionName}--rejected`]: transitionType === DragType.REJECT,
+        }"
+      >
+        <div
+          class="flash-card__transform"
+          :style="getTransformStyle"
+        >
+          <slot :is-dragging="isDragging" />
 
-      <slot name="reject" :delta="position.delta">
-        <div v-show="position.type === DragType.REJECT" class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }">
-          <RejectIcon />
-        </div>
-      </slot>
+          <div v-show="position.type === DragType.REJECT">
+            <slot name="reject" :delta="position.delta">
+              <RejectIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
+            </slot>
+          </div>
 
-      <slot name="approve" :delta="position.delta">
-        <div v-show="position.type === DragType.APPROVE" class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }">
-          <ApproveIcon />
+          <div v-show="position.type === DragType.APPROVE">
+            <slot name="approve" :delta="position.delta">
+              <ApproveIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
+            </slot>
+          </div>
         </div>
-      </slot>
-    </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -90,14 +113,15 @@ defineExpose({
 .flash-card {
   width: 100%;
   border-radius: 8px;
-  transform-origin: 50%, 100%;
   position: relative;
-  touch-action: pan-x pan-y;
+  touch-action: none;
+  will-change: transform;
+  overscroll-behavior: none;
 }
 
+.flash-card__transition,
 .flash-card__transform {
-  will-change: transform;
-  width: 100%;
+  touch-action: inherit;
 }
 
 .flash-card:not(.flash-card--dragging),
@@ -110,5 +134,26 @@ defineExpose({
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+}
+
+.card-transition-enter-active,
+.card-transition-leave-active {
+  will-change: transform opacity;
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.card-transition-enter-from,
+.card-transition-leave-to {
+  opacity: 0;
+}
+
+.card-transition-enter-from.card-transition--rejected,
+.card-transition-leave-to.card-transition--rejected {
+  transform: translateX(-300px) rotate(-20deg);
+}
+
+.card-transition-enter-from.card-transition--approved,
+.card-transition-leave-to.card-transition--approved {
+  transform: translateX(300px) rotate(20deg);
 }
 </style>

@@ -12,6 +12,7 @@ import TinderUsage from '../example/tinder-usage/index.vue'
 import DeltaUsage from '../example/delta-usage/index.vue'
 import ScaleUsage from '../example/scale-usage/index.vue'
 import InfiniteUsage from '../example/infinite-usage/index.vue'
+import TransitionEffectsUsage from '../example/transition-effects/index.vue'
 </script>
 
 # Live Examples
@@ -146,4 +147,18 @@ Endless card swiping with only 3 cards that loop infinitely.
 ::: code-group
 <<< ../example/infinite-usage/index.vue [index.vue]
 <<< ../example/infinite-usage/InfiniteCard.vue [InfiniteCard.vue]
+:::
+
+## 🎭 Transition Effects
+
+Custom transition animations using the `transitionName` prop with fast rotating, scaling, 3D flips, and elastic bounce effects.
+
+<ClientOnly>
+  <TransitionEffectsUsage />
+</ClientOnly>
+
+:::details Source
+::: code-group
+<<< ../example/transition-effects/index.vue [index.vue]
+<<< ../example/transition-effects/TransitionCard.vue [TransitionCard.vue]
 :::

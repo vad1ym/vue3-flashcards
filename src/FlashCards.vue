@@ -2,6 +2,7 @@
 import type { FlashCardProps } from './FlashCard.vue'
 import { computed, reactive, ref } from 'vue'
 import FlashCard from './FlashCard.vue'
+import { DragType } from './utils/useDragSetup'
 
 export interface FlashCardsProps<Item> extends FlashCardProps {
   items?: Item[]
@@ -32,8 +33,8 @@ defineSlots<{
 const cardRefs = ref<Map<number, InstanceType<typeof FlashCard>>>(new Map())
 
 interface CardState {
-  approved?: boolean
-  done: boolean
+  completed?: boolean
+  type?: DragType
 }
 
 const history = reactive<Map<number, CardState>>(new Map())
@@ -83,7 +84,10 @@ const visibleItems = computed(() => {
  * Set the card as approved or rejected and emit event with the original item
  */
 function setApproval(index: number, approved: boolean) {
-  history.set(index, { approved, done: true })
+  history.set(index, {
+    type: approved ? DragType.APPROVE : DragType.REJECT,
+    completed: true,
+  })
   currentIndex.value++
 
   // Get the original item for emit
@@ -103,10 +107,10 @@ function restore() {
     return
 
   const previousIndex = currentIndex.value - 1
-  const previousCard = history.get(previousIndex)
+  const previousCardState = history.get(previousIndex)
 
-  if (previousCard) {
-    previousCard.done = false
+  if (previousCardState) {
+    previousCardState.completed = false
     currentIndex.value = previousIndex
     cardRefs.value.get(currentIndex.value)?.restore()
   }
@@ -138,11 +142,9 @@ defineExpose({
 <template>
   <div>
     <div class="flashcards">
-      <div class="flashcards__empty-state" :style="{ zIndex: -items.length - 1 }">
+      <div class="flashcards__card-wrapper" :style="{ zIndex: -items.length - 1 }">
         <slot name="empty">
-          <div>
-            No more cards!
-          </div>
+          No more cards!
         </slot>
       </div>
 
@@ -151,39 +153,33 @@ defineExpose({
         <slot :item="({} as T)" />
       </div>
 
-      <template v-for="{ item, index, state } in visibleItems" :key="index">
-        <Transition name="card-transition" mode="out-in">
-          <div
-            v-show="!state?.done"
-            class="flashcards__card-wrapper"
-            :class="{
-              'flashcards__card-wrapper--rejected': state?.approved === false,
-              'flashcards__card-wrapper--approved': state?.approved === true,
-              'flashcards__card-wrapper--current': index === currentIndex,
-            }"
-            :style="{ zIndex: currentIndex - index }"
-          >
-            <FlashCard
-              :ref="el => el && cardRefs.set(index, el as InstanceType<typeof FlashCard>)"
-              v-bind="flashCardProps"
-              class="flashcards__card"
-              :class="{ 'flashcards__card--interactive': index === currentIndex }"
-              @complete="setApproval(index, $event)"
-            >
-              <template #default>
-                <slot :item="item" />
-              </template>
+      <div
+        v-for="{ item, index, state } in visibleItems"
+        :key="index"
+        class="flashcards__card-wrapper"
+        :style="{ zIndex: currentIndex - index }"
+      >
+        <FlashCard
+          :ref="el => el && cardRefs.set(index, el as InstanceType<typeof FlashCard>)"
+          v-bind="flashCardProps"
+          :transition-type="state?.type"
+          :transition-show="!state?.completed"
+          class="flashcards__card"
+          :class="{ 'flashcards__card--active': index === currentIndex }"
+          @complete="setApproval(index, $event)"
+        >
+          <template #default>
+            <slot :item="item" />
+          </template>
 
-              <template #reject="{ delta }">
-                <slot name="reject" :item="item" :delta="delta" />
-              </template>
-              <template #approve="{ delta }">
-                <slot name="approve" :item="item" :delta="delta" />
-              </template>
-            </FlashCard>
-          </div>
-        </Transition>
-      </template>
+          <template #reject="{ delta }">
+            <slot name="reject" :item="item" :delta="delta" />
+          </template>
+          <template #approve="{ delta }">
+            <slot name="approve" :item="item" :delta="delta" />
+          </template>
+        </FlashCard>
+      </div>
     </div>
 
     <slot
@@ -201,17 +197,10 @@ defineExpose({
 .flashcards {
   position: relative;
   width: 100%;
-  height: 100%;
   isolation: isolate;
-}
-
-.flashcards__empty-state {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  text-align: center;
+  overflow: visible;
+  touch-action: none;
+  overscroll-behavior: none;
 }
 
 .flashcards__height-reference {
@@ -220,45 +209,27 @@ defineExpose({
 }
 
 .flashcards__card-wrapper {
-  pointer-events: none;
+  text-align: center;
   position: absolute;
-  left: 50%;
   top: 50%;
+  left: 50%;
   width: 100%;
-  transform: translate3d(-50%, -50%, 0);
-  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.3s ease;
-  will-change: transform, opacity;
+  transform: translate3D(-50%, -50%, 0);
+  pointer-events: none;
+  touch-action: inherit;
+  contain: layout;
 }
 
 .flashcards__card {
   pointer-events: none;
 }
 
-.flashcards__card--interactive {
-  will-change: transform opacity;
+.flashcards__card--empty {
+  text-align: center;
 }
 
-.flashcards__card-wrapper--current .flashcards__card {
+.flashcards__card--active {
   pointer-events: all;
-}
-
-.card-transition-enter-active,
-.card-transition-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-}
-
-.card-transition-enter-from,
-.card-transition-leave-to {
-  opacity: 0;
-}
-
-.card-transition-enter-from.flashcards__card-wrapper--rejected,
-.card-transition-leave-to.flashcards__card-wrapper--rejected {
-  transform: translate(-50%, -50%) translateX(-300px) rotate(-20deg);
-}
-
-.card-transition-enter-from.flashcards__card-wrapper--approved,
-.card-transition-leave-to.flashcards__card-wrapper--approved {
-  transform: translate(-50%, -50%) translateX(300px) rotate(20deg);
+  touch-action: inherit;
 }
 </style>
