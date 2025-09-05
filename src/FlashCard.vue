@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import type { DragSetupParams } from './utils/useDragSetup'
-import { nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import ApproveIcon from './components/ApproveIcon.vue'
 import RejectIcon from './components/RejectIcon.vue'
 import { DragType, useDragSetup } from './utils/useDragSetup'
 
-const props = defineProps<DragSetupParams>()
+const {
+  // Max rotation in degrees the card can be rotated on swipe
+  // Is used for default transform string on swipe
+  maxRotation = 20,
+
+  ...params
+} = defineProps<DragSetupParams & {
+  maxRotation?: number
+}>()
 
 const emit = defineEmits<{
   complete: [approved: boolean]
@@ -22,14 +30,12 @@ const el = ref<HTMLElement>()
 const {
   setupInteract,
   position,
-  getTransformString,
   isDragging,
-  isAnimating,
   restore,
   reject,
   approve,
 } = useDragSetup(() => ({
-  ...props,
+  ...params,
   onComplete(approved) {
     emit('complete', approved)
   },
@@ -38,6 +44,11 @@ const {
 onMounted(async () => {
   await nextTick()
   el.value && setupInteract(el.value)
+})
+
+const getTransformString = computed(() => {
+  const { x, y, delta } = position
+  return `translate3D(${x}px, ${y}px, 0) rotate(${delta * maxRotation}deg)`
 })
 
 defineExpose({
@@ -51,19 +62,19 @@ defineExpose({
   <div
     ref="el"
     class="flash-card"
-    :class="{ 'flash-card--animated': isAnimating, 'flash-card--dragging': isDragging }"
+    :class="{ 'flash-card--dragging': isDragging }"
     :style="{ transform: getTransformString }"
   >
     <slot :is-dragging="isDragging" />
 
-    <slot v-if="position.type === DragType.REJECT" name="reject" :delta="position.delta">
-      <div class="flash-card__indicator" :style="{ opacity: position.delta }">
+    <slot name="reject" :delta="position.delta">
+      <div v-show="position.type === DragType.REJECT" class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }">
         <RejectIcon />
       </div>
     </slot>
 
-    <slot v-else-if="position.type === DragType.APPROVE" name="approve" :delta="position.delta">
-      <div class="flash-card__indicator" :style="{ opacity: position.delta }">
+    <slot name="approve" :delta="position.delta">
+      <div v-show="position.type === DragType.APPROVE" class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }">
         <ApproveIcon />
       </div>
     </slot>
@@ -86,7 +97,7 @@ defineExpose({
   perspective: 1000px;
 }
 
-.flash-card--animated {
+.flash-card:not(.flash-card--dragging) {
   transition: transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 

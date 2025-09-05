@@ -27,11 +27,11 @@ const cards = ref<WordCard[]>([
         </template>
 
         <template #approve="{ delta }">
-          <SwipeOverlay :delta="delta" type="approve" />
+          <SwipeOverlay :delta="Math.abs(delta)" type="approve" />
         </template>
 
         <template #reject="{ delta }">
-          <SwipeOverlay :delta="delta" type="reject" />
+          <SwipeOverlay :delta="Math.abs(delta)" type="reject" />
         </template>
       </FlashCards>
     </div>
