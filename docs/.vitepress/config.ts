@@ -1,3 +1,4 @@
+import { resolve } from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vitepress'
 
@@ -5,8 +6,10 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
-    server: {
-      allowedHosts: ['wsnbf-80-73-14-41.a.free.pinggy.link'],
+    resolve: {
+      alias: {
+        'vue3-flashcards': resolve(__dirname, '../../src/index.ts'),
+      },
     },
   },
   base: '/vue3-flashcards/',
