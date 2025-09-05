@@ -5,6 +5,9 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      allowedHosts: ['wsnbf-80-73-14-41.a.free.pinggy.link'],
+    },
   },
   base: '/vue3-flashcards/',
   title: 'Vue3 Flashcards',

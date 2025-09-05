@@ -94,6 +94,28 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `maxDraggingX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |
 | `infinite` | `boolean` | `false` | Enable infinite swiping mode (cards loop endlessly) |
 | `virtualBuffer` | `number` | `2` | Cards to render for virtual scrolling |
+| `transformStyle` | `(position: DragPosition) => string \| null` | `null` | Custom transform function for card movement during drag |
+
+#### Transform Style Function
+
+The `transformStyle` prop allows you to customize how cards transform during drag interactions. It receives a `DragPosition` object with `x`, `y`, and `delta` properties.
+
+**Default behavior:**
+```javascript
+const defaultTransform = (position) => 
+  `transform: rotate(${position.delta * maxRotation}deg)`
+```
+
+**Custom examples:**
+```javascript
+// Scale effect
+const scaleTransform = (position) => 
+  `transform: rotate(${position.delta * 15}deg) scale(${1 - Math.abs(position.delta) * 0.1})`
+
+// Blur effect
+const blurTransform = (position) => 
+  `transform: rotate(${position.delta * 20}deg); filter: blur(${Math.abs(position.delta) * 3}px)`
+```
 
 ### Key Slots
 

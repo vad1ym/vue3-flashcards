@@ -1,26 +1,20 @@
 <script lang="ts" setup generic="T extends Record<string, unknown>">
+import type { FlashCardProps } from './FlashCard.vue'
 import { computed, reactive, ref } from 'vue'
 import FlashCard from './FlashCard.vue'
 
+export interface FlashCardsProps<Item> extends FlashCardProps {
+  items?: Item[]
+  infinite?: boolean
+  virtualBuffer?: number
+}
+
 const {
   items = [],
-  threshold,
-  dragThreshold,
-  maxRotation,
-  virtualBuffer = 2,
-  maxDraggingX,
-  maxDraggingY,
   infinite = false,
-} = defineProps<{
-  items?: T[]
-  threshold?: number
-  dragThreshold?: number
-  maxRotation?: number
-  virtualBuffer?: number
-  maxDraggingX?: number | null
-  maxDraggingY?: number | null
-  infinite?: boolean
-}>()
+  virtualBuffer = 2,
+  ...flashCardProps
+} = defineProps<FlashCardsProps<T>>()
 
 const emit = defineEmits<{
   approve: [item: T]
@@ -45,6 +39,10 @@ interface CardState {
 const history = reactive<Map<number, CardState>>(new Map())
 const currentIndex = ref(0)
 
+/**
+ * Returns item based on virtual index (for infinite mode)
+ * Returns item based on index (for finite mode)
+ */
 function getItemAtIndex(index: number) {
   if (infinite) {
     return items[index % items.length]
@@ -52,8 +50,19 @@ function getItemAtIndex(index: number) {
   return items[index]
 }
 
-const isFirstCard = computed(() => currentIndex.value === 0)
+// Indicates the start of the finite cards
+const isStart = computed(() => currentIndex.value === 0)
 
+// Indicates the end of finite cards
+const isEnd = computed(() => currentIndex.value >= items.length)
+
+// Indicates the ability to restore the previous card
+const canRestore = computed(() => !isStart.value)
+
+/**
+ * Returns the visible items based on the current index and virtual buffer
+ * Is used for virtualization
+ */
 const visibleItems = computed(() => {
   const start = Math.max(0, currentIndex.value - 1)
   const end = infinite
@@ -70,20 +79,27 @@ const visibleItems = computed(() => {
   })
 })
 
+/**
+ * Set the card as approved or rejected and emit event with the original item
+ */
 function setApproval(index: number, approved: boolean) {
   history.set(index, { approved, done: true })
   currentIndex.value++
 
   // Get the original item for emit
   const originalItem = getItemAtIndex(index)
+
   if (approved)
     emit('approve', originalItem)
   else
     emit('reject', originalItem)
 }
 
+/**
+ * Find the previous card, reset and restore it, show restoring animation
+ */
 function restore() {
-  if (isFirstCard.value)
+  if (isStart.value)
     return
 
   const previousIndex = currentIndex.value - 1
@@ -96,19 +112,19 @@ function restore() {
   }
 }
 
+/**
+ * Call approve method on the current card, show approval animation
+ */
 function approve() {
   cardRefs.value.get(currentIndex.value)?.approve()
 }
 
+/**
+ * Call reject method on the current card, show rejection animation
+ */
 function reject() {
   cardRefs.value.get(currentIndex.value)?.reject()
 }
-
-const isEnd = computed(() => {
-  return currentIndex.value >= items.length
-})
-
-const canRestore = computed(() => !isFirstCard.value)
 
 defineExpose({
   restore,
@@ -149,11 +165,7 @@ defineExpose({
           >
             <FlashCard
               :ref="el => el && cardRefs.set(index, el as InstanceType<typeof FlashCard>)"
-              :threshold="threshold"
-              :drag-threshold="dragThreshold"
-              :max-rotation="maxRotation"
-              :max-dragging-x="maxDraggingX"
-              :max-dragging-y="maxDraggingY"
+              v-bind="flashCardProps"
               class="flashcards__card"
               :class="{ 'flashcards__card--interactive': index === currentIndex }"
               @complete="setApproval(index, $event)"
@@ -220,6 +232,10 @@ defineExpose({
 
 .flashcards__card {
   pointer-events: none;
+}
+
+.flashcards__card--interactive {
+  will-change: transform opacity;
 }
 
 .flashcards__card-wrapper--current .flashcards__card {

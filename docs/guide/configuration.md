@@ -80,6 +80,38 @@ The main `FlashCards` component accepts several props to control its behavior:
 <FlashCards :items="cards" :infinite="true" />
 ```
 
+#### `transformStyle`
+
+- **Type:** `(position: DragPosition) => string | null`
+- **Default:** `null`
+- **Description:** Custom function to define how cards transform during drag interactions. Receives a `DragPosition` object with `x`, `y`, and `delta` properties.
+
+```vue
+<script setup>
+import { FlashCards } from 'vue3-flashcards'
+
+const cards = ref([...])
+
+// Custom transform with scaling effect
+const customTransform = (position) => {
+  const scale = 1 - Math.abs(position.delta) * 0.1
+  return `transform: rotate(${position.delta * 15}deg) scale(${scale})`
+}
+</script>
+
+<template>
+  <FlashCards 
+    :items="cards" 
+    :transform-style="customTransform"
+  />
+</template>
+```
+
+**Default behavior (when `transformStyle` is not provided):**
+```javascript
+`transform: rotate(${position.delta * maxRotation}deg)`
+```
+
 ### Performance Props
 
 #### `virtualBuffer`

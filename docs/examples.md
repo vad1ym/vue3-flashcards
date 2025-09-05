@@ -10,6 +10,7 @@ import CustomActionsUsage from '../example/custom-actions/index.vue'
 import VirtualUsage from '../example/virtual-usage/index.vue'
 import TinderUsage from '../example/tinder-usage/index.vue'
 import DeltaUsage from '../example/delta-usage/index.vue'
+import ScaleUsage from '../example/scale-usage/index.vue'
 import InfiniteUsage from '../example/infinite-usage/index.vue'
 </script>
 
@@ -117,6 +118,20 @@ Custom swiping indicators with dynamic opacity transitions.
 <<< ../example/delta-usage/index.vue [index.vue]
 <<< ../example/delta-usage/LanguageCard.vue [LanguageCard.vue]
 <<< ../example/delta-usage/SwipeOverlay.vue [SwipeOverlay.vue]
+:::
+
+## 📏 Scale Transform
+
+Custom transform that scales cards instead of rotating them during swipe gestures.
+
+<ClientOnly>
+  <ScaleUsage />
+</ClientOnly>
+
+:::details Source
+::: code-group
+<<< ../example/scale-usage/index.vue [index.vue]
+<<< ../example/scale-usage/ScaleCard.vue [ScaleCard.vue]
 :::
 
 ## ♾️ Infinite Swiping

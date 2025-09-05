@@ -51,6 +51,48 @@ The main component for creating swipeable card interfaces.
 - **Default:** `2`
 - **Description:** Number of cards to render before/after the current card. Used for virtual rendering with large datasets. A value of 2 means 5 cards total will be rendered (current + 2 before + 2 after).
 
+### `transformStyle`
+
+- **Type:** `(position: DragPosition) => string | null`
+- **Default:** `null`
+- **Description:** Custom function to define how cards transform during drag interactions. The function receives a `DragPosition` object containing:
+  - `x`: Horizontal position in pixels
+  - `y`: Vertical position in pixels  
+  - `delta`: Normalized drag progress (-1 to 1, where negative values indicate left swipes and positive values indicate right swipes)
+
+**Default implementation:**
+```javascript
+`transform: rotate(${position.delta * maxRotation}deg)`
+```
+
+**Example with custom scaling:**
+```vue
+<script setup>
+const customTransform = (position) => {
+  const scale = 1 - Math.abs(position.delta) * 0.15
+  const rotation = position.delta * 25
+  return `transform: rotate(${rotation}deg) scale(${scale})`
+}
+</script>
+
+<template>
+  <FlashCards 
+    :items="cards" 
+    :transform-style="customTransform"
+  />
+</template>
+```
+
+**Example with blur effect:**
+```vue
+<script setup>
+const blurTransform = (position) => {
+  const blur = Math.abs(position.delta) * 3
+  return `transform: rotate(${position.delta * 20}deg); filter: blur(${blur}px)`
+}
+</script>
+```
+
 ## Slots
 
 ### `default`

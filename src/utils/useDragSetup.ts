@@ -1,5 +1,5 @@
 import type { InjectionKey, MaybeRefOrGetter, Ref } from 'vue'
-import { computed, onUnmounted, provide, reactive, readonly, ref, toRef } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, provide, reactive, readonly, ref, toRef, toValue } from 'vue'
 
 export enum DragType {
   APPROVE = 'approve',
@@ -40,7 +40,7 @@ export interface DragPosition {
   type: DragType | null
 }
 
-export function useDragSetup(_options: MaybeRefOrGetter<DragSetupOptions>) {
+export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _options: MaybeRefOrGetter<DragSetupOptions>) {
   const options = toRef(_options)
 
   const {
@@ -156,7 +156,7 @@ export function useDragSetup(_options: MaybeRefOrGetter<DragSetupOptions>) {
     }
     else if (position.x < -threshold.value) {
       onComplete(false)
-      position.delta = 1
+      position.delta = -1
     }
     else {
       restore()
@@ -188,6 +188,12 @@ export function useDragSetup(_options: MaybeRefOrGetter<DragSetupOptions>) {
 
     onComplete(type === DragType.APPROVE)
   }
+
+  onMounted(async () => {
+    await nextTick()
+    const element = toValue(el)
+    element && setupInteract(element)
+  })
 
   onUnmounted(() => {
     sourceEl.value?.removeEventListener('pointerdown', handleDragStart)
