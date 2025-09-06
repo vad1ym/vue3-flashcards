@@ -16,6 +16,9 @@ export interface DragSetupParams {
   // Distance in pixels the card must be dragged to start swiping, small value
   // Is need to prevent false positives (e.x. for card fliping feature)
   dragThreshold?: number
+
+  // If true, disables vertical dragging so the card can only move horizontally
+  disableVerticalDrag: boolean
 }
 
 export interface DragSetupCallbacks {
@@ -40,6 +43,7 @@ function parseOptions(options: DragSetupOptions) {
     maxRotation: options.maxRotation ?? 20,
     threshold: options.threshold ?? 150,
     dragThreshold: options.dragThreshold ?? 5,
+    disableVerticalDrag: options.disableVerticalDrag ?? false,
     onDragStart: options.onDragStart || (() => {}),
     onDragMove: options.onDragMove || (() => {}),
     onDragEnd: options.onDragEnd || (() => {}),
@@ -48,7 +52,7 @@ function parseOptions(options: DragSetupOptions) {
 }
 
 export function useDragSetup(options: DragSetupOptions) {
-  const { maxRotation, threshold, dragThreshold, onDragStart, onDragMove, onDragEnd, onComplete } = parseOptions(options)
+  const { maxRotation, threshold, dragThreshold, disableVerticalDrag, onDragStart, onDragMove, onDragEnd, onComplete } = parseOptions(options)
 
   const sourceEl = ref<HTMLElement | null>(null)
   const isDrag = ref(false)
@@ -101,7 +105,7 @@ export function useDragSetup(options: DragSetupOptions) {
     const clientY = event instanceof MouseEvent ? event.clientY : event.touches[0].clientY
 
     const x = clientX - startX
-    const y = clientY - startY
+    const y = disableVerticalDrag ? 0 : clientY - startY
 
     const distance = Math.sqrt(x * x + y * y)
     if (!isDragging.value && distance < dragThreshold) {

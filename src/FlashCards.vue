@@ -6,12 +6,14 @@ const {
   items = [],
   threshold,
   dragThreshold,
+  disableVerticalDrag,
   maxRotation,
   virtualBuffer = 2,
 } = defineProps<{
   items?: T[]
   threshold?: number
   dragThreshold?: number
+  disableVerticalDrag?: boolean
   maxRotation?: number
   virtualBuffer?: number
 }>()
@@ -134,6 +136,7 @@ defineExpose({
               :ref="el => el && cardRefs.set(index, el as InstanceType<typeof FlashCard>)"
               :threshold="threshold"
               :drag-threshold="dragThreshold"
+              :disable-vertical-drag="disableVerticalDrag"
               :max-rotation="maxRotation"
               class="flashcards__card"
               :class="{ 'flashcards__card--interactive': index === currentIndex }"

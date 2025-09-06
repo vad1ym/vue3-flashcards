@@ -47,6 +47,16 @@ The main `FlashCards` component accepts several props to control its behavior:
 <FlashCards :items="cards" :drag-threshold="10" />
 ```
 
+#### `disableVerticalDrag`
+
+- **Type:** `boolean`
+- **Default:** `false`
+- **Description:** Disabling vertical dragging, the card can only move horizontally.
+
+```vue
+<FlashCards :items="cards" :disable-vertical-drag="true"  />
+```
+
 ### Performance Props
 
 #### `virtualBuffer`

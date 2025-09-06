@@ -27,6 +27,11 @@ The main component for creating swipeable card interfaces.
 - **Default:** `5`
 - **Description:** Minimum distance in pixels the card must be dragged to start swiping. Helps prevent false positives from small movements like clicks.
 
+### `disableVerticalDrag`
+
+- **Type:** `boolean`
+- **Default:** `false`
+- **Description:** Disabling vertical dragging, the card can only move horizontally.
 ### `virtualBuffer`
 
 - **Type:** `number`

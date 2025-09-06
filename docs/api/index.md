@@ -78,7 +78,8 @@ app.use(Vue3Flashcards, {
   // Global defaults
   maxRotation: 25,
   threshold: 120,
-  dragThreshold: 8
+  dragThreshold: 8, 
+  disableVerticalDrag: false
 })
 ```
 

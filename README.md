@@ -84,13 +84,14 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 
 ### FlashCards Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `items` | `T[]` | **required** | Array of items to display as cards |
-| `maxRotation` | `number` | `20` | Maximum rotation angle in degrees |
-| `threshold` | `number` | `150` | Swipe threshold in pixels |
-| `dragThreshold` | `number` | `5` | Minimum drag distance to start swiping |
-| `virtualBuffer` | `number` | `2` | Cards to render for virtual scrolling |
+| Prop                   | Type      | Default      | Description                                                       |
+|------------------------|-----------|--------------|-------------------------------------------------------------------|
+| `items`                | `T[]`     | **required** | Array of items to display as cards                                |
+| `maxRotation`          | `number`  | `20`         | Maximum rotation angle in degrees                                 |
+| `threshold`            | `number`  | `150`        | Swipe threshold in pixels                                         |
+| `dragThreshold`        | `number`  | `5`          | Minimum drag distance to start swiping                            |
+| `disableVerticalDrag`  | `boolean` | `false`      | Disabling vertical dragging, the card can only move horizontally  |
+| `virtualBuffer`        | `number`  | `2`          | Cards to render for virtual scrolling                             |
 
 ### Key Slots
 
