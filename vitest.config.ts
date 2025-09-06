@@ -10,5 +10,6 @@ export default defineConfig({
     coverage: {
       include: ['src/**/*'],
     },
+    reporters: process.env.GITHUB_ACTIONS ? ['dot', 'github-actions'] : ['dot'],
   },
 })

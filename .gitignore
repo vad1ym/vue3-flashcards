@@ -26,3 +26,10 @@ dist-ssr
 docs/.vitepress/dist
 docs/.vitepress/cache
 development
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage
+coverage/
+*.lcov

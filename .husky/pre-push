@@ -1,0 +1,5 @@
+# Check project build
+npm run build || exit 1
+
+# Run tests
+npm run test:quiet || exit 1

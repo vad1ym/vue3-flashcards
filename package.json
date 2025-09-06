@@ -40,11 +40,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "prepare": "npm run build",
+    "prepare": "husky",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
+    "test:quiet": "vitest run --reporter=dot --silent",
     "lint": "eslint src --fix",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
@@ -58,6 +59,8 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.2.2",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@tailwindcss/vite": "^4.1.13",
     "@types/node": "^24.3.1",
     "@vitejs/plugin-vue": "^6.0.1",
@@ -68,7 +71,9 @@
     "conventional-changelog-conventionalcommits": "^9.1.0",
     "daisyui": "^5.1.6",
     "eslint": "^9.15.0",
+    "husky": "^9.1.7",
     "jsdom": "^26.1.0",
+    "lint-staged": "^16.1.6",
     "tailwindcss": "^4.1.13",
     "typescript": "~5.9.2",
     "vite": "^7.1.4",
@@ -78,5 +83,10 @@
     "vitest": "^3.2.4",
     "vue": "^3.5.12",
     "vue-tsc": "^3.0.6"
+  },
+  "lint-staged": {
+    "*.{vue,ts}": [
+      "eslint --fix"
+    ]
   }
 }
