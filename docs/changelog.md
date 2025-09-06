@@ -1,3 +1,29 @@
+## [0.8.0](https://github.com/vad1ym/vue3-flashcards/compare/0.7.0...0.8.0) (2025-09-06)
+
+### ⚠ BREAKING CHANGES
+
+* delta value in slot data is no longer absolute; the sign now indicates direction
+
+### improve
+
+* simplify logic and improve performance ([fea19b2](https://github.com/vad1ym/vue3-flashcards/commit/fea19b25f469d5e9beedb136a65007b6060b78e8))
+
+### Features
+
+* add infinite swiping ([15427d2](https://github.com/vad1ym/vue3-flashcards/commit/15427d2f355a8ec25f8b50370e42883ea6f1f5e7))
+* add maxDraggingX and maxDraggingY flashcards options ([f3e4ff7](https://github.com/vad1ym/vue3-flashcards/commit/f3e4ff7c2bf6d458d01d327b6baaa3232b56bbc5))
+* add stacking feature ([94f788b](https://github.com/vad1ym/vue3-flashcards/commit/94f788b4bbf1a5213d5a87d843c2e70ec31ae285))
+* add transformStyle prop to customize card rotation transform ([9fc16cb](https://github.com/vad1ym/vue3-flashcards/commit/9fc16cbf1e22088fd0882b0bd04aef29994c6314))
+* add transitionName prop to customize card exit transition ([ef181fd](https://github.com/vad1ym/vue3-flashcards/commit/ef181fd51fd43098ad145c2f75cf6694725ae3d3))
+
+### Bug Fixes
+
+* flip card doesn't work for touch devices ([1381632](https://github.com/vad1ym/vue3-flashcards/commit/13816326fbf4318c879681e9a6080ee540c6ecfb))
+
+### Maintenance
+
+* migrate to TailwindCSS v4 and bump dependencies@tailwindcss/vite by @molsrg
+* replace postcss with @tailwindcss/vite by @molsrg
 ## [0.7.0](https://github.com/vad1ym/vue3-flashcards/compare/v0.6.3...v0.7.0) (2025-09-03)
 
 ### ⚠ BREAKING CHANGES

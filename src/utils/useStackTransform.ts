@@ -1,4 +1,4 @@
-import type { MaybeRefOrGetter, Ref } from 'vue'
+import type { MaybeRefOrGetter } from 'vue'
 import { computed, toRef } from 'vue'
 
 export interface StackTransformOptions {
