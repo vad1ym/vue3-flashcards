@@ -1,5 +1,5 @@
 import type { InjectionKey, MaybeRefOrGetter, Ref } from 'vue'
-import { computed, nextTick, onMounted, onUnmounted, provide, reactive, readonly, ref, toRef, toValue } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, provide, reactive, readonly, ref, toRef } from 'vue'
 
 export enum DragType {
   APPROVE = 'approve',
@@ -21,9 +21,6 @@ export interface DragSetupParams {
   maxDraggingX?: number | null
 }
 
-// For nested components to notify about dragging state
-export const IsDraggingStateInjectionKey = Symbol('is-dragging-key') as InjectionKey<Readonly<Ref<boolean>>>
-
 export interface DragSetupCallbacks {
   onDragStart?: () => void
   onDragMove?: (type: DragType | null, delta: number) => void
@@ -33,6 +30,9 @@ export interface DragSetupCallbacks {
 
 export type DragSetupOptions = DragSetupParams & DragSetupCallbacks
 
+// For nested components to notify about dragging state
+export const IsDraggingStateInjectionKey = Symbol('is-dragging-key') as InjectionKey<Readonly<Ref<boolean>>>
+
 export interface DragPosition {
   x: number
   y: number
@@ -41,6 +41,7 @@ export interface DragPosition {
 }
 
 export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _options: MaybeRefOrGetter<DragSetupOptions>) {
+  const element = toRef(el)
   const options = toRef(_options)
 
   const {
@@ -54,8 +55,6 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   const dragThreshold = computed(() => options.value.dragThreshold ?? 5)
   const maxDraggingY = computed(() => options.value.maxDraggingY ?? null)
   const maxDraggingX = computed(() => options.value.maxDraggingX ?? null)
-
-  const sourceEl = ref<HTMLElement | null>(null)
 
   // Is drag started
   const isDragStarted = ref(false)
@@ -171,12 +170,15 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     onDragEnd()
   }
 
-  function setupInteract(el: HTMLElement) {
-    sourceEl.value = el
+  function setupInteract() {
+    if (!element.value) {
+      return
+    }
+
     restore()
 
     // Touch events with passive optimization
-    el.addEventListener('pointerdown', handleDragStart, { passive: false })
+    element.value.addEventListener('pointerdown', handleDragStart, { passive: false })
     window.addEventListener('pointermove', handleDragMove, { passive: false })
     window.addEventListener('pointerup', handleDragEnd, { passive: true })
   }
@@ -197,12 +199,11 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
 
   onMounted(async () => {
     await nextTick()
-    const element = toValue(el)
-    element && setupInteract(element)
+    setupInteract()
   })
 
   onUnmounted(() => {
-    sourceEl.value?.removeEventListener('pointerdown', handleDragStart)
+    element.value?.removeEventListener('pointerdown', handleDragStart)
     window.removeEventListener('pointermove', handleDragMove)
     window.removeEventListener('pointerup', handleDragEnd)
   })

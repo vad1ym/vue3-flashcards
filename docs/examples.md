@@ -11,6 +11,7 @@ import VirtualUsage from '../example/virtual-usage/index.vue'
 import TinderUsage from '../example/tinder-usage/index.vue'
 import DeltaUsage from '../example/delta-usage/index.vue'
 import ScaleUsage from '../example/scale-usage/index.vue'
+import StackUsage from '../example/stack-usage/index.vue'
 import InfiniteUsage from '../example/infinite-usage/index.vue'
 import TransitionEffectsUsage from '../example/transition-effects/index.vue'
 </script>
@@ -133,6 +134,20 @@ Custom transform that scales cards instead of rotating them during swipe gesture
 ::: code-group
 <<< ../example/scale-usage/index.vue [index.vue]
 <<< ../example/scale-usage/ScaleCard.vue [ScaleCard.vue]
+:::
+
+## 📚 Stack Configuration
+
+Interactive stack controls with adjustable size (3-10 cards) and directional positioning (top, bottom, left, right).
+
+<ClientOnly>
+  <StackUsage />
+</ClientOnly>
+
+:::details Source
+::: code-group
+<<< ../example/stack-usage/index.vue [index.vue]
+<<< ../example/stack-usage/StackCard.vue [StackCard.vue]
 :::
 
 ## ♾️ Infinite Swiping

@@ -11,7 +11,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="relative overflow-hidden rounded-2xl shadow-2xl h-64 bg-white dark:bg-gray-800 transform transition-all duration-300 hover:scale-105">
+  <div class="relative overflow-hidden rounded-2xl shadow-2xl h-64 bg-white dark:bg-gray-800">
     <!-- Gradient header -->
     <div :class="`bg-gradient-to-r ${item.color} h-20 relative`">
       <div class="absolute inset-0 bg-black/10" />

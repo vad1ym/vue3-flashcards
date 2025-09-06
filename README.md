@@ -73,7 +73,6 @@ function handleReject(item) {
     </FlashCards>
   </div>
 </template>
-
 ```
 
 ---
@@ -93,7 +92,10 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `maxDraggingY` | `number \| null` | `null` | Maximum Y dragging distance in pixels (null = unlimited) |
 | `maxDraggingX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |
 | `infinite` | `boolean` | `false` | Enable infinite swiping mode (cards loop endlessly) |
-| `virtualBuffer` | `number` | `2` | Cards to render for virtual scrolling |
+| `virtualBuffer` | `number` | `3` | Cards to render for virtual scrolling. Can't be lower than 1. |
+| `stack` | `number` | `0` | Number of cards to show stacked behind the active card. When stack is greater than virtualBuffer, virtualBuffer is automatically increased to stack + 1. |
+| `stackOffset` | `number` | `20` | Offset in pixels between stacked cards. |
+| `stackDirection` | `'top' \| 'bottom' \| 'left' \| 'right'` | `'bottom'` | Direction where stacked cards appear relative to the active card. |
 | `transformStyle` | `(position: DragPosition) => string \| null` | `null` | Custom transform function for card movement during drag |
 | `transitionName` | `string` | `'card-transition'` | CSS transition name for card exit animations. Use `{name}--approved`/`{name}--rejected` classes for direction-based transitions |
 
@@ -103,19 +105,22 @@ The `transformStyle` prop allows you to customize how cards transform during dra
 
 **Default behavior:**
 ```javascript
-const defaultTransform = (position) => 
-  `transform: rotate(${position.delta * maxRotation}deg)`
+function defaultTransform(position) {
+  return `transform: rotate(${position.delta * maxRotation}deg)`
+}
 ```
 
 **Custom examples:**
 ```javascript
 // Scale effect
-const scaleTransform = (position) => 
-  `transform: rotate(${position.delta * 15}deg) scale(${1 - Math.abs(position.delta) * 0.1})`
+function scaleTransform(position) {
+  return `transform: rotate(${position.delta * 15}deg) scale(${1 - Math.abs(position.delta) * 0.1})`
+}
 
 // Blur effect
-const blurTransform = (position) => 
-  `transform: rotate(${position.delta * 20}deg); filter: blur(${Math.abs(position.delta) * 3}px)`
+function blurTransform(position) {
+  return `transform: rotate(${position.delta * 20}deg); filter: blur(${Math.abs(position.delta) * 3}px)`
+}
 ```
 
 ### Key Slots

@@ -80,6 +80,39 @@ The main `FlashCards` component accepts several props to control its behavior:
 <FlashCards :items="cards" :infinite="true" />
 ```
 
+#### `stack`
+
+- **Type:** `number`
+- **Default:** `0`
+- **Description:** Number of cards to show stacked behind the active card. Creates a visual depth effect where multiple cards are visible with scaling and positioning offsets. When stack is greater than virtualBuffer, virtualBuffer is automatically increased to stack + 1 to ensure proper rendering.
+
+```vue
+<!-- Show 3 cards stacked behind the active card -->
+<FlashCards :items="cards" :stack="3" />
+```
+
+#### `stackOffset`
+
+- **Type:** `number`
+- **Default:** `20`
+- **Description:** Offset in pixels between stacked cards. Controls the visual spacing between cards in the stack.
+
+```vue
+<!-- Increase spacing between stacked cards -->
+<FlashCards :items="cards" :stack="3" :stack-offset="30" />
+```
+
+#### `stackDirection`
+
+- **Type:** `'top' | 'bottom' | 'left' | 'right'`
+- **Default:** `'bottom'`
+- **Description:** Direction where stacked cards appear relative to the active card.
+
+```vue
+<!-- Stack cards to the right -->
+<FlashCards :items="cards" :stack="3" stack-direction="right" />
+```
+
 #### `transformStyle`
 
 - **Type:** `(position: DragPosition) => string | null`
@@ -100,8 +133,8 @@ const customTransform = (position) => {
 </script>
 
 <template>
-  <FlashCards 
-    :items="cards" 
+  <FlashCards
+    :items="cards"
     :transform-style="customTransform"
   />
 </template>
@@ -151,8 +184,8 @@ const customTransform = (position) => {
 #### `virtualBuffer`
 
 - **Type:** `number`
-- **Default:** `2`
-- **Description:** Number of cards to render before/after current card. Useful for large datasets.
+- **Default:** `3`
+- **Description:** Number of cards to render. Useful for large datasets. Can't be lower than 1.
 
 ```vue
 <!-- Renders 5 cards total: current + 2 before + 2 after -->

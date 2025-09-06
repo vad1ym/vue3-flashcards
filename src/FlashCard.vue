@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { DragPosition, DragSetupParams } from './utils/useDragSetup'
-import { computed, useTemplateRef } from 'vue'
-import ApproveIcon from './components/ApproveIcon.vue'
-import RejectIcon from './components/RejectIcon.vue'
+import { computed, onMounted, useTemplateRef } from 'vue'
+import ApproveIcon from './components/icons/ApproveIcon.vue'
+import RejectIcon from './components/icons/RejectIcon.vue'
 import { DragType, useDragSetup } from './utils/useDragSetup'
 
 export interface FlashCardProps extends DragSetupParams {
@@ -33,6 +33,7 @@ const {
 
 const emit = defineEmits<{
   complete: [approved: boolean]
+  mounted: [height: number]
 }>()
 
 defineSlots<{
@@ -61,6 +62,12 @@ const getTransformStyle = computed(() => {
     return `transform: rotate(${position.delta * maxRotation}deg)`
   }
   return transformStyle(position)
+})
+
+onMounted(() => {
+  if (el.value?.offsetHeight) {
+    emit('mounted', el.value?.offsetHeight)
+  }
 })
 
 defineExpose({

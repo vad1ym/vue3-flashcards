@@ -48,8 +48,41 @@ The main component for creating swipeable card interfaces.
 ### `virtualBuffer`
 
 - **Type:** `number`
-- **Default:** `2`
-- **Description:** Number of cards to render before/after the current card. Used for virtual rendering with large datasets. A value of 2 means 5 cards total will be rendered (current + 2 before + 2 after).
+- **Default:** `3`
+- **Description:** Number of cards to render in dom. Used for virtual rendering with large datasets. Can't be lower than 1.
+
+### `stack`
+
+- **Type:** `number`
+- **Default:** `0`
+- **Description:** Number of cards to show stacked behind the active card. Creates a visual depth effect where multiple cards are visible with scaling and positioning offsets. When stack is greater than virtualBuffer, virtualBuffer is automatically increased to stack + 1 to ensure proper rendering.
+
+**Example:**
+```vue
+<FlashCards :items="cards" :stack="5" />
+```
+
+### `stackOffset`
+
+- **Type:** `number`
+- **Default:** `20`
+- **Description:** Offset in pixels between stacked cards. Controls the visual spacing between cards in the stack.
+
+**Example:**
+```vue
+<FlashCards :items="cards" :stack="3" :stack-offset="30" />
+```
+
+### `stackDirection`
+
+- **Type:** `'top' | 'bottom' | 'left' | 'right'`
+- **Default:** `'bottom'`
+- **Description:** Direction where stacked cards appear relative to the active card.
+
+**Example:**
+```vue
+<FlashCards :items="cards" :stack="3" stack-direction="right" />
+```
 
 ### `transformStyle`
 
@@ -57,7 +90,7 @@ The main component for creating swipeable card interfaces.
 - **Default:** `null`
 - **Description:** Custom function to define how cards transform during drag interactions. The function receives a `DragPosition` object containing:
   - `x`: Horizontal position in pixels
-  - `y`: Vertical position in pixels  
+  - `y`: Vertical position in pixels
   - `delta`: Normalized drag progress (-1 to 1, where negative values indicate left swipes and positive values indicate right swipes)
 
 **Default implementation:**
@@ -68,7 +101,7 @@ The main component for creating swipeable card interfaces.
 **Example with custom scaling:**
 ```vue
 <script setup>
-const customTransform = (position) => {
+function customTransform(position) {
   const scale = 1 - Math.abs(position.delta) * 0.15
   const rotation = position.delta * 25
   return `transform: rotate(${rotation}deg) scale(${scale})`
@@ -76,8 +109,8 @@ const customTransform = (position) => {
 </script>
 
 <template>
-  <FlashCards 
-    :items="cards" 
+  <FlashCards
+    :items="cards"
     :transform-style="customTransform"
   />
 </template>
@@ -86,7 +119,7 @@ const customTransform = (position) => {
 **Example with blur effect:**
 ```vue
 <script setup>
-const blurTransform = (position) => {
+function blurTransform(position) {
   const blur = Math.abs(position.delta) * 3
   return `transform: rotate(${position.delta * 20}deg); filter: blur(${blur}px)`
 }

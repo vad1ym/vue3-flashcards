@@ -1,19 +1,37 @@
 <script lang="ts" setup generic="T extends Record<string, unknown>">
 import type { FlashCardProps } from './FlashCard.vue'
-import { computed, reactive, ref } from 'vue'
+import { computed, ref } from 'vue'
 import FlashCard from './FlashCard.vue'
-import { DragType } from './utils/useDragSetup'
+import { useStackList } from './utils/useStackList'
+import { useStackTransform } from './utils/useStackTransform'
 
 export interface FlashCardsProps<Item> extends FlashCardProps {
   items?: Item[]
+
+  // Enable infinite swiping
   infinite?: boolean
+
+  // Count of cards to render in DOM
   virtualBuffer?: number
+
+  // Show card as stacked (lower cards are scaled down and have offset)
+  // Stack can't be greater than virtual buffer - 1
+  stack?: number
+
+  // Offset between stacked cards
+  stackOffset?: number
+
+  // Direction of the stack
+  stackDirection?: 'top' | 'left' | 'right' | 'bottom'
 }
 
 const {
   items = [],
   infinite = false,
-  virtualBuffer = 2,
+  virtualBuffer = 3,
+  stack = 0,
+  stackOffset = 20,
+  stackDirection = 'bottom',
   ...flashCardProps
 } = defineProps<FlashCardsProps<T>>()
 
@@ -30,68 +48,44 @@ defineSlots<{
   empty?: () => any
 }>()
 
+// References to stack elements
 const cardRefs = ref<Map<number, InstanceType<typeof FlashCard>>>(new Map())
 
-interface CardState {
-  completed?: boolean
-  type?: DragType
-}
+// Keep height of last mounted element
+const stackHeight = ref(0)
 
-const history = reactive<Map<number, CardState>>(new Map())
-const currentIndex = ref(0)
+// Virtual buffer can't be less than 1
+// Vritual buffer can't be less than stack + 1, when stack is passed
+const getVirtualBuffer = computed(() => Math.max(stack + 1, virtualBuffer, 1))
 
-/**
- * Returns item based on virtual index (for infinite mode)
- * Returns item based on index (for finite mode)
- */
-function getItemAtIndex(index: number) {
-  if (infinite) {
-    return items[index % items.length]
-  }
-  return items[index]
-}
+// Use stack list composable
+const {
+  currentIndex,
+  isEnd,
+  canRestore,
+  visibleItems,
+  setApproval: setCardApproval,
+  restoreCard,
+} = useStackList<T>(() => ({
+  items,
+  infinite,
+  virtualBuffer: getVirtualBuffer.value,
+}))
 
-// Indicates the start of the finite cards
-const isStart = computed(() => currentIndex.value === 0)
-
-// Indicates the end of finite cards
-const isEnd = computed(() => currentIndex.value >= items.length)
-
-// Indicates the ability to restore the previous card
-const canRestore = computed(() => !isStart.value)
-
-/**
- * Returns the visible items based on the current index and virtual buffer
- * Is used for virtualization
- */
-const visibleItems = computed(() => {
-  const start = Math.max(0, currentIndex.value - 1)
-  const end = infinite
-    ? currentIndex.value + virtualBuffer
-    : Math.min(items.length - 1, currentIndex.value + virtualBuffer)
-
-  return Array.from({ length: end - start + 1 }, (_, i) => {
-    const index = start + i
-    return {
-      item: getItemAtIndex(index),
-      index,
-      state: history.get(index),
-    }
-  })
-})
+// Use stack transform composable
+const { getCardStyle } = useStackTransform(() => ({
+  stack,
+  stackOffset,
+  stackDirection,
+  currentIndex: currentIndex.value,
+  virtualBuffer: getVirtualBuffer.value,
+}))
 
 /**
  * Set the card as approved or rejected and emit event with the original item
  */
 function setApproval(index: number, approved: boolean) {
-  history.set(index, {
-    type: approved ? DragType.APPROVE : DragType.REJECT,
-    completed: true,
-  })
-  currentIndex.value++
-
-  // Get the original item for emit
-  const originalItem = getItemAtIndex(index)
+  const originalItem = setCardApproval(index, approved)
 
   if (approved)
     emit('approve', originalItem)
@@ -103,15 +97,7 @@ function setApproval(index: number, approved: boolean) {
  * Find the previous card, reset and restore it, show restoring animation
  */
 function restore() {
-  if (isStart.value)
-    return
-
-  const previousIndex = currentIndex.value - 1
-  const previousCardState = history.get(previousIndex)
-
-  if (previousCardState) {
-    previousCardState.completed = false
-    currentIndex.value = previousIndex
+  if (restoreCard()) {
     cardRefs.value.get(currentIndex.value)?.restore()
   }
 }
@@ -141,23 +127,25 @@ defineExpose({
 
 <template>
   <div>
-    <div class="flashcards">
-      <div class="flashcards__card-wrapper" :style="{ zIndex: -items.length - 1 }">
+    <div class="flashcards" :style="{ height: isEnd ? `${stackHeight}px` : 'auto' }">
+      <!-- Dont show empty state in infinite mode -->
+      <!-- Show only within last card in finite mode -->
+      <div
+        v-if="!infinite && currentIndex >= items.length - 1"
+        class="flashcards__card-wrapper flashcards-empty-state"
+        :style="{ zIndex: -items.length - 1 }"
+      >
         <slot name="empty">
           No more cards!
         </slot>
       </div>
 
-      <!-- This invisible card is needed to keep the height of the cards -->
-      <div class="flashcards__height-reference">
-        <slot :item="({} as T)" />
-      </div>
-
+      <!-- Virtual stack -->
       <div
         v-for="{ item, index, state } in visibleItems"
         :key="index"
         class="flashcards__card-wrapper"
-        :style="{ zIndex: currentIndex - index }"
+        :style="[{ zIndex: currentIndex - index }, getCardStyle(index, state?.completed)]"
       >
         <FlashCard
           :ref="el => el && cardRefs.set(index, el as InstanceType<typeof FlashCard>)"
@@ -167,6 +155,7 @@ defineExpose({
           class="flashcards__card"
           :class="{ 'flashcards__card--active': index === currentIndex }"
           @complete="setApproval(index, $event)"
+          @mounted="stackHeight = Math.max($event, 0)"
         >
           <template #default>
             <slot :item="item" />
@@ -196,11 +185,11 @@ defineExpose({
 <style scoped>
 .flashcards {
   position: relative;
-  width: 100%;
+  display: grid;
+  grid-row: 1;
   isolation: isolate;
   overflow: visible;
   touch-action: none;
-  overscroll-behavior: none;
 }
 
 .flashcards__height-reference {
@@ -209,27 +198,25 @@ defineExpose({
 }
 
 .flashcards__card-wrapper {
-  text-align: center;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  transform: translate3D(-50%, -50%, 0);
   pointer-events: none;
-  touch-action: inherit;
   contain: layout;
+  grid-area: 1 / 1;
+  transition: transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 .flashcards__card {
   pointer-events: none;
 }
 
-.flashcards__card--empty {
-  text-align: center;
-}
-
 .flashcards__card--active {
   pointer-events: all;
-  touch-action: inherit;
+}
+
+.flashcards-empty-state {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 </style>
