@@ -4,7 +4,11 @@ import { computed, nextTick, onMounted, onUnmounted, provide, reactive, readonly
 export enum DragType {
   APPROVE = 'approve',
   REJECT = 'reject',
+  TOP = 'top',
+  BOTTOM = 'bottom',
 }
+
+// Modify 1
 
 export interface DragSetupParams {
   // Distance in pixels the card must be dragged to complete swiping
