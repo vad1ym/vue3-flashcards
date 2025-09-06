@@ -9,7 +9,11 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     coverage: {
       include: ['src/**/*'],
+      reporter: ['text', 'json-summary'],
     },
-    reporters: process.env.GITHUB_ACTIONS ? ['dot', 'github-actions'] : ['dot'],
+    reporters: process.env.GITHUB_ACTIONS ? ['dot', 'github-actions', 'junit'] : ['dot'],
+    outputFile: {
+      junit: './test-results.xml',
+    },
   },
 })

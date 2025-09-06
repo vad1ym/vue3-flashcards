@@ -32,4 +32,6 @@ development
 
 # Coverage
 coverage/
+test-results.xml
 *.lcov
+.env
