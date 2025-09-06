@@ -32,6 +32,7 @@ The main component for creating swipeable card interfaces.
 - **Type:** `boolean`
 - **Default:** `false`
 - **Description:** Disabling vertical dragging, the card can only move horizontally.
+
 ### `virtualBuffer`
 
 - **Type:** `number`
