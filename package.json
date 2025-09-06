@@ -61,6 +61,7 @@
     "@tailwindcss/vite": "^4.1.13",
     "@types/node": "^24.3.1",
     "@vitejs/plugin-vue": "^6.0.1",
+    "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "@vue/test-utils": "^2.4.6",
     "conventional-changelog-cli": "^5.0.0",
