@@ -9,6 +9,8 @@
 [![NPM Version](https://img.shields.io/npm/v/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://www.npmjs.com/package/vue3-flashcards)
 [![NPM Downloads](https://img.shields.io/npm/dm/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://www.npmjs.com/package/vue3-flashcards)
 [![Bundle Size](https://img.shields.io/bundlephobia/minzip/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://bundlephobia.com/package/vue3-flashcards)
+[![Coverage](https://codecov.io/gh/vad1ym/vue3-flashcards/branch/main/graph/badge.svg)](https://codecov.io/gh/vad1ym/vue3-flashcards)
+[![Maintainability](https://qlty.sh/gh/vad1ym/projects/vue3-flashcards/maintainability.svg)](https://qlty.sh/gh/vad1ym/projects/vue3-flashcards)
 [![License](https://img.shields.io/npm/l/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://github.com/vad1ym/vue3-flashcards/blob/main/LICENSE)
 
 [**📚 Documentation**](https://vad1ym.github.io/vue3-flashcards) • [**🎮 Examples**](https://vad1ym.github.io/vue3-flashcards/examples) • [**🚀 Getting Started**](https://vad1ym.github.io/vue3-flashcards/guide/getting-started)

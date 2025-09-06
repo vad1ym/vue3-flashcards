@@ -1,6 +1,7 @@
 import { resolve } from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vitepress'
+import { version } from '../../package.json'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -29,13 +30,17 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started', activeMatch: '/guide/' },
       { text: 'API', link: '/api/flashcards', activeMatch: '/api/' },
       { text: 'Examples', link: '/examples' },
-      { text: 'Changelog', link: '/changelog' },
+      { text: 'Releases', link: 'https://github.com/vad1ym/vue3-flashcards/releases' },
       {
-        text: 'v0.7.0',
+        text: `v${version}`,
         items: [
           {
-            text: 'Changelog',
-            link: '/changelog',
+            text: `Release v${version}`,
+            link: `https://github.com/vad1ym/vue3-flashcards/releases/tag/v${version}`,
+          },
+          {
+            text: 'All Releases',
+            link: 'https://github.com/vad1ym/vue3-flashcards/releases',
           },
           {
             text: 'Contributing',
@@ -60,7 +65,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Examples', link: '/examples' },
-            { text: 'Changelog', link: '/changelog' },
+            { text: 'Releases', link: 'https://github.com/vad1ym/vue3-flashcards/releases' },
           ],
         },
       ],

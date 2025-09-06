@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main, next]
+  pull_request:
+    branches: [main, next]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # =========================
+  # CI Pipeline
+  # =========================
+  ci:
+    name: 🔍 CI
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build library
+        run: yarn build
+
+      - name: Run tests
+        run: yarn test:run --coverage
+
+      - name: Compute coverage
+        id: coverage
+        run: |
+          COVERAGE=$(node -p "require('./coverage/coverage-summary.json').total.statements.pct")
+          echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
+
+      - name: Add test results to PR
+        if: github.event_name == 'pull_request'
+        uses: dorny/test-reporter@v1
+        with:
+          name: 🧪 Test Results | Coverage ${{ env.COVERAGE }}%
+          path: test-results.xml
+          reporter: java-junit
+          fail-on-error: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate current commit (last commit) with commitlint
+        if: github.event_name == 'push'
+        run: yarn commitlint --last --verbose
+
+      - name: Validate PR commits with commitlint
+        if: github.event_name == 'pull_request'
+        run: yarn commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
