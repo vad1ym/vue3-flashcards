@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import type { DragPosition, DragSetupParams } from './utils/useDragSetup'
-import { computed, onMounted, useTemplateRef } from 'vue'
+import { onMounted, useTemplateRef } from 'vue'
 import ApproveIcon from './components/icons/ApproveIcon.vue'
 import RejectIcon from './components/icons/RejectIcon.vue'
+import { config } from './config'
 import { DragType, useDragSetup } from './utils/useDragSetup'
 
 export interface FlashCardProps extends DragSetupParams {
   // Transition config managed by parent stack due to virtualization
   transitionName?: string
+
+  // System params
   transitionShow?: boolean
   transitionType?: DragType | null
 
@@ -22,17 +25,29 @@ export interface FlashCardProps extends DragSetupParams {
 }
 
 const {
-  maxRotation = 20,
-  transformStyle,
+  maxRotation: _maxRotation = config.defaultMaxRotation,
 
-  transitionName = 'card-transition',
+  transformStyle = (position: DragPosition) =>
+    `transform: rotate(${position.delta * config.defaultMaxRotation}deg)`,
+
+  transitionName = config.defaultTransitionName,
+
+  // System params
   transitionShow = false,
   transitionType = null,
+
   ...params
 } = defineProps<FlashCardProps>()
 
 const emit = defineEmits<{
+  /**
+   * Event fired when card is swiped to the end and passed result
+   */
   complete: [approved: boolean]
+
+  /**
+   * Event fired when card is mounted, passed element height
+   */
   mounted: [height: number]
 }>()
 
@@ -42,6 +57,7 @@ defineSlots<{
   approve?: (props: { delta: number }) => any
 }>()
 
+// Current card element ref
 const el = useTemplateRef('flash-card')
 
 const {
@@ -56,13 +72,6 @@ const {
     emit('complete', approved)
   },
 }))
-
-const getTransformStyle = computed(() => {
-  if (!transformStyle) {
-    return `transform: rotate(${position.delta * maxRotation}deg)`
-  }
-  return transformStyle(position)
-})
 
 onMounted(() => {
   if (el.value?.offsetHeight) {
@@ -93,23 +102,16 @@ defineExpose({
           [`${transitionName}--rejected`]: transitionType === DragType.REJECT,
         }"
       >
-        <div
-          class="flash-card__transform"
-          :style="getTransformStyle"
-        >
+        <div class="flash-card__transform" :style="transformStyle(position)">
           <slot :is-dragging="isDragging" />
 
-          <div v-show="position.type === DragType.REJECT">
-            <slot name="reject" :delta="position.delta">
-              <RejectIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
-            </slot>
-          </div>
+          <slot name="reject" :delta="position.delta">
+            <RejectIcon class="flash-card__indicator" :style="{ opacity: position.type === DragType.REJECT ? Math.abs(position.delta) : 0 }" />
+          </slot>
 
-          <div v-show="position.type === DragType.APPROVE">
-            <slot name="approve" :delta="position.delta">
-              <ApproveIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
-            </slot>
-          </div>
+          <slot name="approve" :delta="position.delta">
+            <ApproveIcon class="flash-card__indicator" :style="{ opacity: position.type === DragType.APPROVE ? Math.abs(position.delta) : 0 }" />
+          </slot>
         </div>
       </div>
     </Transition>
