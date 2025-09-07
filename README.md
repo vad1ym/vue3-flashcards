@@ -162,6 +162,7 @@ The `FlipCard` component provides card flipping functionality and can be used in
 |-----------|------|----------|---------|-------------|
 | disabled | `boolean` | No | `false` | Disable card flipping functionality |
 | waitAnimationEnd | `boolean` | No | `true` | Wait for animation to end before allowing another flip |
+| flipAxis | `'x' \| 'y'` | No | `'y'` | Axis of rotation for the flip animation (x = horizontal, y = vertical) |
 
 ### Slots
 

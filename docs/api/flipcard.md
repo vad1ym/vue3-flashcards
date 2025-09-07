@@ -16,6 +16,12 @@ A standalone component for creating flippable cards with front and back content.
 - **Default:** `true`
 - **Description:** Wait for the flip animation to complete before allowing another flip. Prevents rapid clicking issues.
 
+### `flipAxis`
+
+- **Type:** `'x' | 'y'`
+- **Default:** `'y'`
+- **Description:** Axis of rotation for the flip animation. Use `'x'` for horizontal flip (top to bottom) or `'y'` for vertical flip (left to right).
+
 ## Slots
 
 ### `front`
@@ -155,6 +161,24 @@ const cards = ref([
   <FlipCard :wait-animation-end="false">
     <template #front>Front</template>
     <template #back>Back</template>
+  </FlipCard>
+</template>
+```
+
+### Flip Axis Options
+
+```vue
+<template>
+  <!-- Vertical flip (default) - rotates around Y axis -->
+  <FlipCard flip-axis="y">
+    <template #front>Front - Vertical Flip</template>
+    <template #back>Back - Vertical Flip</template>
+  </FlipCard>
+
+  <!-- Horizontal flip - rotates around X axis -->
+  <FlipCard flip-axis="x">
+    <template #front>Front - Horizontal Flip</template>
+    <template #back>Back - Horizontal Flip</template>
   </FlipCard>
 </template>
 ```

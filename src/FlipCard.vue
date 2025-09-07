@@ -3,12 +3,19 @@ import { inject, ref } from 'vue'
 import { config } from './config'
 import { IsDraggingStateInjectionKey } from './utils/useDragSetup'
 
-const { disabled = false, waitAnimationEnd = config.defaultFlipWaitAnimationEnd } = defineProps<{
+const {
+  disabled = false,
+  waitAnimationEnd = config.defaultFlipWaitAnimationEnd,
+  flipAxis = config.defaultFlipAxis,
+} = defineProps<{
   // Disable card flipping functionality
   disabled?: boolean
 
   // Wait for animation to end before can flip card again
   waitAnimationEnd?: boolean
+
+  // Flip axis
+  flipAxis?: 'x' | 'y'
 }>()
 
 defineSlots<{
@@ -40,7 +47,9 @@ function onTransitionEnd() {
   <div class="flip-card" @pointerup="flip">
     <div
       class="flip-card__inner"
-      :class="{ 'flip-card__inner--flipped': isFlipped }"
+      :class="[`flip-card__inner--${flipAxis}`, {
+        'flip-card__inner--flipped': isFlipped,
+      }]"
       @transitionend="onTransitionEnd"
     >
       <div class="flip-card__front">
@@ -68,7 +77,10 @@ function onTransitionEnd() {
   transform-style: preserve-3d;
 }
 
-.flip-card__inner--flipped {
+.flip-card__inner--x.flip-card__inner--flipped {
+  transform: rotateX(180deg);
+}
+.flip-card__inner--y.flip-card__inner--flipped {
   transform: rotateY(180deg);
 }
 
@@ -87,6 +99,13 @@ function onTransitionEnd() {
   top: 0;
   left: 0;
   height: 100%;
+}
+
+.flip-card__inner--y .flip-card__back {
   transform: rotateY(180deg);
+}
+
+.flip-card__inner--x .flip-card__back {
+  transform: rotateX(180deg);
 }
 </style>

@@ -11,12 +11,13 @@ const cards = ref([
 ])
 
 const waitAnimationEnd = ref(true)
+const invertAxios = ref<false>(false)
 </script>
 
 <template>
   <div class="w-full flex flex-col justify-center items-center py-20">
     <div class="mb-8 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
-      <label class="flex items-center gap-3 cursor-pointer">
+      <label class="flex items-center gap-3 cursor-pointer mb-1">
         <input
           v-model="waitAnimationEnd"
           type="checkbox"
@@ -24,12 +25,20 @@ const waitAnimationEnd = ref(true)
         >
         <span class="font-medium text-gray-700 dark:text-gray-300">Wait for animation end</span>
       </label>
+      <label class="flex items-center gap-3 cursor-pointer">
+        <input
+          v-model="invertAxios"
+          type="checkbox"
+          class="toggle toggle-primary"
+        >
+        <span class="font-medium text-gray-700 dark:text-gray-300">Invert axis</span>
+      </label>
     </div>
 
     <div class="max-w-sm w-full">
       <FlashCards :items="cards">
         <template #default="{ item }">
-          <FlipCard :wait-animation-end="waitAnimationEnd">
+          <FlipCard :wait-animation-end="waitAnimationEnd" :flip-axis="invertAxios ? 'x' : 'y'">
             <template #front>
               <QuestionCard :item="item" />
             </template>
