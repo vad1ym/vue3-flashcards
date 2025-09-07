@@ -105,13 +105,17 @@ defineExpose({
         <div class="flash-card__transform" :style="transformStyle(position)">
           <slot :is-dragging="isDragging" />
 
-          <slot name="reject" :delta="position.delta">
-            <RejectIcon class="flash-card__indicator" :style="{ opacity: position.type === DragType.REJECT ? Math.abs(position.delta) : 0 }" />
-          </slot>
+          <div v-show="position.type === DragType.REJECT">
+            <slot name="reject" :delta="position.delta">
+              <RejectIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
+            </slot>
+          </div>
 
-          <slot name="approve" :delta="position.delta">
-            <ApproveIcon class="flash-card__indicator" :style="{ opacity: position.type === DragType.APPROVE ? Math.abs(position.delta) : 0 }" />
-          </slot>
+          <div v-show="position.type === DragType.APPROVE">
+            <slot name="approve" :delta="position.delta">
+              <ApproveIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
+            </slot>
+          </div>
         </div>
       </div>
     </Transition>
