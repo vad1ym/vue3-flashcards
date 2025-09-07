@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { inject, ref } from 'vue'
+import { config } from './config'
 import { IsDraggingStateInjectionKey } from './utils/useDragSetup'
 
-const { disabled = false, waitAnimationEnd = true } = defineProps<{
+const { disabled = false, waitAnimationEnd = config.defaultFlipWaitAnimationEnd } = defineProps<{
   // Disable card flipping functionality
   disabled?: boolean
 

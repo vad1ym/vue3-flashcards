@@ -1,6 +1,8 @@
 <script lang="ts" setup generic="T extends Record<string, unknown>">
 import type { FlashCardProps } from './FlashCard.vue'
+import type { StackDirection } from './utils/useStackTransform'
 import { computed, ref } from 'vue'
+import { config } from './config'
 import FlashCard from './FlashCard.vue'
 import { useStackList } from './utils/useStackList'
 import { useStackTransform } from './utils/useStackTransform'
@@ -22,16 +24,16 @@ export interface FlashCardsProps<Item> extends FlashCardProps {
   stackOffset?: number
 
   // Direction of the stack
-  stackDirection?: 'top' | 'left' | 'right' | 'bottom'
+  stackDirection?: StackDirection
 }
 
 const {
   items = [],
   infinite = false,
-  virtualBuffer = 3,
-  stack = 0,
-  stackOffset = 20,
-  stackDirection = 'bottom',
+  virtualBuffer = config.defaultVirtualBuffer,
+  stack = config.defaultStack,
+  stackOffset = config.defaultStackOffset,
+  stackDirection = config.defaultStackDirection,
   ...flashCardProps
 } = defineProps<FlashCardsProps<T>>()
 

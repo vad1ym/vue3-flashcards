@@ -1,10 +1,19 @@
 import type { MaybeRefOrGetter } from 'vue'
 import { computed, toRef } from 'vue'
 
+export const StackDirection = {
+  TOP: 'top',
+  BOTTOM: 'bottom',
+  LEFT: 'left',
+  RIGHT: 'right',
+} as const
+
+export type StackDirection = typeof StackDirection[keyof typeof StackDirection]
+
 export interface StackTransformOptions {
   stack: number
   stackOffset: number
-  stackDirection: 'top' | 'left' | 'right' | 'bottom'
+  stackDirection: StackDirection
   currentIndex: number
   virtualBuffer: number
 }
@@ -28,16 +37,16 @@ export function useStackTransform(_options: MaybeRefOrGetter<StackTransformOptio
 
     let transform = ''
     switch (options.value.stackDirection) {
-      case 'top':
+      case StackDirection.TOP:
         transform = `transform: translate3D(0, -${offset}px, 0) scale(${scale})`
         break
-      case 'bottom':
+      case StackDirection.BOTTOM:
         transform = `transform: translate3D(0, ${offset}px, 0) scale(${scale})`
         break
-      case 'left':
+      case StackDirection.LEFT:
         transform = `transform: translate3D(-${offset}px, 0, 0) scale(${scale})`
         break
-      case 'right':
+      case StackDirection.RIGHT:
         transform = `transform: translate3D(${offset}px, 0, 0) scale(${scale})`
         break
       default:

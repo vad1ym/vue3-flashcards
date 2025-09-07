@@ -1,10 +1,12 @@
 import type { InjectionKey, MaybeRefOrGetter, Ref } from 'vue'
 import { computed, nextTick, onMounted, onUnmounted, provide, reactive, readonly, ref, toRef } from 'vue'
 
-export enum DragType {
-  APPROVE = 'approve',
-  REJECT = 'reject',
-}
+export const DragType = {
+  APPROVE: 'approve',
+  REJECT: 'reject',
+} as const
+
+export type DragType = typeof DragType[keyof typeof DragType]
 
 export interface DragSetupParams {
   // Distance in pixels the card must be dragged to complete swiping
