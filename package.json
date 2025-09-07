@@ -1,7 +1,7 @@
 {
   "name": "vue3-flashcards",
   "type": "module",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Tinder-like flashcards component with dragging and flipping",
   "author": "vad1ym",
   "license": "MIT",
