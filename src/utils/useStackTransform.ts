@@ -13,6 +13,7 @@ export type StackDirection = typeof StackDirection[keyof typeof StackDirection]
 export interface StackTransformOptions {
   stack: number
   stackOffset: number
+  stackScale: number
   stackDirection: StackDirection
   currentIndex: number
   virtualBuffer: number
@@ -33,7 +34,7 @@ export function useStackTransform(_options: MaybeRefOrGetter<StackTransformOptio
 
     const stackLevel = isStacked ? index - options.value.currentIndex : 1
     const offset = stackLevel * options.value.stackOffset
-    const scale = 1 - stackLevel * 0.05
+    const scale = 1 - stackLevel * options.value.stackScale
 
     let transform = ''
     switch (options.value.stackDirection) {

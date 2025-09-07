@@ -73,6 +73,17 @@ The main component for creating swipeable card interfaces.
 <FlashCards :items="cards" :stack="3" :stack-offset="30" />
 ```
 
+### `stackScale`
+
+- **Type:** `number`
+- **Default:** `0.05`
+- **Description:** Scale reduction factor for stacked cards. Each stacked card behind the active card is scaled down by this amount multiplied by its depth position. For example, with `stackScale="0.05"`, the first card behind will have scale 0.95, the second will have scale 0.90, etc.
+
+**Example:**
+```vue
+<FlashCards :items="cards" :stack="3" :stack-scale="0.1" />
+```
+
 ### `stackDirection`
 
 - **Type:** `'top' | 'bottom' | 'left' | 'right'`

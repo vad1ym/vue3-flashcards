@@ -97,6 +97,7 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `virtualBuffer` | `number` | `3` | Cards to render for virtual scrolling. Can't be lower than 1. |
 | `stack` | `number` | `0` | Number of cards to show stacked behind the active card. When stack is greater than virtualBuffer, virtualBuffer is automatically increased to stack + 1. |
 | `stackOffset` | `number` | `20` | Offset in pixels between stacked cards. |
+| `stackScale` | `number` | `0.05` | Scale reduction factor for stacked cards. Each card behind is scaled down by this amount × depth. |
 | `stackDirection` | `'top' \| 'bottom' \| 'left' \| 'right'` | `'bottom'` | Direction where stacked cards appear relative to the active card. |
 | `transformStyle` | `(position: DragPosition) => string \| null` | `null` | Custom transform function for card movement during drag |
 | `transitionName` | `string` | `'card-transition'` | CSS transition name for card exit animations. Use `{name}--approved`/`{name}--rejected` classes for direction-based transitions |

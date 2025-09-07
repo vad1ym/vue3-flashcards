@@ -8,6 +8,7 @@ export const config = {
   defaultMaxRotation: 20,
   defaultStack: 0,
   defaultStackOffset: 20,
+  defaultStackScale: 0.05,
   defaultStackDirection: StackDirection.BOTTOM,
   defaultTransitionName: 'card-transition',
 

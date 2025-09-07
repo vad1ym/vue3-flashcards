@@ -23,6 +23,9 @@ export interface FlashCardsProps<Item> extends FlashCardProps {
   // Offset between stacked cards
   stackOffset?: number
 
+  // Coefficient of the stack scale on each level
+  stackScale?: number
+
   // Direction of the stack
   stackDirection?: StackDirection
 }
@@ -32,6 +35,7 @@ const {
   infinite = false,
   virtualBuffer = config.defaultVirtualBuffer,
   stack = config.defaultStack,
+  stackScale = config.defaultStackScale,
   stackOffset = config.defaultStackOffset,
   stackDirection = config.defaultStackDirection,
   ...flashCardProps
@@ -77,6 +81,7 @@ const {
 // Use stack transform composable
 const { getCardStyle } = useStackTransform(() => ({
   stack,
+  stackScale,
   stackOffset,
   stackDirection,
   currentIndex: currentIndex.value,
