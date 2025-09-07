@@ -3,8 +3,6 @@ name: CI
 on:
   push:
     branches: [main, next]
-    tags-ignore:
-      - 'v*'
   pull_request:
     branches: [main, next]
 
@@ -19,6 +17,7 @@ jobs:
   ci:
     name: 🔍 CI
     runs-on: ubuntu-latest
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     permissions:
       contents: read
       actions: read
