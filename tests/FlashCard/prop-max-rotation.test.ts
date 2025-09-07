@@ -10,9 +10,7 @@ describe('[props] max-rotation', () => {
 
   beforeEach(() => {
     wrapper = mount(FlashCard, {
-      props: {
-        maxRotation: config.defaultMaxRotation,
-      },
+      props: {},
       slots: {
         default: '<div class="card-content">Test Card</div>',
       },

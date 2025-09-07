@@ -1,7 +1,6 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { config } from '../../src/config'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
@@ -10,9 +9,7 @@ describe('[props] threshold', () => {
 
   beforeEach(() => {
     wrapper = mount(FlashCard, {
-      props: {
-        threshold: config.defaultThreshold,
-      },
+      props: {},
       slots: {
         default: '<div class="card-content">Test Card</div>',
       },
