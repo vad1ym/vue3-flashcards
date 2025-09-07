@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches: [main]
 
 permissions:
   contents: write
@@ -14,6 +19,7 @@ jobs:
   release:
     name: Generate Release Notes
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

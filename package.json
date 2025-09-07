@@ -52,7 +52,8 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "changelog": "changelogithub",
-    "changelog:dry": "changelogithub --dry"
+    "changelog:dry": "changelogithub --dry",
+    "release": "standard-version"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
@@ -74,6 +75,7 @@
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
     "lint-staged": "^16.1.6",
+    "standard-version": "^9.5.0",
     "tailwindcss": "^4.1.13",
     "typescript": "~5.9.2",
     "vite": "npm:rolldown-vite@latest",
