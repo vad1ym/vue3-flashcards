@@ -50,7 +50,13 @@ defineSlots<{
   default: (props: { item: T }) => any
   reject?: (props: { item: T, delta: number }) => any
   approve?: (props: { item: T, delta: number }) => any
-  actions?: (props: { restore: (animated?: boolean) => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }) => any
+  actions?: (props: {
+    restore: () => void
+    reject: () => void
+    approve: () => void
+    isEnd: boolean
+    canRestore: boolean
+  }) => any
   empty?: () => any
 }>()
 

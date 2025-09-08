@@ -15,14 +15,14 @@ export interface DragMovePosition {
  * Core drag simulation class for testing FlashCard drag interactions
  */
 export class DragSimulator {
-  private element: HTMLElement
+  private element: Element
   private currentX = 0
   private currentY = 0
   private startX = 0
   private startY = 0
 
-  constructor(element: HTMLElement | DOMWrapper<HTMLElement>) {
-    this.element = element instanceof HTMLElement ? element : element.element
+  constructor(element: HTMLElement | DOMWrapper<Element>) {
+    this.element = element instanceof Element ? element : element.element
   }
 
   private parsePosition(value: number | string, dimension: 'width' | 'height' = 'width'): number {
