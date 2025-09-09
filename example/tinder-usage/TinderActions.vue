@@ -9,59 +9,29 @@ defineProps<{
 </script>
 
 <template>
-  <div class="tinder-buttons">
-    <button class="return-button" :disabled="!canRestore" @click="restore">
+  <div class="flex justify-center gap-5 mt-5">
+    <button
+      class="w-15 h-15 rounded-full text-2xl text-white bg-blue-500 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110"
+      :disabled="!canRestore"
+      @click="restore"
+    >
       ↺
     </button>
-    <button class="dislike-button" :disabled="isEnd" @click="reject">
+
+    <button
+      class="w-15 h-15 rounded-full text-2xl text-white bg-red-500 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110"
+      :disabled="isEnd"
+      @click="reject"
+    >
       ✕
     </button>
-    <button class="like-button" :disabled="isEnd" @click="approve">
+
+    <button
+      class="w-15 h-15 rounded-full text-2xl text-white bg-green-500 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110"
+      :disabled="isEnd"
+      @click="approve"
+    >
       ♥
     </button>
   </div>
 </template>
-
-<style scoped>
-.tinder-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.tinder-buttons button {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
-}
-
-.tinder-buttons button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-  transform: none;
-}
-
-.tinder-buttons button:not(:disabled):hover {
-  transform: scale(1.1);
-}
-
-.like-button {
-  background-color: #4caf50;
-  color: white;
-}
-
-.dislike-button {
-  background-color: #f44336;
-  color: white;
-}
-
-.return-button {
-  background-color: #2196f3;
-  color: white;
-}
-</style>

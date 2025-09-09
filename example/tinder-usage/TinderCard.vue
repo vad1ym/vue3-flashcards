@@ -12,42 +12,19 @@ defineProps<{
 </script>
 
 <template>
-  <div class="tinder-card" :style="{ backgroundImage: `url(${item.image})` }">
-    <div class="card-content">
-      <h2>{{ item.text }}</h2>
-      <p>{{ item.description }}</p>
+  <div
+    class="w-full h-[500px] bg-cover bg-center rounded-xl relative overflow-hidden"
+    :style="{ backgroundImage: `url(${item.image})` }"
+  >
+    <div
+      class="absolute bottom-0 left-0 right-0 p-5 text-white bg-gradient-to-t from-black/80 to-transparent"
+    >
+      <h2 class="m-0 mb-2 text-2xl font-semibold">
+        {{ item.text }}
+      </h2>
+      <p class="m-0 text-base">
+        {{ item.description }}
+      </p>
     </div>
   </div>
 </template>
-
-<style scoped>
-.tinder-card {
-  width: 100%;
-  height: 500px;
-  background-size: cover;
-  background-position: center;
-  border-radius: 10px;
-  position: relative;
-  overflow: hidden;
-}
-
-.card-content {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  color: white;
-}
-
-.card-content h2 {
-  margin: 0 0 10px;
-  font-size: 24px;
-}
-
-.card-content p {
-  margin: 0;
-  font-size: 16px;
-}
-</style>

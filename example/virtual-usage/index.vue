@@ -22,8 +22,8 @@ function onReject(card: { id: number }) {
 </script>
 
 <template>
-  <div class="example-container">
-    <div class="cards-container isolate">
+  <div class="w-full flex justify-center items-center min-h-[500px] p-5">
+    <div class="max-w-[400px] w-full isolate">
       <FlashCards
         :items="cards"
         :virtual-buffer="1"
@@ -42,19 +42,3 @@ function onReject(card: { id: number }) {
     </div>
   </div>
 </template>
-
-<style scoped>
-.example-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 500px;
-  padding: 20px;
-}
-
-.cards-container {
-  max-width: 400px;
-  width: 100%;
-}
-</style>
