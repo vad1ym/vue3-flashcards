@@ -69,6 +69,11 @@ describe('[props] disableDrag', () => {
         expect(rejectDiv.isVisible()).toBe(false)
       }
     })
+
+    it('should apply drag-disabled class when disableDrag is true', () => {
+      // Should have drag-disabled class
+      expect(cardElement.classList.contains('flash-card--drag-disabled')).toBe(true)
+    })
   })
 
   describe('with disableDrag: false', () => {
@@ -98,6 +103,11 @@ describe('[props] disableDrag', () => {
       // Should be dragging
       expect(cardElement.classList.contains('flash-card--dragging')).toBe(true)
       expect(cardElement.style.transform).not.toContain('translate3D(0px, 0px, 0)')
+    })
+
+    it('should not apply drag-disabled class when disableDrag is false', () => {
+      // Should not have drag-disabled class
+      expect(cardElement.classList.contains('flash-card--drag-disabled')).toBe(false)
     })
   })
 
@@ -166,6 +176,19 @@ describe('[props] disableDrag', () => {
       await wrapper.vm.$nextTick()
       expect(cardElement.classList.contains('flash-card--dragging')).toBe(true)
       expect(cardElement.style.transform).not.toContain('translate3D(0px, 0px, 0)')
+    })
+
+    it('should update drag-disabled CSS class when disableDrag changes', async () => {
+      // Initially should not have drag-disabled class (drag enabled)
+      expect(cardElement.classList.contains('flash-card--drag-disabled')).toBe(false)
+
+      // Change to disabled - should have drag-disabled class
+      await wrapper.setProps({ disableDrag: true })
+      expect(cardElement.classList.contains('flash-card--drag-disabled')).toBe(true)
+
+      // Change back to enabled - should not have drag-disabled class
+      await wrapper.setProps({ disableDrag: false })
+      expect(cardElement.classList.contains('flash-card--drag-disabled')).toBe(false)
     })
   })
 })
