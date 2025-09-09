@@ -90,28 +90,22 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     })
   }
 
-  function handleDragStart(event: MouseEvent | TouchEvent) {
+  function handleDragStart(event: PointerEvent) {
     isDragStarted.value = true
 
-    if (event instanceof MouseEvent) {
-      startX = event.clientX - position.x
-      startY = event.clientY - position.y
-    }
-    else {
-      startX = event.touches[0].clientX - position.x
-      startY = event.touches[0].clientY - position.y
-    }
+    startX = event.clientX - position.x
+    startY = event.clientY - position.y
 
     onDragStart()
   }
 
-  function handleDragMove(event: MouseEvent | TouchEvent) {
+  function handleDragMove(event: PointerEvent) {
     if (!isDragStarted.value) {
       return
     }
 
-    const clientX = event instanceof MouseEvent ? event.clientX : event.touches[0].clientX
-    const clientY = event instanceof MouseEvent ? event.clientY : event.touches[0].clientY
+    const clientX = event.clientX
+    const clientY = event.clientY
 
     const x = clientX - startX
     const y = clientY - startY
@@ -177,10 +171,6 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   }
 
   function setupInteract() {
-    if (!element.value) {
-      return
-    }
-
     restore()
 
     // Don't add event listeners if dragging is disabled
@@ -189,7 +179,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     }
 
     // Touch events with passive optimization
-    element.value.addEventListener('pointerdown', handleDragStart, { passive: false })
+    element.value?.addEventListener('pointerdown', handleDragStart, { passive: false })
     window.addEventListener('pointermove', handleDragMove, { passive: false })
     window.addEventListener('pointerup', handleDragEnd, { passive: true })
   }
