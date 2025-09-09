@@ -69,6 +69,17 @@ The main `FlashCards` component accepts several props to control its behavior:
 <FlashCards :items="cards" :max-dragging-x="200" />
 ```
 
+#### `disableDrag`
+
+- **Type:** `boolean`
+- **Default:** `false`
+- **Description:** Completely disable dragging functionality. When disabled, cards cannot be swiped with touch or mouse gestures. Manual methods (`approve()`, `reject()`, `restore()`) and slot actions still work normally.
+
+```vue
+<!-- Disable drag interactions, only allow programmatic control -->
+<FlashCards :items="cards" :disable-drag="true" />
+```
+
 #### `infinite`
 
 - **Type:** `boolean`

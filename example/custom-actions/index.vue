@@ -9,12 +9,25 @@ const cards = ref([
   { text: 'Data Science', description: 'Master statistical analysis and machine learning', icon: '📊' },
   { text: 'UI/UX Design', description: 'Create beautiful and intuitive user experiences', icon: '🎨' },
 ])
+
+const disableDrag = ref(false)
 </script>
 
 <template>
   <div class="w-full flex justify-center items-center py-20">
     <div class="max-w-sm w-full">
-      <FlashCards :items="cards">
+      <div class="mb-4 flex items-center justify-center">
+        <label class="flex items-center space-x-2">
+          <input
+            v-model="disableDrag"
+            type="checkbox"
+            class="toggle toggle-primary"
+          >
+          <span>Disable Drag</span>
+        </label>
+      </div>
+
+      <FlashCards :items="cards" :disable-drag="disableDrag">
         <template #default="{ item }">
           <LearningCard :item="item" />
         </template>

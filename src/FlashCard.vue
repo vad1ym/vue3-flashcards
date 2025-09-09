@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DragPosition, DragSetupParams } from './utils/useDragSetup'
-import { onMounted, useTemplateRef } from 'vue'
+import { onMounted, useTemplateRef, watch } from 'vue'
 import ApproveIcon from './components/icons/ApproveIcon.vue'
 import RejectIcon from './components/icons/RejectIcon.vue'
 import { config } from './config'
@@ -13,6 +13,9 @@ export interface FlashCardProps extends DragSetupParams {
   // System params
   transitionShow?: boolean
   transitionType?: DragType | null
+
+  // Completely disable dragging feature
+  disableDrag?: boolean
 
   // Max rotation in degrees the card can be rotated on swipe
   // Is used for default transform string on swipe
@@ -66,12 +69,20 @@ const {
   restore,
   reject,
   approve,
+  setupInteract,
+  cleanupInteract,
 } = useDragSetup(el, () => ({
   ...params,
   onComplete(approved) {
     emit('complete', approved)
   },
 }))
+
+// Watch for disableDrag prop changes to resubscribe/unsubscribe
+watch(() => params.disableDrag, () => {
+  cleanupInteract()
+  setupInteract()
+})
 
 onMounted(() => {
   if (el.value?.offsetHeight) {
