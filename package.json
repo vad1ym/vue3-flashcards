@@ -40,7 +40,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "prepare": "husky",
+    "prepare": "simple-git-hooks",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -72,9 +72,9 @@
     "conventional-changelog-conventionalcommits": "6.1.0",
     "daisyui": "^5.1.6",
     "eslint": "^9.15.0",
-    "husky": "^9.1.7",
     "jsdom": "^26.1.0",
     "lint-staged": "^16.1.6",
+    "simple-git-hooks": "^2.13.1",
     "standard-version": "^9.5.0",
     "tailwindcss": "^4.1.13",
     "typescript": "~5.9.2",
@@ -90,5 +90,10 @@
     "*.{vue,ts}": [
       "eslint --fix"
     ]
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged --quiet",
+    "commit-msg": "npx commitlint --edit $1",
+    "pre-push": "npm run build && npm run test:quiet"
   }
 }
