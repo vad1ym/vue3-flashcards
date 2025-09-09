@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { config } from '../../src/config'
 import FlashCards from '../../src/FlashCards.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
@@ -17,7 +18,7 @@ describe('[exposed] restore', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -36,7 +37,7 @@ describe('[exposed] restore', () => {
       await new Promise(resolve => setTimeout(resolve, 50))
 
       // The card should move to approve position
-      expect(activeCard.element.style.transform).toContain('translate3D(151px, 0px, 0)')
+      expect(activeCard.element.style.transform).toContain(`translate3D(${config.defaultThreshold}px, 0px, 0)`)
 
       // Restore the card
       wrapper.vm.restore()
@@ -56,7 +57,7 @@ describe('[exposed] restore', () => {
       await new Promise(resolve => setTimeout(resolve, 50))
 
       // The card should move to reject position
-      expect(activeCard.element.style.transform).toContain('translate3D(-151px, 0px, 0)')
+      expect(activeCard.element.style.transform).toContain(`translate3D(-${config.defaultThreshold}px, 0px, 0)`)
 
       // Restore the card
       wrapper.vm.restore()
@@ -104,7 +105,7 @@ describe('[exposed] restore', () => {
         props: {
           items: testItems,
           infinite: true,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -161,7 +162,7 @@ describe('[exposed] restore', () => {
         props: {
           items: testItems,
           stack: 2,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -205,7 +206,7 @@ describe('[exposed] restore', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',

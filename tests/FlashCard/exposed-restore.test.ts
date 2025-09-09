@@ -1,8 +1,11 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { config } from '../../src/config'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
+
+// Test constants for restore functionality
 
 describe('[exposed] restore', () => {
   let wrapper: VueWrapper<InstanceType<typeof FlashCard>>
@@ -13,7 +16,7 @@ describe('[exposed] restore', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -27,7 +30,7 @@ describe('[exposed] restore', () => {
       // First, move the card to an approved position
       wrapper.vm.approve()
       await wrapper.vm.$nextTick()
-      expect(cardElement.style.transform).toContain('translate3D(151px, 0px, 0)')
+      expect(cardElement.style.transform).toContain(`translate3D(${config.defaultThreshold}px, 0px, 0)`)
 
       // Then restore it
       wrapper.vm.restore()
@@ -78,11 +81,8 @@ describe('[exposed] restore', () => {
     })
 
     it('should work after card was dragged manually', async () => {
-      // Manually drag the card
-      new DragSimulator(cardElement)
-        .dragStart()
-        .dragMove([{ x: 100 }]) // Partial drag
-        .dragEnd() // End without completing
+      // Manually drag the card below threshold
+      new DragSimulator(cardElement).swipeRightBelowThreshold()
 
       await wrapper.vm.$nextTick()
 
@@ -101,7 +101,7 @@ describe('[exposed] restore', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -140,7 +140,7 @@ describe('[exposed] restore', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -152,7 +152,7 @@ describe('[exposed] restore', () => {
     it('should restore after approve', async () => {
       wrapper.vm.approve()
       await wrapper.vm.$nextTick()
-      expect(wrapper.element.style.transform).toContain('translate3D(151px, 0px, 0)')
+      expect(wrapper.element.style.transform).toContain(`translate3D(${config.defaultThreshold}px, 0px, 0)`)
 
       wrapper.vm.restore()
       await wrapper.vm.$nextTick()
@@ -162,7 +162,7 @@ describe('[exposed] restore', () => {
     it('should restore after reject', async () => {
       wrapper.vm.reject()
       await wrapper.vm.$nextTick()
-      expect(wrapper.element.style.transform).toContain('translate3D(-151px, 0px, 0)')
+      expect(wrapper.element.style.transform).toContain(`translate3D(-${config.defaultThreshold}px, 0px, 0)`)
 
       wrapper.vm.restore()
       await wrapper.vm.$nextTick()
@@ -192,7 +192,7 @@ describe('[exposed] restore', () => {
       wrapper = mount(FlashCard, {
         props: {
           disableDrag: true,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -205,7 +205,7 @@ describe('[exposed] restore', () => {
       // Move card first using approve method (should work even with disableDrag)
       wrapper.vm.approve()
       await wrapper.vm.$nextTick()
-      expect(wrapper.element.style.transform).toContain('translate3D(151px, 0px, 0)')
+      expect(wrapper.element.style.transform).toContain(`translate3D(${config.defaultThreshold}px, 0px, 0)`)
 
       // Restore should work
       wrapper.vm.restore()
@@ -219,7 +219,7 @@ describe('[exposed] restore', () => {
       // Move to reject position
       wrapper.vm.reject()
       await wrapper.vm.$nextTick()
-      expect(wrapper.element.style.transform).toContain('translate3D(-151px, 0px, 0)')
+      expect(wrapper.element.style.transform).toContain(`translate3D(-${config.defaultThreshold}px, 0px, 0)`)
 
       // Restore should work
       wrapper.vm.restore()
@@ -233,7 +233,7 @@ describe('[exposed] restore', () => {
       wrapper = mount(FlashCard, {
         props: {
           disableDrag: false,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -246,7 +246,7 @@ describe('[exposed] restore', () => {
       // Move card and restore
       wrapper.vm.approve()
       await wrapper.vm.$nextTick()
-      expect(wrapper.element.style.transform).toContain('translate3D(151px, 0px, 0)')
+      expect(wrapper.element.style.transform).toContain(`translate3D(${config.defaultThreshold}px, 0px, 0)`)
 
       wrapper.vm.restore()
       await wrapper.vm.$nextTick()
@@ -257,10 +257,7 @@ describe('[exposed] restore', () => {
       const cardElement = wrapper.element
 
       // Manually drag and release (without reaching threshold)
-      new DragSimulator(cardElement)
-        .dragStart()
-        .dragMove([{ x: 100 }]) // Below threshold
-        .dragEnd()
+      new DragSimulator(cardElement).swipeRightBelowThreshold()
 
       await wrapper.vm.$nextTick()
 

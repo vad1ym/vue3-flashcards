@@ -4,10 +4,17 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import FlashCards from '../../src/FlashCards.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
+// Test constants for virtual buffer functionality
+const TEST_ITEMS_COUNT = 10
+const LARGE_VIRTUAL_BUFFER = 5 // Large buffer for performance tests
+const MINIMAL_VIRTUAL_BUFFER = 1 // Minimal buffer size
+const SMALL_VIRTUAL_BUFFER = 2 // Buffer smaller than stack size
+const EXCESSIVE_VIRTUAL_BUFFER = 15 // Buffer larger than available items
+
 describe('[props] virtualBuffer', () => {
   let wrapper: VueWrapper
 
-  const testItems = Array.from({ length: 10 }, (_, i) => ({
+  const testItems = Array.from({ length: TEST_ITEMS_COUNT }, (_, i) => ({
     id: i + 1,
     title: `Card ${i + 1}`,
   }))
@@ -47,7 +54,7 @@ describe('[props] virtualBuffer', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          virtualBuffer: 5,
+          virtualBuffer: LARGE_VIRTUAL_BUFFER,
         },
         slots: {
           default: '{{ item.title }}',
@@ -93,7 +100,7 @@ describe('[props] virtualBuffer', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          virtualBuffer: 1,
+          virtualBuffer: MINIMAL_VIRTUAL_BUFFER,
         },
         slots: {
           default: '{{ item.title }}',
@@ -119,7 +126,7 @@ describe('[props] virtualBuffer', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          virtualBuffer: 2, // Smaller than stack + 1
+          virtualBuffer: SMALL_VIRTUAL_BUFFER, // Smaller than stack + 1
           stack: 3, // Stack of 3 requires virtualBuffer of at least 4
         },
         slots: {
@@ -141,7 +148,7 @@ describe('[props] virtualBuffer', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          virtualBuffer: 15, // Larger than available items
+          virtualBuffer: EXCESSIVE_VIRTUAL_BUFFER, // Larger than available items
         },
         slots: {
           default: '{{ item.title }}',
@@ -171,7 +178,7 @@ describe('[props] virtualBuffer', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems.slice(0, 3), // Only 3 items
-          virtualBuffer: 5,
+          virtualBuffer: LARGE_VIRTUAL_BUFFER,
           infinite: true,
         },
         slots: {

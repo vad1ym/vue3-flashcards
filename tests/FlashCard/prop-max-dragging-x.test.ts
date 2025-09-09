@@ -4,16 +4,25 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
+// Test constants for max dragging X functionality
+const MAX_DRAGGING_X_LIMIT = 100 // Maximum horizontal pixels allowed for dragging
+const DRAG_DISTANCE_WITHIN_LIMIT = 80 // Drag distance that should be allowed (within limit)
+const DRAG_DISTANCE_EXCEEDING_LIMIT = 150 // Drag distance that exceeds the limit and should be clamped
+const VERTICAL_DRAG_DISTANCE = 50 // Vertical drag distance for combined movement tests
+const HIGH_THRESHOLD_FOR_TESTING = 200 // Threshold higher than max dragging limit for completion tests
+const DRAG_DISTANCE_BEYOND_THRESHOLD = 250 // Drag distance that exceeds both limit and threshold
+const UNLIMITED_DRAG_DISTANCE = 300 // Large drag distance for testing unlimited dragging
+
 describe('[props] maxDraggingX', () => {
   let wrapper: VueWrapper<InstanceType<typeof FlashCard>>
 
-  describe('with maxDraggingX set to 100px', () => {
+  describe('with maxDraggingX set to limit', () => {
     let cardElement: HTMLElement
 
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          maxDraggingX: 100, // Limit horizontal dragging to 100px
+          maxDraggingX: MAX_DRAGGING_X_LIMIT,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -24,59 +33,59 @@ describe('[props] maxDraggingX', () => {
     })
 
     it('should allow dragging up to maxDraggingX limit', async () => {
-      // Drag right 80px (within 100px limit)
+      // Drag right within limit
       new DragSimulator(cardElement)
         .dragStart()
-        .dragMove([{ x: 80, y: 0 }])
+        .dragMove([{ x: DRAG_DISTANCE_WITHIN_LIMIT, y: 0 }])
 
       await wrapper.vm.$nextTick()
 
       // Should allow full movement
-      expect(cardElement.style.transform).toContain('translate3D(80px, 0px, 0)')
+      expect(cardElement.style.transform).toContain(`translate3D(${DRAG_DISTANCE_WITHIN_LIMIT}px, 0px, 0)`)
     })
 
     it('should clamp horizontal dragging when exceeding positive maxDraggingX', async () => {
-      // Try to drag right 150px (exceeds 100px limit)
+      // Try to drag right beyond limit
       new DragSimulator(cardElement)
         .dragStart()
-        .dragMove([{ x: 150, y: 0 }])
+        .dragMove([{ x: DRAG_DISTANCE_EXCEEDING_LIMIT, y: 0 }])
 
       await wrapper.vm.$nextTick()
 
-      // Should be clamped to 100px
-      expect(cardElement.style.transform).toContain('translate3D(100px, 0px, 0)')
+      // Should be clamped to limit
+      expect(cardElement.style.transform).toContain(`translate3D(${MAX_DRAGGING_X_LIMIT}px, 0px, 0)`)
     })
 
     it('should clamp horizontal dragging when exceeding negative maxDraggingX', async () => {
-      // Try to drag left -150px (exceeds -100px limit)
+      // Try to drag left beyond negative limit
       new DragSimulator(cardElement)
         .dragStart()
-        .dragMove([{ x: -150, y: 0 }])
+        .dragMove([{ x: -DRAG_DISTANCE_EXCEEDING_LIMIT, y: 0 }])
 
       await wrapper.vm.$nextTick()
 
-      // Should be clamped to -100px
-      expect(cardElement.style.transform).toContain('translate3D(-100px, 0px, 0)')
+      // Should be clamped to negative limit
+      expect(cardElement.style.transform).toContain(`translate3D(-${MAX_DRAGGING_X_LIMIT}px, 0px, 0)`)
     })
 
     it('should still allow vertical dragging when horizontal is clamped', async () => {
-      // Drag horizontally 150px (should be clamped) and vertically 50px
+      // Drag horizontally beyond limit (should be clamped) and vertically
       new DragSimulator(cardElement)
         .dragStart()
-        .dragMove([{ x: 150, y: 50 }])
+        .dragMove([{ x: DRAG_DISTANCE_EXCEEDING_LIMIT, y: VERTICAL_DRAG_DISTANCE }])
 
       await wrapper.vm.$nextTick()
 
       // Horizontal should be clamped, vertical should be full
-      expect(cardElement.style.transform).toContain('translate3D(100px, 50px, 0)')
+      expect(cardElement.style.transform).toContain(`translate3D(${MAX_DRAGGING_X_LIMIT}px, ${VERTICAL_DRAG_DISTANCE}px, 0)`)
     })
 
     it('should affect swipe completion when threshold exceeds maxDraggingX', async () => {
       // Set threshold higher than maxDraggingX
       wrapper = mount(FlashCard, {
         props: {
-          maxDraggingX: 100,
-          threshold: 200, // Higher than maxDraggingX
+          maxDraggingX: MAX_DRAGGING_X_LIMIT,
+          threshold: HIGH_THRESHOLD_FOR_TESTING, // Higher than maxDraggingX
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -88,12 +97,12 @@ describe('[props] maxDraggingX', () => {
       // Try to drag beyond threshold but it will be clamped
       new DragSimulator(cardElement)
         .dragStart()
-        .dragMove([{ x: 250, y: 0 }]) // Try to drag 250px
+        .dragMove([{ x: DRAG_DISTANCE_BEYOND_THRESHOLD, y: 0 }]) // Try to drag beyond threshold
         .dragEnd()
 
       await wrapper.vm.$nextTick()
 
-      // Should NOT complete because actual movement was clamped to 100px (less than 200px threshold)
+      // Should NOT complete because actual movement was clamped (less than threshold)
       expect(wrapper.emitted('complete')).toBeFalsy()
       expect(cardElement.style.transform).toContain('translate3D(0px, 0px, 0)') // Should restore
     })
@@ -103,12 +112,12 @@ describe('[props] maxDraggingX', () => {
       // The card should be clamped to maxDraggingX even if user tries to drag beyond it
       new DragSimulator(cardElement)
         .dragStart()
-        .dragMove([{ x: 150, y: 0 }]) // Try to drag 150px (more than 100px limit)
+        .dragMove([{ x: DRAG_DISTANCE_EXCEEDING_LIMIT, y: 0 }]) // Try to drag beyond limit
         .dragEnd()
 
       await wrapper.vm.$nextTick()
 
-      // Since 100px (clamped) < 150px (threshold), it should restore to origin
+      // Since clamped distance < threshold, it should restore to origin
       expect(wrapper.emitted('complete')).toBeFalsy()
       expect(cardElement.style.transform).toContain('translate3D(0px, 0px, 0)')
     })
@@ -131,27 +140,27 @@ describe('[props] maxDraggingX', () => {
     })
 
     it('should allow unlimited horizontal dragging when maxDraggingX is null', async () => {
-      // Drag right 300px (no limit)
+      // Drag right with no limit
       new DragSimulator(cardElement)
         .dragStart()
-        .dragMove([{ x: 300, y: 0 }])
+        .dragMove([{ x: UNLIMITED_DRAG_DISTANCE, y: 0 }])
 
       await wrapper.vm.$nextTick()
 
       // Should allow full movement
-      expect(cardElement.style.transform).toContain('translate3D(300px, 0px, 0)')
+      expect(cardElement.style.transform).toContain(`translate3D(${UNLIMITED_DRAG_DISTANCE}px, 0px, 0)`)
     })
 
     it('should allow unlimited leftward dragging when maxDraggingX is null', async () => {
-      // Drag left -300px (no limit)
+      // Drag left with no limit
       new DragSimulator(cardElement)
         .dragStart()
-        .dragMove([{ x: -300, y: 0 }])
+        .dragMove([{ x: -UNLIMITED_DRAG_DISTANCE, y: 0 }])
 
       await wrapper.vm.$nextTick()
 
       // Should allow full movement
-      expect(cardElement.style.transform).toContain('translate3D(-300px, 0px, 0)')
+      expect(cardElement.style.transform).toContain(`translate3D(-${UNLIMITED_DRAG_DISTANCE}px, 0px, 0)`)
     })
   })
 })

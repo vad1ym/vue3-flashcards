@@ -31,19 +31,19 @@ describe('[props] max-rotation', () => {
     }
 
     it('should apply rotation transform during drag based on maxRotation', async () => {
-      const simulator = new DragSimulator(cardElement).dragRightTo(0.5) // 50% of threshold
-      await checkRotation(config.defaultMaxRotation / 2) // Should be 10deg (50% of 20deg)
+      const simulator = new DragSimulator(cardElement).dragRightToThreshold(0.5) // 50% of threshold
+      await checkRotation(config.defaultMaxRotation * 0.5) // Should be 10deg (50% of 20deg)
       simulator.dragEnd()
     })
 
     it('should cap rotation at maxRotation when drag distance exceeds threshold', async () => {
-      const simulator = new DragSimulator(cardElement).dragRightTo(1.5) // 150% of threshold
+      const simulator = new DragSimulator(cardElement).dragRightToThreshold(1.5) // 150% of threshold
       await checkRotation(config.defaultMaxRotation) // Should be 20deg (max rotation)
       simulator.dragEnd()
     })
 
     it('should restore rotation to 0 when drag ends', async () => {
-      const simulator = new DragSimulator(cardElement).dragRightTo(0.5) // 50% of threshold
+      const simulator = new DragSimulator(cardElement).dragRightToThreshold(0.5) // 50% of threshold
       await checkRotation(config.defaultMaxRotation * 0.5) // Should be 10deg during drag
 
       simulator.dragEnd()

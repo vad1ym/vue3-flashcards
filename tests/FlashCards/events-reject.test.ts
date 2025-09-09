@@ -1,7 +1,14 @@
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { config } from '../../src/config'
 import FlashCards from '../../src/FlashCards.vue'
 import { DragSimulator } from '../utils/drag-simular'
+
+// Test constants for reject events
+const VERY_HIGH_THRESHOLD_FOR_TESTING = 500 // Very high threshold to prevent completion
+const LOW_THRESHOLD_FOR_TESTING = 50 // Low threshold for edge case testing
+const ANIMATION_DELAY_SHORT = 50 // Short delay for animation completion
+const ANIMATION_DELAY_STANDARD = 100 // Standard delay for animation completion
 
 describe('[events] reject', () => {
   let wrapper = mount(FlashCards)
@@ -17,7 +24,7 @@ describe('[events] reject', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -93,7 +100,7 @@ describe('[events] reject', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -105,7 +112,7 @@ describe('[events] reject', () => {
     it('should emit reject event when reject() method is called', async () => {
       wrapper.vm.reject()
       await wrapper.vm.$nextTick()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_DELAY_STANDARD))
 
       expect(wrapper.emitted('reject')).toBeTruthy()
       expect(wrapper.emitted('reject')?.[0]).toEqual([testItems[0]])
@@ -115,12 +122,12 @@ describe('[events] reject', () => {
       // Reject first card programmatically
       wrapper.vm.reject()
       await wrapper.vm.$nextTick()
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_DELAY_SHORT))
 
       // Reject second card programmatically
       wrapper.vm.reject()
       await wrapper.vm.$nextTick()
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_DELAY_SHORT))
 
       const rejectEvents = wrapper.emitted('reject')
       expect(rejectEvents).toHaveLength(2)
@@ -135,7 +142,7 @@ describe('[events] reject', () => {
         props: {
           items: testItems,
           infinite: true,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -195,7 +202,7 @@ describe('[events] reject', () => {
         props: {
           items: testItems,
           stack: 2,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -233,7 +240,7 @@ describe('[events] reject', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -260,7 +267,7 @@ describe('[events] reject', () => {
       new DragSimulator(activeCard).swipeReject()
 
       await wrapper.vm.$nextTick()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_DELAY_STANDARD))
 
       // Should only emit one event per card rejection
       const events = wrapper.emitted('reject')
@@ -273,7 +280,7 @@ describe('[events] reject', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -329,7 +336,7 @@ describe('[events] reject', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: [],
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -349,7 +356,7 @@ describe('[events] reject', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 50, // Low threshold
+          threshold: LOW_THRESHOLD_FOR_TESTING, // Low threshold
         },
         slots: {
           default: '{{ item.title }}',
@@ -359,17 +366,18 @@ describe('[events] reject', () => {
 
       // Wait for component to be fully mounted and setup
       await wrapper.vm.$nextTick()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_DELAY_STANDARD))
 
       // Find the active card (which has both .flash-card and .flashcards__card--active classes)
       const activeCard = wrapper.find('.flashcards__card--active')
       expect(activeCard.exists()).toBe(true)
 
       // Use the active card for drag simulation
-      new DragSimulator(activeCard).swipeReject(50)
+      new DragSimulator(activeCard, { threshold: LOW_THRESHOLD_FOR_TESTING })
+        .swipeReject()
 
       await wrapper.vm.$nextTick()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_DELAY_STANDARD))
 
       expect(wrapper.emitted('reject')?.[0]).toEqual([testItems[0]])
     })
@@ -378,7 +386,7 @@ describe('[events] reject', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 500, // Very high threshold
+          threshold: VERY_HIGH_THRESHOLD_FOR_TESTING, // Very high threshold
         },
         slots: {
           default: '{{ item.title }}',
@@ -389,10 +397,8 @@ describe('[events] reject', () => {
       const activeCard = wrapper.find('.flashcards__card--active')
 
       // Normal drag should not trigger reject with high threshold
-      new DragSimulator(activeCard)
-        .dragStart()
-        .dragMove([{ x: -200 }]) // Normal movement but below high threshold
-        .dragEnd()
+      new DragSimulator(activeCard, { threshold: VERY_HIGH_THRESHOLD_FOR_TESTING })
+        .swipeLeftBelowThreshold()
 
       await wrapper.vm.$nextTick()
 

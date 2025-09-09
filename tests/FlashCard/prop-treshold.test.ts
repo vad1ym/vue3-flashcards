@@ -46,7 +46,7 @@ describe('[props] threshold', () => {
 
     describe('when swiped below threshold', () => {
       it('should restore card position without event when swiped right', async () => {
-        new DragSimulator(cardElement).dragRightBelowThreshold()
+        new DragSimulator(cardElement).swipeRightBelowThreshold()
 
         await wrapper.vm.$nextTick()
         expect(wrapper.emitted('complete')).toBeFalsy()
@@ -54,7 +54,7 @@ describe('[props] threshold', () => {
       })
 
       it('should restore card position without event when swiped left', async () => {
-        new DragSimulator(cardElement).dragLeftBelowThreshold()
+        new DragSimulator(cardElement).swipeLeftBelowThreshold()
 
         await wrapper.vm.$nextTick()
         expect(wrapper.emitted('complete')).toBeFalsy()

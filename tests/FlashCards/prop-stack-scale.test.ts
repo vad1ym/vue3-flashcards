@@ -4,10 +4,19 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import FlashCards from '../../src/FlashCards.vue'
 import { hasScale, hasScale1, parseScale } from '../utils/test-helpers'
 
+// Test constants for stack scale functionality
+const TEST_ITEMS_COUNT = 5
+const STACK_SIZE_FOR_SCALE_TESTS = 3 // Stack size to see scale effects
+const AGGRESSIVE_SCALE_FACTOR = 0.1 // More aggressive scaling
+const NO_SCALE_FACTOR = 0 // No scaling (scale remains 1)
+const LARGE_SCALE_REDUCTION = 0.2 // Large scale reduction
+const MEDIUM_SCALE_REDUCTION = 0.15 // Medium scale reduction for combination tests
+const EXTREME_SCALE_REDUCTION = 0.5 // Very large scale reduction
+
 describe('[props] stackScale', () => {
   let wrapper: VueWrapper
 
-  const testItems = Array.from({ length: 5 }, (_, i) => ({
+  const testItems = Array.from({ length: TEST_ITEMS_COUNT }, (_, i) => ({
     id: i + 1,
     title: `Card ${i + 1}`,
   }))
@@ -17,7 +26,7 @@ describe('[props] stackScale', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          stack: 3, // Enable stacking to see scale effects
+          stack: STACK_SIZE_FOR_SCALE_TESTS, // Enable stacking to see scale effects
         },
         slots: {
           default: '{{ item.title }}',
@@ -86,7 +95,7 @@ describe('[props] stackScale', () => {
         props: {
           items: testItems,
           stack: 3,
-          stackScale: 0.1, // More aggressive scaling
+          stackScale: AGGRESSIVE_SCALE_FACTOR, // More aggressive scaling
         },
         slots: {
           default: '{{ item.title }}',
@@ -144,7 +153,7 @@ describe('[props] stackScale', () => {
         props: {
           items: testItems,
           stack: 3,
-          stackScale: 0, // No scaling
+          stackScale: NO_SCALE_FACTOR, // No scaling
         },
         slots: {
           default: '{{ item.title }}',
@@ -192,7 +201,7 @@ describe('[props] stackScale', () => {
         props: {
           items: testItems,
           stack: 2,
-          stackScale: 0.2, // Large scale reduction
+          stackScale: LARGE_SCALE_REDUCTION, // Large scale reduction
         },
         slots: {
           default: '{{ item.title }}',
@@ -302,7 +311,7 @@ describe('[props] stackScale', () => {
         props: {
           items: testItems,
           stack: 1,
-          stackScale: 0.15,
+          stackScale: MEDIUM_SCALE_REDUCTION,
         },
         slots: {
           default: '{{ item.title }}',
@@ -332,7 +341,7 @@ describe('[props] stackScale', () => {
         props: {
           items: testItems,
           stack: 3,
-          stackScale: 0.5, // Very large scale reduction
+          stackScale: EXTREME_SCALE_REDUCTION, // Very large scale reduction
         },
         slots: {
           default: '{{ item.title }}',

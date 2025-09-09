@@ -1,5 +1,6 @@
 import type { InjectionKey, MaybeRefOrGetter, Ref } from 'vue'
 import { computed, nextTick, onMounted, onUnmounted, provide, reactive, readonly, ref, toRef } from 'vue'
+import { config } from '../config'
 
 export const DragType = {
   APPROVE: 'approve',
@@ -56,8 +57,8 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     onComplete = () => {},
   } = options.value
 
-  const threshold = computed(() => options.value.threshold ?? 150)
-  const dragThreshold = computed(() => options.value.dragThreshold ?? 5)
+  const threshold = computed(() => options.value.threshold ?? config.defaultThreshold)
+  const dragThreshold = computed(() => options.value.dragThreshold ?? config.defaultDragThreshold)
   const maxDraggingY = computed(() => options.value.maxDraggingY ?? null)
   const maxDraggingX = computed(() => options.value.maxDraggingX ?? null)
 
@@ -158,12 +159,12 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     isDragStarted.value = false
     isDragging.value = false
 
-    if (position.x > threshold.value) {
+    if (position.x >= threshold.value) {
       onComplete(true)
       position.delta = 1
       position.type = DragType.APPROVE
     }
-    else if (position.x < -threshold.value) {
+    else if (position.x <= -threshold.value) {
       onComplete(false)
       position.delta = -1
       position.type = DragType.REJECT
@@ -228,7 +229,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     position,
     isDragging,
     restore,
-    reject: () => complete(DragType.REJECT, -threshold.value - 1),
-    approve: () => complete(DragType.APPROVE, threshold.value + 1),
+    reject: () => complete(DragType.REJECT, -threshold.value),
+    approve: () => complete(DragType.APPROVE, threshold.value),
   }
 }

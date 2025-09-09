@@ -1,6 +1,10 @@
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { config } from '../../src/config'
 import FlashCards from '../../src/FlashCards.vue'
+
+// Test constants for exposed approve functionality
+const SMALL_STACK_OFFSET_FOR_TESTING = 10 // Small offset for stack testing
 
 describe('[exposed] approve', () => {
   let wrapper = mount(FlashCards)
@@ -16,7 +20,7 @@ describe('[exposed] approve', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -34,7 +38,7 @@ describe('[exposed] approve', () => {
       await new Promise(resolve => setTimeout(resolve, 50))
 
       // Check the specific card that was active - it should now be in approve position
-      expect(activeCard.element.style.transform).toContain('translate3D(151px, 0px, 0)')
+      expect(activeCard.element.style.transform).toContain(`translate3D(${config.defaultThreshold}px, 0px, 0)`)
     })
 
     it('should emit approve event with current item', async () => {
@@ -81,7 +85,7 @@ describe('[exposed] approve', () => {
         props: {
           items: testItems,
           infinite: true,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -123,9 +127,9 @@ describe('[exposed] approve', () => {
         props: {
           items: testItems,
           stack: 2,
-          stackOffset: 10,
+          stackOffset: SMALL_STACK_OFFSET_FOR_TESTING,
           stackScale: 0.95,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -145,7 +149,7 @@ describe('[exposed] approve', () => {
       await new Promise(resolve => setTimeout(resolve, 50))
 
       // Check that the card moved to approve position
-      expect(activeCard.element.style.transform).toContain('translate3D(151px, 0px, 0)')
+      expect(activeCard.element.style.transform).toContain(`translate3D(${config.defaultThreshold}px, 0px, 0)`)
     })
 
     it('should maintain stack appearance after approve', async () => {
@@ -164,7 +168,7 @@ describe('[exposed] approve', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -215,7 +219,7 @@ describe('[exposed] approve', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: [],
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
