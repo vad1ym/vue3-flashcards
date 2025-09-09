@@ -42,7 +42,7 @@ const directions = [
               min="1"
               max="10"
               step="1"
-              class="w-full slider"
+              class="w-full appearance-none h-2 rounded-lg bg-gray-200 accent-blue-500 cursor-pointer"
             >
           </div>
 
@@ -80,23 +80,3 @@ const directions = [
     </div>
   </div>
 </template>
-
-<style scoped>
-.slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #3b82f6;
-  cursor: pointer;
-}
-
-.slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #3b82f6;
-  cursor: pointer;
-  border: none;
-}
-</style>
