@@ -26,15 +26,17 @@ A standalone component for creating flippable cards with front and back content.
 
 ### `front`
 
-- **Description:** Content shown on the front of the card.
+- **Props:** `{ flip: () => void }`
+- **Description:** Content shown on the front of the card. Receives `flip` method for programmatic flipping.
 
 ```vue
 <template>
   <FlipCard>
-    <template #front>
+    <template #front="{ flip }">
       <div class="card-front">
         <h3>Question</h3>
         <p>What is the capital of France?</p>
+        <button @click="flip">Reveal Answer</button>
       </div>
     </template>
   </FlipCard>
@@ -43,18 +45,73 @@ A standalone component for creating flippable cards with front and back content.
 
 ### `back`
 
-- **Description:** Content shown on the back of the card. If not provided, the card will not flip.
+- **Props:** `{ flip: () => void }`
+- **Description:** Content shown on the back of the card. If not provided, the card will not flip. Receives `flip` method for programmatic flipping.
 
 ```vue
 <template>
   <FlipCard>
-    <template #front>
-      <div class="card-front">Question</div>
+    <template #front="{ flip }">
+      <div class="card-front" @click="flip">Question</div>
     </template>
-    <template #back>
-      <div class="card-back">Answer: Paris</div>
+    <template #back="{ flip }">
+      <div class="card-back">
+        <p>Answer: Paris</p>
+        <button @click="flip">Back to Question</button>
+      </div>
     </template>
   </FlipCard>
+</template>
+```
+
+## Events
+
+### `flip`
+
+- **Type:** `(isFlipped: boolean) => void`
+- **Description:** Emitted when the card is flipped. The payload indicates the current state: `true` when showing back side, `false` when showing front side.
+
+```vue
+<script setup>
+function onFlip(isFlipped) {
+  console.log('Card is now showing:', isFlipped ? 'back' : 'front')
+}
+</script>
+
+<template>
+  <FlipCard @flip="onFlip">
+    <template #front>Front Side</template>
+    <template #back>Back Side</template>
+  </FlipCard>
+</template>
+```
+
+## Exposed Methods
+
+### `flip()`
+
+- **Type:** `() => void`
+- **Description:** Programmatically flip the card. This method respects the `disabled` and `waitAnimationEnd` props.
+
+```vue
+<script setup>
+import { ref } from 'vue'
+
+const flipCardRef = ref()
+
+function flipProgrammatically() {
+  flipCardRef.value.flip()
+}
+</script>
+
+<template>
+  <div>
+    <button @click="flipProgrammatically">Flip Card</button>
+    <FlipCard ref="flipCardRef">
+      <template #front>Front Side</template>
+      <template #back>Back Side</template>
+    </FlipCard>
+  </div>
 </template>
 ```
 

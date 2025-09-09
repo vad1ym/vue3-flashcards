@@ -169,8 +169,20 @@ The `FlipCard` component provides card flipping functionality and can be used in
 
 | Slot Name | Props | Description |
 |-----------|-------|-------------|
-| front | - | Content shown on the front of the card |
-| back | - | Content shown on the back of the card (optional) |
+| front | `{ flip: () => void }` | Content shown on the front of the card. Receives `flip` method for programmatic flipping |
+| back | `{ flip: () => void }` | Content shown on the back of the card (optional). Receives `flip` method for programmatic flipping |
+
+### Events
+
+| Event Name | Payload | Description |
+|------------|---------|-------------|
+| flip | `isFlipped: boolean` | Emitted when the card is flipped. `true` when showing back side, `false` when showing front side |
+
+### Exposed Methods
+
+| Method | Type | Description |
+|--------|------|-------------|
+| flip | `() => void` | Programmatically flip the card. Respects `disabled` and `waitAnimationEnd` props |
 
 ### FlipCard Usage Example
 

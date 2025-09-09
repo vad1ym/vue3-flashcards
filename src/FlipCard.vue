@@ -18,9 +18,13 @@ const {
   flipAxis?: 'x' | 'y'
 }>()
 
+const emit = defineEmits<{
+  flip: [isFlipped: boolean]
+}>()
+
 defineSlots<{
-  front: () => any
-  back?: () => any
+  front: (props: { flip: () => void }) => any
+  back?: (props: { flip: () => void }) => any
 }>()
 
 /**
@@ -36,11 +40,16 @@ function flip() {
 
   isAnimating.value = true
   isFlipped.value = !isFlipped.value
+  emit('flip', isFlipped.value)
 }
 
 function onTransitionEnd() {
   isAnimating.value = false
 }
+
+defineExpose({
+  flip,
+})
 </script>
 
 <template>
@@ -53,10 +62,10 @@ function onTransitionEnd() {
       @transitionend="onTransitionEnd"
     >
       <div class="flip-card__front">
-        <slot name="front" />
+        <slot name="front" :flip="flip" />
       </div>
       <div class="flip-card__back">
-        <slot name="back" />
+        <slot name="back" :flip="flip" />
       </div>
     </div>
   </div>

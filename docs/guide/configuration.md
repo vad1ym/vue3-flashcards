@@ -239,3 +239,89 @@ The `FlipCard` component can be used independently or within FlashCards:
 ```vue
 <FlipCard :wait-animation-end="false" />
 ```
+
+#### `flipAxis`
+
+- **Type:** `'x' | 'y'`
+- **Default:** `'y'`
+- **Description:** Axis of rotation for the flip animation. Use `'x'` for horizontal flip or `'y'` for vertical flip.
+
+```vue
+<FlipCard flip-axis="x" />
+```
+
+### Events
+
+#### `flip`
+
+- **Type:** `(isFlipped: boolean) => void`
+- **Description:** Emitted when the card is flipped. The payload indicates whether the card is showing the back side (`true`) or front side (`false`).
+
+```vue
+<script setup>
+function handleFlip(isFlipped) {
+  console.log('Card flipped to:', isFlipped ? 'back' : 'front')
+}
+</script>
+
+<template>
+  <FlipCard @flip="handleFlip">
+    <template #front>Front Content</template>
+    <template #back>Back Content</template>
+  </FlipCard>
+</template>
+```
+
+### Slots
+
+#### `front` and `back`
+
+Both slots receive a `flip` method as a prop for programmatic flipping:
+
+```vue
+<template>
+  <FlipCard>
+    <template #front="{ flip }">
+      <div class="question-card">
+        <h3>What is Vue.js?</h3>
+        <button @click="flip">Show Answer</button>
+      </div>
+    </template>
+    <template #back="{ flip }">
+      <div class="answer-card">
+        <p>A progressive JavaScript framework</p>
+        <button @click="flip">Back to Question</button>
+      </div>
+    </template>
+  </FlipCard>
+</template>
+```
+
+### Exposed Methods
+
+#### `flip()`
+
+- **Type:** `() => void`
+- **Description:** Programmatically flip the card. Respects `disabled` and `waitAnimationEnd` props.
+
+```vue
+<script setup>
+import { ref } from 'vue'
+
+const cardRef = ref()
+
+function flipCard() {
+  cardRef.value.flip()
+}
+</script>
+
+<template>
+  <div>
+    <button @click="flipCard">Flip from outside</button>
+    <FlipCard ref="cardRef">
+      <template #front>Front</template>
+      <template #back>Back</template>
+    </FlipCard>
+  </div>
+</template>
+```
