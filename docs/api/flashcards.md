@@ -39,6 +39,12 @@ The main component for creating swipeable card interfaces.
 - **Default:** `null`
 - **Description:** Maximum X dragging distance in pixels. When set, limits horizontal card movement. Set to `null` for unlimited horizontal dragging.
 
+### `disableDrag`
+
+- **Type:** `boolean`
+- **Default:** `false`
+- **Description:** Completely disable dragging functionality. When disabled, cards cannot be swiped with touch or mouse gestures. Manual methods (`approve()`, `reject()`, `restore()`) and slot actions still work normally.
+
 ### `infinite`
 
 - **Type:** `boolean`

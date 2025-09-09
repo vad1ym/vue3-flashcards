@@ -21,6 +21,9 @@ export interface DragSetupParams {
   // Disabled by default
   maxDraggingY?: number | null
   maxDraggingX?: number | null
+
+  // Completely disable dragging feature
+  disableDrag?: boolean
 }
 
 export interface DragSetupCallbacks {
@@ -179,6 +182,11 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
 
     restore()
 
+    // Don't add event listeners if dragging is disabled
+    if (options.value.disableDrag) {
+      return
+    }
+
     // Touch events with passive optimization
     element.value.addEventListener('pointerdown', handleDragStart, { passive: false })
     window.addEventListener('pointermove', handleDragMove, { passive: false })
@@ -204,14 +212,19 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     setupInteract()
   })
 
-  onUnmounted(() => {
+  function cleanupInteract() {
     element.value?.removeEventListener('pointerdown', handleDragStart)
     window.removeEventListener('pointermove', handleDragMove)
     window.removeEventListener('pointerup', handleDragEnd)
+  }
+
+  onUnmounted(() => {
+    cleanupInteract()
   })
 
   return {
     setupInteract,
+    cleanupInteract,
     position,
     isDragging,
     restore,

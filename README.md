@@ -93,6 +93,7 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `dragThreshold` | `number` | `5` | Minimum drag distance to start swiping |
 | `maxDraggingY` | `number \| null` | `null` | Maximum Y dragging distance in pixels (null = unlimited) |
 | `maxDraggingX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |
+| `disableDrag` | `boolean` | `false` | Completely disable dragging functionality. Manual methods and slot actions still work |
 | `infinite` | `boolean` | `false` | Enable infinite swiping mode (cards loop endlessly) |
 | `virtualBuffer` | `number` | `3` | Cards to render for virtual scrolling. Can't be lower than 1. |
 | `stack` | `number` | `0` | Number of cards to show stacked behind the active card. When stack is greater than virtualBuffer, virtualBuffer is automatically increased to stack + 1. |
