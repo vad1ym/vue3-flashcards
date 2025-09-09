@@ -40,15 +40,15 @@ const items = ref<Card[]>([
 </script>
 
 <template>
-  <div class="tinder-container">
-    <div class="tinder-cards">
+  <div class="max-w-[400px] mx-auto p-5">
+    <div class="relative mb-5">
       <FlashCards :items="items">
         <template #default="{ item }">
           <TinderCard :item="item" />
         </template>
 
         <template #empty>
-          <div class="tinder-empty">
+          <div class="text-center text-xl text-gray-600 p-10">
             No more cards!
           </div>
         </template>
@@ -66,23 +66,3 @@ const items = ref<Card[]>([
     </div>
   </div>
 </template>
-
-<style scoped>
-.tinder-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.tinder-cards {
-  position: relative;
-  margin-bottom: 20px;
-}
-
-.tinder-empty {
-  text-align: center;
-  font-size: 20px;
-  color: #666;
-  padding: 40px;
-}
-</style>
