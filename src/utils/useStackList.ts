@@ -91,8 +91,6 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
       currentIndex.value = previousIndex
       return true
     }
-
-    return false
   }
 
   return {

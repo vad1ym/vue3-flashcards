@@ -1,7 +1,10 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { config } from '../../src/config'
 import FlashCard from '../../src/FlashCard.vue'
+
+const CUSTOM_THRESHOLD_FOR_TESTING = 200
 
 describe('[exposed] approve', () => {
   let wrapper: VueWrapper<InstanceType<typeof FlashCard>>
@@ -12,7 +15,7 @@ describe('[exposed] approve', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -27,8 +30,8 @@ describe('[exposed] approve', () => {
       wrapper.vm.approve()
       await wrapper.vm.$nextTick()
 
-      // Should move card to approved position (beyond threshold)
-      expect(cardElement.style.transform).toContain('translate3D(151px, 0px, 0)')
+      // Should move card to approved position (at threshold)
+      expect(cardElement.style.transform).toContain(`translate3D(${config.defaultThreshold}px, 0px, 0)`)
     })
 
     it('should emit complete event with true when approve method is called', async () => {
@@ -68,7 +71,7 @@ describe('[exposed] approve', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -95,7 +98,7 @@ describe('[exposed] approve', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: 200, // Custom threshold
+          threshold: CUSTOM_THRESHOLD_FOR_TESTING, // Custom threshold
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -109,8 +112,8 @@ describe('[exposed] approve', () => {
       wrapper.vm.approve()
       await wrapper.vm.$nextTick()
 
-      // Should move card beyond custom threshold (200 + 1 = 201px)
-      expect(wrapper.element.style.transform).toContain('translate3D(201px, 0px, 0)')
+      // Should move card to custom threshold
+      expect(wrapper.element.style.transform).toContain(`translate3D(${CUSTOM_THRESHOLD_FOR_TESTING}px, 0px, 0)`)
     })
   })
 
@@ -119,7 +122,7 @@ describe('[exposed] approve', () => {
       wrapper = mount(FlashCard, {
         props: {
           disableDrag: true,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -134,7 +137,7 @@ describe('[exposed] approve', () => {
       await wrapper.vm.$nextTick()
 
       // Should still trigger approve animation
-      expect(wrapper.element.style.transform).toContain('translate3D(151px, 0px, 0)')
+      expect(wrapper.element.style.transform).toContain(`translate3D(${config.defaultThreshold}px, 0px, 0)`)
 
       // Should still emit complete event
       expect(wrapper.emitted('complete')).toBeTruthy()
@@ -157,7 +160,7 @@ describe('[exposed] approve', () => {
       wrapper = mount(FlashCard, {
         props: {
           disableDrag: false,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -172,7 +175,7 @@ describe('[exposed] approve', () => {
       await wrapper.vm.$nextTick()
 
       // Should trigger approve animation
-      expect(wrapper.element.style.transform).toContain('translate3D(151px, 0px, 0)')
+      expect(wrapper.element.style.transform).toContain(`translate3D(${config.defaultThreshold}px, 0px, 0)`)
 
       // Should emit complete event
       expect(wrapper.emitted('complete')).toBeTruthy()

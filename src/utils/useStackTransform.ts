@@ -36,7 +36,8 @@ export function useStackTransform(_options: MaybeRefOrGetter<StackTransformOptio
     const offset = stackLevel * options.value.stackOffset
     const scale = 1 - stackLevel * options.value.stackScale
 
-    let transform = ''
+    let transform = 'transform: translate3D(0, 0, 0) scale(1)'
+
     switch (options.value.stackDirection) {
       case StackDirection.TOP:
         transform = `transform: translate3D(0, -${offset}px, 0) scale(${scale})`
@@ -50,8 +51,6 @@ export function useStackTransform(_options: MaybeRefOrGetter<StackTransformOptio
       case StackDirection.RIGHT:
         transform = `transform: translate3D(${offset}px, 0, 0) scale(${scale})`
         break
-      default:
-        transform = `transform: translate3D(0, ${offset}px, 0) scale(${scale})`
     }
 
     return `${transform}; opacity: ${isStacked ? 1 : 0}`

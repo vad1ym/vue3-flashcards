@@ -11,6 +11,10 @@ export interface DragMovePosition {
   y?: number | string
 }
 
+export interface DragOptions {
+  threshold?: number
+}
+
 /**
  * Core drag simulation class for testing FlashCard drag interactions
  */
@@ -20,9 +24,14 @@ export class DragSimulator {
   private currentY = 0
   private startX = 0
   private startY = 0
+  private options: DragOptions
 
-  constructor(element: HTMLElement | DOMWrapper<Element>) {
+  constructor(element: HTMLElement | DOMWrapper<Element>, options: DragOptions = {}) {
     this.element = element instanceof Element ? element : element.element
+    this.options = {
+      threshold: options.threshold ?? config.defaultThreshold,
+      ...options,
+    }
   }
 
   private parsePosition(value: number | string, dimension: 'width' | 'height' = 'width'): number {
@@ -118,52 +127,94 @@ export class DragSimulator {
   }
 
   /**
-   * Quick drag right to a specific percentage of threshold (without ending)
+   * Drag right to a specific percentage of threshold (without ending)
    * @param percentage - Percentage of threshold
-   * @param threshold - The threshold value (defaults to config.defaultThreshold)
    */
-  dragRightTo(percentage: number, threshold = config.defaultThreshold) {
-    return this.dragToThreshold(percentage, threshold)
+  dragRightToThreshold(percentage: number) {
+    return this.dragToThreshold(percentage, this.options.threshold!)
   }
 
   /**
-   * Quick drag left to a specific percentage of threshold (without ending)
+   * Drag left to a specific percentage of threshold (without ending)
    * @param percentage - Percentage of threshold
-   * @param threshold - The threshold value (defaults to config.defaultThreshold)
    */
-  dragLeftTo(percentage: number, threshold = config.defaultThreshold) {
-    return this.dragToThreshold(-percentage, threshold)
+  dragLeftToThreshold(percentage: number) {
+    return this.dragToThreshold(-percentage, this.options.threshold!)
+  }
+
+  // --- BELOW THRESHOLD METHODS ---
+
+  /**
+   * Drag right below threshold (without ending) - for testing intermediate state
+   */
+  dragRightBelowThreshold() {
+    return this.dragToThreshold(0.9, this.options.threshold!) // 90% of threshold, no dragEnd
   }
 
   /**
-   * Swipe right beyond threshold (complete approval)
-   * @param threshold - The threshold value (defaults to config.defaultThreshold)
+   * Drag left below threshold (without ending) - for testing intermediate state
    */
-  swipeApprove(threshold = config.defaultThreshold) {
-    return this.dragAndRelease(1.1, threshold) // 110% of threshold
+  dragLeftBelowThreshold() {
+    return this.dragToThreshold(-0.9, this.options.threshold!) // 90% of threshold, no dragEnd
   }
 
   /**
-   * Swipe left beyond threshold (complete rejection)
-   * @param threshold - The threshold value (defaults to config.defaultThreshold)
+   * Swipe right below threshold (complete cycle) - drag and release below threshold
    */
-  swipeReject(threshold = config.defaultThreshold) {
-    return this.dragAndRelease(-1.1, threshold) // 110% of threshold in opposite direction
+  swipeRightBelowThreshold() {
+    return this.dragAndRelease(0.9, this.options.threshold!) // 90% of threshold + dragEnd
   }
 
   /**
-   * Drag right below threshold (should restore, not complete)
-   * @param threshold - The threshold value (defaults to config.defaultThreshold)
+   * Swipe left below threshold (complete cycle) - drag and release below threshold
    */
-  dragRightBelowThreshold(threshold = config.defaultThreshold) {
-    return this.dragAndRelease(0.9, threshold) // 90% of threshold
+  swipeLeftBelowThreshold() {
+    return this.dragAndRelease(-0.9, this.options.threshold!) // 90% of threshold + dragEnd
+  }
+
+  // --- BEYOND THRESHOLD METHODS ---
+
+  /**
+   * Drag right beyond threshold (without ending) - for testing intermediate state
+   */
+  dragRightBeyondThreshold() {
+    return this.dragToThreshold(1.1, this.options.threshold!) // 110% of threshold, no dragEnd
   }
 
   /**
-   * Drag left below threshold (should restore, not complete)
-   * @param threshold - The threshold value (defaults to config.defaultThreshold)
+   * Drag left beyond threshold (without ending) - for testing intermediate state
    */
-  dragLeftBelowThreshold(threshold = config.defaultThreshold) {
-    return this.dragAndRelease(-0.9, threshold) // 90% of threshold in opposite direction
+  dragLeftBeyondThreshold() {
+    return this.dragToThreshold(-1.1, this.options.threshold!) // 110% of threshold, no dragEnd
+  }
+
+  /**
+   * Swipe right beyond threshold (complete cycle) - full approval swipe
+   */
+  swipeRightBeyondThreshold() {
+    return this.dragAndRelease(1.1, this.options.threshold!) // 110% of threshold + dragEnd
+  }
+
+  /**
+   * Swipe left beyond threshold (complete cycle) - full rejection swipe
+   */
+  swipeLeftBeyondThreshold() {
+    return this.dragAndRelease(-1.1, this.options.threshold!) // 110% of threshold + dragEnd
+  }
+
+  // --- ALIASES FOR BACKWARDS COMPATIBILITY ---
+
+  /**
+   * Alias for swipeRightBeyondThreshold - complete approval swipe
+   */
+  swipeApprove() {
+    return this.swipeRightBeyondThreshold()
+  }
+
+  /**
+   * Alias for swipeLeftBeyondThreshold - complete rejection swipe
+   */
+  swipeReject() {
+    return this.swipeLeftBeyondThreshold()
   }
 }

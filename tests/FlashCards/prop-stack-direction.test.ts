@@ -5,10 +5,20 @@ import FlashCards from '../../src/FlashCards.vue'
 import { StackDirection } from '../../src/utils/useStackTransform'
 import { hasNegativeXTransform, hasNegativeYTransform, hasPositiveXTransform, hasPositiveYTransform, parseTranslate3D } from '../utils/test-helpers'
 
+// Test constants for stack direction functionality
+const TEST_ITEMS_COUNT = 5
+const STANDARD_STACK_SIZE = 2 // Standard stack size for most tests
+const STANDARD_STACK_OFFSET = 20 // Standard stack offset for basic tests
+const LARGE_STACK_OFFSET = 30 // Larger offset for visibility tests
+const SMALL_STACK_OFFSET = 15 // Smaller offset for comparison tests
+const NO_STACK_OFFSET = 0 // Zero offset for testing no spacing
+const STACK_OFFSET_FOR_SCALE_TEST = 25 // Offset for scale combination tests
+const AGGRESSIVE_SCALE_FACTOR = 0.1 // More aggressive scaling factor
+
 describe('[props] stackDirection', () => {
   let wrapper: VueWrapper
 
-  const testItems = Array.from({ length: 5 }, (_, i) => ({
+  const testItems = Array.from({ length: TEST_ITEMS_COUNT }, (_, i) => ({
     id: i + 1,
     title: `Card ${i + 1}`,
   }))
@@ -18,8 +28,8 @@ describe('[props] stackDirection', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          stack: 2,
-          stackOffset: 20,
+          stack: STANDARD_STACK_SIZE,
+          stackOffset: STANDARD_STACK_OFFSET,
           // stackDirection defaults to StackDirection.BOTTOM
         },
         slots: {
@@ -69,8 +79,8 @@ describe('[props] stackDirection', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          stack: 2,
-          stackOffset: 20,
+          stack: STANDARD_STACK_SIZE,
+          stackOffset: STANDARD_STACK_OFFSET,
           stackDirection: StackDirection.TOP,
         },
         slots: {
@@ -120,8 +130,8 @@ describe('[props] stackDirection', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          stack: 2,
-          stackOffset: 20,
+          stack: STANDARD_STACK_SIZE,
+          stackOffset: STANDARD_STACK_OFFSET,
           stackDirection: StackDirection.LEFT,
         },
         slots: {
@@ -189,8 +199,8 @@ describe('[props] stackDirection', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          stack: 2,
-          stackOffset: 20,
+          stack: STANDARD_STACK_SIZE,
+          stackOffset: STANDARD_STACK_OFFSET,
           stackDirection: StackDirection.RIGHT,
         },
         slots: {
@@ -259,7 +269,7 @@ describe('[props] stackDirection', () => {
         props: {
           items: testItems,
           stack: 1,
-          stackOffset: 30,
+          stackOffset: LARGE_STACK_OFFSET,
           stackDirection: StackDirection.TOP,
         },
         slots: {
@@ -289,7 +299,7 @@ describe('[props] stackDirection', () => {
         props: {
           items: testItems,
           stack: 3,
-          stackOffset: 15,
+          stackOffset: SMALL_STACK_OFFSET,
           stackDirection: StackDirection.LEFT,
         },
         slots: {
@@ -321,7 +331,7 @@ describe('[props] stackDirection', () => {
         props: {
           items: testItems,
           stack: 2,
-          stackOffset: 0,
+          stackOffset: NO_STACK_OFFSET,
           stackDirection: StackDirection.RIGHT, // Direction shouldn't matter with 0 offset
         },
         slots: {
@@ -371,8 +381,8 @@ describe('[props] stackDirection', () => {
         props: {
           items: testItems,
           stack: 2,
-          stackOffset: 25,
-          stackScale: 0.1,
+          stackOffset: STACK_OFFSET_FOR_SCALE_TEST,
+          stackScale: AGGRESSIVE_SCALE_FACTOR,
           stackDirection: StackDirection.TOP,
         },
         slots: {

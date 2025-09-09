@@ -1,23 +1,32 @@
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { config } from '../../src/config'
 import FlashCards from '../../src/FlashCards.vue'
 import { DragSimulator } from '../utils/drag-simular'
+
+// Test constants for approve events functionality
+const TEST_ITEMS_COUNT = 3
+const ANIMATION_DELAY_SHORT = 50 // Short delay for animation completion
+const ANIMATION_DELAY_STANDARD = 100 // Standard delay for animation completion
+const LOW_THRESHOLD_FOR_TESTING = 50 // Low threshold for edge case testing
+const CARDS_TO_APPROVE_IN_INFINITE_MODE = 5 // Number of cards to approve in infinite mode test
+const STANDARD_STACK_SIZE = 2 // Standard stack size for testing
 
 describe('[events] approve', () => {
   let wrapper = mount(FlashCards)
 
-  const testItems = [
-    { id: 1, title: 'Card 1', data: 'test1' },
-    { id: 2, title: 'Card 2', data: 'test2' },
-    { id: 3, title: 'Card 3', data: 'test3' },
-  ]
+  const testItems = Array.from({ length: TEST_ITEMS_COUNT }, (_, i) => ({
+    id: i + 1,
+    title: `Card ${i + 1}`,
+    data: `test${i + 1}`,
+  }))
 
   describe('drag-triggered approve events', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -93,7 +102,7 @@ describe('[events] approve', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -105,7 +114,7 @@ describe('[events] approve', () => {
     it('should emit approve event when approve() method is called', async () => {
       wrapper.vm.approve()
       await wrapper.vm.$nextTick()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_DELAY_STANDARD))
 
       expect(wrapper.emitted('approve')).toBeTruthy()
       expect(wrapper.emitted('approve')?.[0]).toEqual([testItems[0]])
@@ -115,12 +124,12 @@ describe('[events] approve', () => {
       // Approve first card programmatically
       wrapper.vm.approve()
       await wrapper.vm.$nextTick()
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_DELAY_SHORT))
 
       // Approve second card programmatically
       wrapper.vm.approve()
       await wrapper.vm.$nextTick()
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_DELAY_SHORT))
 
       const approveEvents = wrapper.emitted('approve')
       expect(approveEvents).toHaveLength(2)
@@ -135,7 +144,7 @@ describe('[events] approve', () => {
         props: {
           items: testItems,
           infinite: true,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -146,14 +155,14 @@ describe('[events] approve', () => {
 
     it('should emit approve events for cycling items in infinite mode', async () => {
       // Approve more cards than we have items
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < CARDS_TO_APPROVE_IN_INFINITE_MODE; i++) {
         const activeCard = wrapper.find('.flashcards__card--active')
         new DragSimulator(activeCard).swipeApprove()
         await wrapper.vm.$nextTick()
       }
 
       const events = wrapper.emitted('approve')
-      expect(events).toHaveLength(5)
+      expect(events).toHaveLength(CARDS_TO_APPROVE_IN_INFINITE_MODE)
 
       // Should cycle through items: 0, 1, 2, 0, 1
       expect(events?.[0]).toEqual([testItems[0]])
@@ -165,7 +174,7 @@ describe('[events] approve', () => {
 
     it('should maintain correct item references in infinite mode', async () => {
       // Process all items once
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < TEST_ITEMS_COUNT; i++) {
         const activeCard = wrapper.find('.flashcards__card--active')
         new DragSimulator(activeCard).swipeApprove()
         await wrapper.vm.$nextTick()
@@ -194,8 +203,8 @@ describe('[events] approve', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          stack: 2,
-          threshold: 150,
+          stack: STANDARD_STACK_SIZE,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -221,7 +230,7 @@ describe('[events] approve', () => {
       }
 
       const events = wrapper.emitted('approve')
-      expect(events).toHaveLength(3)
+      expect(events).toHaveLength(TEST_ITEMS_COUNT)
       testItems.forEach((item, index) => {
         expect(events?.[index]).toEqual([item])
       })
@@ -233,7 +242,7 @@ describe('[events] approve', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -260,7 +269,7 @@ describe('[events] approve', () => {
       new DragSimulator(activeCard).swipeApprove()
 
       await wrapper.vm.$nextTick()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_DELAY_STANDARD))
 
       // Should only emit one event per card approval
       const events = wrapper.emitted('approve')
@@ -273,7 +282,7 @@ describe('[events] approve', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -306,7 +315,7 @@ describe('[events] approve', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: [],
-          threshold: 150,
+          threshold: config.defaultThreshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -326,7 +335,7 @@ describe('[events] approve', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: 50, // Low threshold
+          threshold: LOW_THRESHOLD_FOR_TESTING, // Low threshold
         },
         slots: {
           default: '{{ item.title }}',
@@ -336,17 +345,18 @@ describe('[events] approve', () => {
 
       // Wait for component to be fully mounted and setup
       await wrapper.vm.$nextTick()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_DELAY_STANDARD))
 
       // Find the active card (which has both .flash-card and .flashcards__card--active classes)
       const activeCard = wrapper.find('.flashcards__card--active')
       expect(activeCard.exists()).toBe(true)
 
       // Use the active card for drag simulation
-      new DragSimulator(activeCard).swipeApprove(50)
+      new DragSimulator(activeCard, { threshold: LOW_THRESHOLD_FOR_TESTING })
+        .swipeApprove()
 
       await wrapper.vm.$nextTick()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_DELAY_STANDARD))
 
       expect(wrapper.emitted('approve')?.[0]).toEqual([testItems[0]])
     })

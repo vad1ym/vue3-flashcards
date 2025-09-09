@@ -4,10 +4,16 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import FlashCards from '../../src/FlashCards.vue'
 import { hasTranslate3DOffset, parseTranslate3D } from '../utils/test-helpers'
 
+// Test constants for stack offset functionality
+const TEST_ITEMS_COUNT = 5
+const STACK_SIZE_FOR_TESTING = 2
+const STACK_SIZE_FOR_CUSTOM_TEST = 3
+const CUSTOM_STACK_OFFSET_FOR_TESTING = 10
+
 describe('[props] stackOffset', () => {
   let wrapper: VueWrapper
 
-  const testItems = Array.from({ length: 5 }, (_, i) => ({
+  const testItems = Array.from({ length: TEST_ITEMS_COUNT }, (_, i) => ({
     id: i + 1,
     title: `Card ${i + 1}`,
   }))
@@ -17,7 +23,7 @@ describe('[props] stackOffset', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          stack: 2, // Enable stacking to see offset effects
+          stack: STACK_SIZE_FOR_TESTING, // Enable stacking to see offset effects
         },
         slots: {
           default: '{{ item.title }}',
@@ -26,7 +32,7 @@ describe('[props] stackOffset', () => {
       })
     })
 
-    it('should use default stackOffset of 20px from config', () => {
+    it('should use default stackOffset from config', () => {
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards-empty-state)')
 
       // Check that background cards have offset transforms in translate3D
@@ -58,7 +64,7 @@ describe('[props] stackOffset', () => {
         }
       })
 
-      // Should have increasing offsets (20px, 40px, 60px with default stackOffset=20)
+      // Should have increasing offsets based on config.defaultStackOffset
       expect(translateYValues.length).toBeGreaterThan(0)
       for (let i = 1; i < translateYValues.length; i++) {
         expect(Math.abs(translateYValues[i])).toBeGreaterThan(Math.abs(translateYValues[i - 1]))
@@ -66,13 +72,13 @@ describe('[props] stackOffset', () => {
     })
   })
 
-  describe('with custom stackOffset of 10px', () => {
+  describe('with custom stackOffset', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          stack: 3,
-          stackOffset: 10,
+          stack: STACK_SIZE_FOR_CUSTOM_TEST,
+          stackOffset: CUSTOM_STACK_OFFSET_FOR_TESTING,
         },
         slots: {
           default: '{{ item.title }}',
@@ -84,7 +90,7 @@ describe('[props] stackOffset', () => {
     it('should use custom stackOffset value', () => {
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards-empty-state)')
 
-      // Check for Y values with multiples of 10 in translate3D
+      // Check for Y values with multiples of custom offset in translate3D
       let foundExpectedOffset = false
       cardWrappers.forEach((cardWrapper, index) => {
         if (index > 0) { // Skip active card
@@ -92,8 +98,8 @@ describe('[props] stackOffset', () => {
           const parsed = parseTranslate3D(style)
           if (parsed) {
             const offsetValue = Math.abs(parsed.y)
-            // Should be multiple of 10 (10, 20, 30...)
-            if (offsetValue % 10 === 0 && offsetValue > 0) {
+            // Should be multiple of custom offset
+            if (offsetValue % CUSTOM_STACK_OFFSET_FOR_TESTING === 0 && offsetValue > 0) {
               foundExpectedOffset = true
             }
           }
