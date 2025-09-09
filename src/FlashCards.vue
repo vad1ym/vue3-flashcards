@@ -202,7 +202,6 @@ defineExpose({
   grid-row: 1;
   isolation: isolate;
   overflow: visible;
-  touch-action: none;
 }
 
 .flashcards__height-reference {
@@ -215,10 +214,6 @@ defineExpose({
   contain: layout;
   grid-area: 1 / 1;
   transition: transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
-}
-
-.flashcards__card {
-  pointer-events: none;
 }
 
 .flashcards__card--active {

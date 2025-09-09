@@ -101,7 +101,10 @@ defineExpose({
   <div
     ref="flash-card"
     class="flash-card"
-    :class="{ 'flash-card--dragging': isDragging }"
+    :class="{
+      'flash-card--dragging': isDragging,
+      'flash-card--drag-disabled': params.disableDrag,
+    }"
     :style="{ transform: `translate3D(${position.x}px, ${position.y}px, 0)` }"
   >
     <Transition :name="transitionName" mode="out-in">
@@ -138,9 +141,12 @@ defineExpose({
   width: 100%;
   border-radius: 8px;
   position: relative;
-  touch-action: none;
   will-change: transform;
   overscroll-behavior: none;
+}
+
+.flash-card:not(.flash-card--drag-disabled) {
+  touch-action: none;
 }
 
 .flash-card__transition,
