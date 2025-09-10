@@ -1,4 +1,4 @@
-import type { MaybeRefOrGetter } from 'vue'
+import type { MaybeRefOrGetter, Ref } from 'vue'
 import { computed, reactive, ref, toRef } from 'vue'
 import { DragType } from './useDragSetup'
 
@@ -14,7 +14,7 @@ export interface StackListOptions<T> {
 }
 
 export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>) {
-  const options = toRef(_options)
+  const options = toRef(_options) as Ref<StackListOptions<T>> // simplify type
 
   const history = reactive<Map<number, CardState>>(new Map())
   const currentIndex = ref(0)
@@ -27,9 +27,9 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     const { infinite, items } = options.value
 
     if (infinite) {
-      return items[index % items.length] as T
+      return items[index % items.length]
     }
-    return items[index] as T
+    return items[index]
   }
 
   // Indicates the start of the finite cards
