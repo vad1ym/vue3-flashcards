@@ -29,18 +29,18 @@ export interface FlashCardProps extends DragSetupParams {
 
 const {
   maxRotation: _maxRotation = config.defaultMaxRotation,
-
-  transformStyle = (position: DragPosition) =>
-    `transform: rotate(${position.delta * config.defaultMaxRotation}deg)`,
-
+  transformStyle: _transformStyle,
   transitionName = config.defaultTransitionName,
 
   // System params
   transitionShow = false,
   transitionType = null,
-
   ...params
 } = defineProps<FlashCardProps>()
+
+const transformStyle = _transformStyle ?? ((position: DragPosition) =>
+  `transform: rotate(${position.delta * _maxRotation}deg)`
+)
 
 const emit = defineEmits<{
   /**
