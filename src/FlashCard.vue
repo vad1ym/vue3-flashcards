@@ -38,10 +38,9 @@ const {
   ...params
 } = defineProps<FlashCardProps>()
 
-const transformStyle = customTransformStyle ?? ((position: DragPosition) =>
-  `transform: rotate(${position.delta * maxRotation}deg)`
-)
-
+const transformStyle = (position: DragPosition) =>
+  (customTransformStyle ?? ((pos: DragPosition) =>
+    `transform: rotate(${pos.delta * maxRotation}deg)`))(position)
 
 const emit = defineEmits<{
   /**
