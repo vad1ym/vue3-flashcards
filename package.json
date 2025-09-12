@@ -50,7 +50,10 @@
     "commitlint": "commitlint",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "changelog": "changelogithub",
+    "changelog:dry": "changelogithub --dry",
+    "release": "standard-version"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
@@ -59,23 +62,20 @@
     "@antfu/eslint-config": "^5.2.2",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^11.0.5",
-    "@semantic-release/npm": "^12.0.2",
     "@tailwindcss/vite": "^4.1.13",
     "@types/node": "^24.3.1",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "@vue/test-utils": "^2.4.6",
+    "changelogithub": "^13.16.0",
+    "conventional-changelog-conventionalcommits": "6.1.0",
     "daisyui": "^5.1.6",
     "eslint": "^9.15.0",
     "jsdom": "^26.1.0",
     "lint-staged": "^16.1.6",
-    "semantic-release": "^24.2.7",
-    "semantic-release-config-gitmoji": "^1.5.3",
-    "semantic-release-gitmoji": "^1.6.8",
     "simple-git-hooks": "^2.13.1",
+    "standard-version": "^9.5.0",
     "tailwindcss": "^4.1.13",
     "typescript": "~5.9.2",
     "vite": "npm:rolldown-vite@latest",
@@ -86,14 +86,14 @@
     "vue": "^3.5.12",
     "vue-tsc": "^3.0.6"
   },
-  "simple-git-hooks": {
-    "pre-commit": "npx lint-staged --quiet",
-    "commit-msg": "npx commitlint --edit $1",
-    "pre-push": "npm run build && npm run test:quiet"
-  },
   "lint-staged": {
     "*.{vue,ts}": [
       "eslint --fix"
     ]
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged --quiet",
+    "commit-msg": "npx commitlint --edit $1",
+    "pre-push": "npm run build && npm run test:quiet"
   }
 }
