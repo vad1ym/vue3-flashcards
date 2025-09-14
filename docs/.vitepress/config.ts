@@ -30,6 +30,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started', activeMatch: '/guide/' },
       { text: 'API', link: '/api/flashcards', activeMatch: '/api/' },
       { text: 'Examples', link: '/examples' },
+      { text: 'Interactive Demo', link: '/interactive-demo', target: '_blank' },
       { text: 'Releases', link: 'https://github.com/vad1ym/vue3-flashcards/releases' },
       {
         text: `v${version}`,
@@ -64,6 +65,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Examples', link: '/examples' },
+            { text: 'Interactive Demo', link: '/interactive-demo' },
             { text: 'Releases', link: 'https://github.com/vad1ym/vue3-flashcards/releases' },
           ],
         },
@@ -83,6 +85,7 @@ export default defineConfig({
           items: [
             { text: 'Getting Started', link: '/guide/getting-started' },
             { text: 'Examples', link: '/examples' },
+            { text: 'Interactive Demo', link: '/interactive-demo' },
           ],
         },
         {

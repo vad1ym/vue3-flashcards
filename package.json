@@ -46,7 +46,7 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:quiet": "vitest run --reporter=dot --silent",
-    "lint": "eslint ./src ./tests --fix",
+    "lint": "eslint ./src ./tests ./example --fix",
     "commitlint": "commitlint",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",

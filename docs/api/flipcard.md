@@ -36,7 +36,9 @@ A standalone component for creating flippable cards with front and back content.
       <div class="card-front">
         <h3>Question</h3>
         <p>What is the capital of France?</p>
-        <button @click="flip">Reveal Answer</button>
+        <button @click="flip">
+          Reveal Answer
+        </button>
       </div>
     </template>
   </FlipCard>
@@ -52,12 +54,16 @@ A standalone component for creating flippable cards with front and back content.
 <template>
   <FlipCard>
     <template #front="{ flip }">
-      <div class="card-front" @click="flip">Question</div>
+      <div class="card-front" @click="flip">
+        Question
+      </div>
     </template>
     <template #back="{ flip }">
       <div class="card-back">
         <p>Answer: Paris</p>
-        <button @click="flip">Back to Question</button>
+        <button @click="flip">
+          Back to Question
+        </button>
       </div>
     </template>
   </FlipCard>
@@ -80,8 +86,12 @@ function onFlip(isFlipped) {
 
 <template>
   <FlipCard @flip="onFlip">
-    <template #front>Front Side</template>
-    <template #back>Back Side</template>
+    <template #front>
+      Front Side
+    </template>
+    <template #back>
+      Back Side
+    </template>
   </FlipCard>
 </template>
 ```
@@ -106,10 +116,16 @@ function flipProgrammatically() {
 
 <template>
   <div>
-    <button @click="flipProgrammatically">Flip Card</button>
+    <button @click="flipProgrammatically">
+      Flip Card
+    </button>
     <FlipCard ref="flipCardRef">
-      <template #front>Front Side</template>
-      <template #back>Back Side</template>
+      <template #front>
+        Front Side
+      </template>
+      <template #back>
+        Back Side
+      </template>
     </FlipCard>
   </div>
 </template>
@@ -140,7 +156,6 @@ import { FlipCard } from 'vue3-flashcards'
     </template>
   </FlipCard>
 </template>
-
 ```
 
 ### FlipCard with FlashCards
@@ -153,13 +168,13 @@ import { ref } from 'vue'
 import { FlashCards, FlipCard } from 'vue3-flashcards'
 
 const cards = ref([
-  { 
-    id: 1, 
+  {
+    id: 1,
     question: 'What is Vue.js?',
     answer: 'A progressive JavaScript framework'
   },
-  { 
-    id: 2, 
+  {
+    id: 2,
     question: 'What is composition API?',
     answer: 'A new way to organize component logic in Vue 3'
   },
@@ -210,14 +225,22 @@ const cards = ref([
 <template>
   <!-- Prevents rapid clicking by waiting for animation -->
   <FlipCard :wait-animation-end="true">
-    <template #front>Front</template>
-    <template #back>Back</template>
+    <template #front>
+      Front
+    </template>
+    <template #back>
+      Back
+    </template>
   </FlipCard>
 
   <!-- Allows immediate flipping (might cause visual issues) -->
   <FlipCard :wait-animation-end="false">
-    <template #front>Front</template>
-    <template #back>Back</template>
+    <template #front>
+      Front
+    </template>
+    <template #back>
+      Back
+    </template>
   </FlipCard>
 </template>
 ```
@@ -228,16 +251,22 @@ const cards = ref([
 <template>
   <!-- Vertical flip (default) - rotates around Y axis -->
   <FlipCard flip-axis="y">
-    <template #front>Front - Vertical Flip</template>
-    <template #back>Back - Vertical Flip</template>
+    <template #front>
+      Front - Vertical Flip
+    </template>
+    <template #back>
+      Back - Vertical Flip
+    </template>
   </FlipCard>
 
   <!-- Horizontal flip - rotates around X axis -->
   <FlipCard flip-axis="x">
-    <template #front>Front - Horizontal Flip</template>
-    <template #back>Back - Horizontal Flip</template>
+    <template #front>
+      Front - Horizontal Flip
+    </template>
+    <template #back>
+      Back - Horizontal Flip
+    </template>
   </FlipCard>
 </template>
 ```
-
-
