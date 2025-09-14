@@ -31,10 +31,15 @@ export function useStackTransform(_options: MaybeRefOrGetter<StackTransformOptio
       return ''
     }
 
-    const isStacked = level <= stack + 1
+    // Only cards with index lower than stack value should be stacked
+    // First card is level 0 so it should be considered stacked, but have no scaling of offset
+    const isStacked = level <= stack
 
-    // const stackLevel = isStacked ? level : stack + 1
-    const offset = isStacked ? level * stackOffset : (level - 1) * stackOffset
+    // All not stacked should be scaled down to be not visible and appear with transition
+    const offset = isStacked
+      ? level * stackOffset
+      : (level - 1) * stackOffset
+
     const scale = 1 - level * stackScale
 
     let transform = 'transform: translate3D(0, 0, 0) scale(1)'

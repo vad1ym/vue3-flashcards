@@ -88,7 +88,7 @@ defineEmits<Emits>()
             <span class="label-text font-medium">Stack</span>
           </div>
           <div class="text-xs text-gray-500 mb-2">
-            Number of cards in the stack
+            Number of cards to show stacked behind the active card
           </div>
           <input
             :value="config.stack"

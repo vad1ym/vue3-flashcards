@@ -204,7 +204,7 @@ defineExpose({
         :key="`stack-${itemId}`"
         :data-item-id="itemId"
         class="flashcards__card-wrapper"
-        :style="[{ zIndex }, getCardStyle(domIndex + 1)]"
+        :style="[{ zIndex }, getCardStyle(domIndex)]"
       >
         <FlashCard
           :ref="el => el && cardInstanceRefs.set(index, el as InstanceType<typeof FlashCard>)"
