@@ -27,6 +27,6 @@ jobs:
           node-version: 22
 
       - name: Generate changelog
-        run: npx changelogithub
+        run: npx changelogen gh release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
