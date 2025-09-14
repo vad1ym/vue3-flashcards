@@ -46,7 +46,7 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:quiet": "vitest run --reporter=dot --silent",
-    "lint": "eslint src --fix",
+    "lint": "eslint ./src ./tests --fix",
     "commitlint": "commitlint",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
@@ -86,14 +86,14 @@
     "vue": "^3.5.12",
     "vue-tsc": "^3.0.6"
   },
-  "lint-staged": {
-    "*.{vue,ts}": [
-      "eslint --fix"
-    ]
-  },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged --quiet",
     "commit-msg": "npx commitlint --edit $1",
     "pre-push": "npm run build && npm run test:quiet"
+  },
+  "lint-staged": {
+    "*.{vue,ts}": [
+      "eslint --fix"
+    ]
   }
 }

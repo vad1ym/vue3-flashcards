@@ -57,7 +57,6 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Getting Started', link: '/guide/getting-started' },
-            { text: 'Configuration', link: '/guide/configuration' },
           ],
         },
         {
@@ -83,7 +82,6 @@ export default defineConfig({
           text: 'Guide',
           items: [
             { text: 'Getting Started', link: '/guide/getting-started' },
-            { text: 'Configuration', link: '/guide/configuration' },
             { text: 'Examples', link: '/examples' },
           ],
         },

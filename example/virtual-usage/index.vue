@@ -26,7 +26,7 @@ function onReject(card: { id: number }) {
     <div class="max-w-[400px] w-full isolate">
       <FlashCards
         :items="cards"
-        :virtual-buffer="1"
+        :virtual-buffer="2"
         #="{ item }"
         @approve="onApprove"
         @reject="onReject"

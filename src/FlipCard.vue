@@ -34,6 +34,9 @@ const isDragging = inject(IsDraggingStateInjectionKey, ref(false))
 const isFlipped = ref(false)
 const isAnimating = ref(false)
 
+/**
+ * Flips card
+ */
 function flip() {
   if (disabled || isDragging.value || (waitAnimationEnd && isAnimating.value))
     return
@@ -43,6 +46,9 @@ function flip() {
   emit('flip', isFlipped.value)
 }
 
+/**
+ * Marks animation as complete
+ */
 function onTransitionEnd() {
   isAnimating.value = false
 }

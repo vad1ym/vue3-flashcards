@@ -5,9 +5,15 @@ import ActionButtons from './ActionButtons.vue'
 import LearningCard from './LearningCard.vue'
 
 const cards = ref([
-  { text: 'Business Strategy', description: 'Learn the fundamentals of strategic planning', icon: '💼' },
-  { text: 'Data Science', description: 'Master statistical analysis and machine learning', icon: '📊' },
-  { text: 'UI/UX Design', description: 'Create beautiful and intuitive user experiences', icon: '🎨' },
+  { id: 1, text: 'Business Strategy', description: 'Learn the fundamentals of strategic planning', icon: '💼' },
+  { id: 2, text: 'Data Science', description: 'Master statistical analysis and machine learning', icon: '📊' },
+  { id: 3, text: 'UI/UX Design', description: 'Create beautiful and intuitive user experiences', icon: '🎨' },
+  // { id: 4, text: 'Business Strategy', description: 'Learn the fundamentals of strategic planning', icon: '💼' },
+  // { id: 5, text: 'Data Science', description: 'Master statistical analysis and machine learning', icon: '📊' },
+  // { id: 6, text: 'UI/UX Design', description: 'Create beautiful and intuitive user experiences', icon: '🎨' },
+  // { id: 7, text: 'Business Strategy', description: 'Learn the fundamentals of strategic planning', icon: '💼' },
+  // { id: 8, text: 'Data Science', description: 'Master statistical analysis and machine learning', icon: '📊' },
+  // { id: 9, text: 'UI/UX Design', description: 'Create beautiful and intuitive user experiences', icon: '🎨' },
 ])
 
 const disableDrag = ref(false)

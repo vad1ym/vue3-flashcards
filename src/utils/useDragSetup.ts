@@ -25,6 +25,9 @@ export interface DragSetupParams {
 
   // Completely disable dragging feature
   disableDrag?: boolean
+
+  // Initial position for the card (used for animations)
+  initialPosition?: DragPosition
 }
 
 export interface DragSetupCallbacks {
@@ -43,7 +46,7 @@ export interface DragPosition {
   x: number
   y: number
   delta: number
-  type: DragType | null
+  type?: DragType | null
 }
 
 export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _options: MaybeRefOrGetter<DragSetupOptions>) {
@@ -74,11 +77,12 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   // Provide dragging state to nested components
   provide(IsDraggingStateInjectionKey, readonly(isDragging))
 
+  const initialPos = options.value.initialPosition
   const position = reactive<DragPosition>({
-    x: 0,
-    y: 0,
-    delta: 0,
-    type: null,
+    x: initialPos?.x || 0,
+    y: initialPos?.y || 0,
+    delta: initialPos?.delta || 0,
+    type: initialPos?.delta ? (initialPos.delta > 0 ? DragType.APPROVE : DragType.REJECT) : null,
   })
 
   function restore() {
@@ -171,7 +175,14 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   }
 
   function setupInteract() {
-    restore()
+    // Устанавливаем начальную позицию
+    const initialPos = options.value.initialPosition
+    Object.assign(position, {
+      x: initialPos?.x || 0,
+      y: initialPos?.y || 0,
+      delta: initialPos?.delta || 0,
+      type: initialPos?.delta ? (initialPos.delta > 0 ? DragType.APPROVE : DragType.REJECT) : null,
+    })
 
     // Don't add event listeners if dragging is disabled
     if (options.value.disableDrag) {
@@ -184,16 +195,8 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     window.addEventListener('pointerup', handleDragEnd, { passive: true })
   }
 
-  function complete(type: DragType, threshold: number) {
+  function complete(type: DragType) {
     isDragging.value = false
-
-    const sign = type === DragType.APPROVE ? 1 : -1
-    Object.assign(position, {
-      x: sign * Math.abs(threshold),
-      y: 0,
-      type,
-      delta: sign,
-    })
 
     onComplete(type === DragType.APPROVE)
   }
@@ -219,7 +222,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     position,
     isDragging,
     restore,
-    reject: () => complete(DragType.REJECT, -threshold.value),
-    approve: () => complete(DragType.APPROVE, threshold.value),
+    reject: () => complete(DragType.REJECT),
+    approve: () => complete(DragType.APPROVE),
   }
 }

@@ -166,7 +166,7 @@ Endless card swiping with only 3 cards that loop infinitely.
 
 ## 🎭 Transition Effects
 
-Custom transition animations using the `transitionName` prop with fast rotating, scaling, 3D flips, and elastic bounce effects.
+Custom transition animations with fast rotating, scaling, 3D flips, and elastic bounce effects.
 
 <ClientOnly>
   <TransitionEffectsUsage />

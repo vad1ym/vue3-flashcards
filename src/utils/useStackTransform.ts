@@ -1,5 +1,5 @@
 import type { MaybeRefOrGetter } from 'vue'
-import { computed, toRef } from 'vue'
+import { toRef } from 'vue'
 
 export const StackDirection = {
   TOP: 'top',
@@ -23,18 +23,19 @@ export function useStackTransform(_options: MaybeRefOrGetter<StackTransformOptio
   const options = toRef(_options)
 
   // Stack can't be greater than virtual buffer - 1
-  const getStack = computed(() => Math.min(options.value.stack, options.value.virtualBuffer - 1))
 
-  const getCardStyle = (index: number, completed?: boolean): string => {
-    if (!getStack.value || completed) {
+  const getCardStyle = (level: number): string => {
+    const { stack, stackOffset, stackScale } = options.value
+
+    if (!stack) {
       return ''
     }
 
-    const isStacked = index >= options.value.currentIndex && index <= options.value.currentIndex + getStack.value
+    const isStacked = level <= stack + 1
 
-    const stackLevel = isStacked ? index - options.value.currentIndex : 1
-    const offset = stackLevel * options.value.stackOffset
-    const scale = 1 - stackLevel * options.value.stackScale
+    // const stackLevel = isStacked ? level : stack + 1
+    const offset = isStacked ? level * stackOffset : (level - 1) * stackOffset
+    const scale = 1 - level * stackScale
 
     let transform = 'transform: translate3D(0, 0, 0) scale(1)'
 
@@ -53,11 +54,10 @@ export function useStackTransform(_options: MaybeRefOrGetter<StackTransformOptio
         break
     }
 
-    return `${transform}; opacity: ${isStacked ? 1 : 0}`
+    return `${transform}; opacity: ${isStacked ? 1 : 0}; color: ${isStacked ? 'black' : 'red'}`
   }
 
   return {
-    getStack,
     getCardStyle,
   }
 }

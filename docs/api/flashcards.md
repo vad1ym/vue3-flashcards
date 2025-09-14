@@ -9,6 +9,12 @@ The main component for creating swipeable card interfaces.
 - **Type:** `T[]`
 - **Description:** Array of items to display as cards. Each item will be passed to the default and back slots.
 
+### `trackBy`
+
+- **Type:** `string | number`
+- **Default:** `id`
+- **Description:** Property to track items by. When provided, items will be tracked by this property instead of their index. Should be unique for each item. This is recommended to use when you modify items array in runtime.
+
 ### `maxRotation`
 
 - **Type:** `number`
@@ -61,7 +67,11 @@ The main component for creating swipeable card interfaces.
 
 - **Type:** `number`
 - **Default:** `0`
-- **Description:** Number of cards to show stacked behind the active card. Creates a visual depth effect where multiple cards are visible with scaling and positioning offsets. When stack is greater than virtualBuffer, virtualBuffer is automatically increased to stack + 1 to ensure proper rendering.
+- **Description:** Number of cards to show stacked behind the active card. Creates a visual depth effect where multiple cards are visible with scaling and positioning offsets.
+
+::: warning
+When stack is greater than virtualBuffer, virtualBuffer is automatically increased to stack + 2 to ensure proper rendering. (1 card is currently visible and 1 is used for transition). This means that if you set `stack="5"`, `virtualBuffer` will be set to `7` and there will be 7 cards rendered in dom.
+:::
 
 **Example:**
 ```vue
@@ -142,47 +152,6 @@ function blurTransform(position) {
 }
 </script>
 ```
-
-### `transitionName`
-
-- **Type:** `string`
-- **Default:** `'card-transition'`
-- **Description:** Name of the CSS transition used when cards disappear after being swiped or programmatically approved/rejected. This allows you to customize the exit animation by defining your own CSS transitions. Direction-based transitions can be created using `{transition-name}--approved` and `{transition-name}--rejected` modifier classes.
-
-**Usage:**
-```vue
-<FlashCards :items="cards" transition-name="my-custom-transition" />
-```
-
-**Custom transition CSS:**
-```css
-.my-custom-transition-enter-active,
-.my-custom-transition-leave-active {
-  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
-}
-
-.my-custom-transition-enter-from,
-.my-custom-transition-leave-to {
-  opacity: 0;
-}
-
-/* Direction-based animations using modifier classes */
-/* Animation for rejected cards */
-.my-custom-transition-enter-from.my-custom-transition--rejected,
-.my-custom-transition-leave-to.my-custom-transition--rejected {
-  transform: translateX(-500px) rotate(-45deg) scale(0.8);
-}
-
-/* Animation for approved cards */
-.my-custom-transition-enter-from.my-custom-transition--approved,
-.my-custom-transition-leave-to.my-custom-transition--approved {
-  transform: translateX(500px) rotate(45deg) scale(0.8);
-}
-```
-
-The transition system automatically applies modifier classes based on the swipe direction:
-- `{transitionName}--approved` for approved/right swipes
-- `{transitionName}--rejected` for rejected/left swipes
 
 ## Slots
 

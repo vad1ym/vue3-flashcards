@@ -10,7 +10,7 @@ export const config = {
   defaultStackOffset: 20,
   defaultStackScale: 0.05,
   defaultStackDirection: StackDirection.BOTTOM,
-  defaultTransitionName: 'card-transition',
+  defaultTrackBy: 'id',
 
   // Flip card
   defaultFlipWaitAnimationEnd: true,

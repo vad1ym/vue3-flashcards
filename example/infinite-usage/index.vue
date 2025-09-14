@@ -4,9 +4,9 @@ import { FlashCards } from 'vue3-flashcards'
 import InfiniteCard from './InfiniteCard.vue'
 
 const cards = ref([
-  { text: 'A', color: 'from-red-500 to-red-600' },
-  { text: 'B', color: 'from-green-500 to-green-600' },
-  { text: 'C', color: 'from-blue-500 to-blue-600' },
+  { id: 1, text: 'A', color: 'from-red-500 to-red-600' },
+  { id: 2, text: 'B', color: 'from-green-500 to-green-600' },
+  { id: 3, text: 'C', color: 'from-blue-500 to-blue-600' },
 ])
 </script>
 

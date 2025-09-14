@@ -1,5 +1,6 @@
 <script lang="ts" setup generic="T extends Record<string, unknown>">
 import type { FlashCardProps } from './FlashCard.vue'
+import type { DragPosition } from './utils/useDragSetup'
 import type { StackDirection } from './utils/useStackTransform'
 import { computed, ref } from 'vue'
 import { config } from './config'
@@ -8,26 +9,38 @@ import { useStackList } from './utils/useStackList'
 import { useStackTransform } from './utils/useStackTransform'
 
 export interface FlashCardsProps<Item> extends FlashCardProps {
+  /**
+   * Array of items to display as cards
+   */
   items?: Item[]
-
-  // Enable infinite swiping
+  /**
+   * Enable infinite swiping mode
+   */
   infinite?: boolean
-
-  // Count of cards to render in DOM
+  /**
+   * Number of cards to render in dom, cant be less than 1. If stack is greater it will override this value
+   */
   virtualBuffer?: number
-
-  // Show card as stacked (lower cards are scaled down and have offset)
-  // Stack can't be greater than virtual buffer - 1
+  /**
+   * Number of cards to stack
+   */
   stack?: number
-
-  // Offset between stacked cards
+  /**
+   * Offset for stack
+   */
   stackOffset?: number
-
-  // Coefficient of the stack scale on each level
+  /**
+   * Scale factor for stack
+   */
   stackScale?: number
-
-  // Direction of the stack
+  /**
+   * Direction for stack
+   */
   stackDirection?: StackDirection
+  /**
+   * Key to track items by (is required if you are going to modify items array)
+   */
+  trackBy?: keyof Item | 'id'
 }
 
 const {
@@ -38,6 +51,7 @@ const {
   stackScale = config.defaultStackScale,
   stackOffset = config.defaultStackOffset,
   stackDirection = config.defaultStackDirection,
+  trackBy = config.defaultTrackBy,
   ...flashCardProps
 } = defineProps<FlashCardsProps<T>>()
 
@@ -55,78 +69,111 @@ defineSlots<{
     reject: () => void
     approve: () => void
     isEnd: boolean
+    isStart: boolean
     canRestore: boolean
   }) => any
   empty?: () => any
 }>()
 
-// References to stack elements
-const cardRefs = ref<Map<number, InstanceType<typeof FlashCard>>>(new Map())
+const cardInstanceRefs = ref<Map<number, InstanceType<typeof FlashCard>>>(new Map())
+const containerHeight = ref(0)
 
-// Keep height of last mounted element
-const stackHeight = ref(0)
+/**
+ * VIRTUAL BUFFER
+ * The minimal buffer value is 1
+ * Passed virtual buffer value is used as is
+ * If stack is not 0, it can be used to override virtual buffer if it's lower than stack + 2
+ * IMPORTANT: We add 2 to stack value to account for the current card and hidden transition card
+ */
+const calculateVirtualBuffer = computed(() => Math.max(stack && stack + 2, virtualBuffer, 1))
 
-// Virtual buffer can't be less than 1
-// Vritual buffer can't be less than stack + 1, when stack is passed
-const getVirtualBuffer = computed(() => Math.max(stack + 1, virtualBuffer, 1))
-
-// Use stack list composable
+/**
+ * STACK LIST
+ * Stack list is used to render cards both finite and infinite mods, calculate indices, positions etc
+ */
 const {
   currentIndex,
   isEnd,
+  isStart,
   canRestore,
-  visibleItems,
-  setApproval: setCardApproval,
+  stackList,
+  cardsInTransition,
+  swipeCard,
   restoreCard,
+  removeAnimatingCard,
 } = useStackList<T>(() => ({
   items,
   infinite,
-  virtualBuffer: getVirtualBuffer.value,
+  virtualBuffer: calculateVirtualBuffer.value,
+  trackBy,
 }))
 
-// Use stack transform composable
-const { getCardStyle } = useStackTransform(() => ({
+/**
+ * STACK TRANSFORM
+ * Stack transform is used to calculate card styles for stacking mode
+ */
+const {
+  getCardStyle,
+} = useStackTransform(() => ({
   stack,
   stackScale,
   stackOffset,
   stackDirection,
   currentIndex: currentIndex.value,
-  virtualBuffer: getVirtualBuffer.value,
+  virtualBuffer: calculateVirtualBuffer.value,
 }))
 
 /**
- * Set the card as approved or rejected and emit event with the original item
+ * Handles card swipe completion
  */
-function setApproval(index: number, approved: boolean) {
-  const originalItem = setCardApproval(index, approved)
+function handleCardSwipe(item: T, itemId: string | number, approved: boolean, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
+  const cardWithAnimation = cardsInTransition.value.find(card => card.itemId === itemId)
+  if (cardWithAnimation)
+    return
 
-  if (approved)
-    emit('approve', originalItem)
-  else
-    emit('reject', originalItem)
+  swipeCard(itemId, approved, position)
+  approved ? emit('approve', item) : emit('reject', item)
 }
 
 /**
- * Find the previous card, reset and restore it, show restoring animation
+ * Helper to perform card action
+ */
+function performCardAction(type: 'approve' | 'reject' | 'restore') {
+  if (type === 'restore')
+    return restore()
+
+  const currentCard = stackList.value.find(item => item.index === currentIndex.value)
+  if (!currentCard)
+    return
+
+  const cardRef = cardInstanceRefs.value.get(currentCard.index)
+  cardRef?.[type]()
+  handleCardSwipe(currentCard.item, currentCard.itemId, type === 'approve')
+}
+
+/**
+ * Approves card
+ */
+const approve = () => performCardAction('approve')
+
+/**
+ * Rejects card
+ */
+const reject = () => performCardAction('reject')
+
+/**
+ * Restores card
  */
 function restore() {
-  if (restoreCard()) {
-    cardRefs.value.get(currentIndex.value)?.restore()
+  const restored = restoreCard()
+  if (restored) {
+    cardsInTransition.value.forEach((visItem) => {
+      if (visItem.animationType === 'restore') {
+        const cardRef = cardInstanceRefs.value.get(visItem.index)
+        cardRef?.restore()
+      }
+    })
   }
-}
-
-/**
- * Call approve method on the current card, show approval animation
- */
-function approve() {
-  cardRefs.value.get(currentIndex.value)?.approve()
-}
-
-/**
- * Call reject method on the current card, show rejection animation
- */
-function reject() {
-  cardRefs.value.get(currentIndex.value)?.reject()
 }
 
 defineExpose({
@@ -135,45 +182,69 @@ defineExpose({
   reject,
   canRestore,
   isEnd,
+  isStart,
 })
 </script>
 
 <template>
   <div>
-    <div class="flashcards" :style="{ height: isEnd ? `${stackHeight}px` : 'auto' }">
-      <!-- Dont show empty state in infinite mode -->
-      <!-- Show only within last card in finite mode -->
+    <div class="flashcards" :style="{ height: containerHeight ? `${containerHeight}px` : 'auto' }">
       <div
         v-if="!infinite && currentIndex >= items.length - 1"
-        class="flashcards__card-wrapper flashcards-empty-state"
-        :style="{ zIndex: -items.length - 1 }"
+        key="empty-state"
+        class="flashcards-empty-state"
       >
         <slot name="empty">
           No more cards!
         </slot>
       </div>
-
-      <!-- Virtual stack -->
+      <!-- Обычные карточки стека -->
       <div
-        v-for="{ item, index, state } in visibleItems"
-        :key="index"
+        v-for="({ item, itemId, index, zIndex }, domIndex) in stackList"
+        :key="`stack-${itemId}`"
+        :data-item-id="itemId"
         class="flashcards__card-wrapper"
-        :style="[{ zIndex: currentIndex - index }, getCardStyle(index, state?.completed)]"
+        :style="[{ zIndex }, getCardStyle(domIndex + 1)]"
       >
         <FlashCard
-          :ref="el => el && cardRefs.set(index, el as InstanceType<typeof FlashCard>)"
+          :ref="el => el && cardInstanceRefs.set(index, el as InstanceType<typeof FlashCard>)"
           v-bind="flashCardProps"
-          :transition-type="state?.type"
-          :transition-show="!state?.completed"
           class="flashcards__card"
           :class="{ 'flashcards__card--active': index === currentIndex }"
-          @complete="setApproval(index, $event)"
-          @mounted="stackHeight = Math.max($event, 0)"
+          @complete="(approved, pos) => handleCardSwipe(item, itemId, approved, pos)"
+          @mounted="containerHeight = Math.max($event, 0)"
         >
           <template #default>
             <slot :item="item" />
           </template>
+          <template #reject="{ delta }">
+            <slot name="reject" :item="item" :delta="delta" />
+          </template>
+          <template #approve="{ delta }">
+            <slot name="approve" :item="item" :delta="delta" />
+          </template>
+        </FlashCard>
+      </div>
 
+      <!-- Animating cards -->
+      <div
+        v-for="{ item, itemId, state, zIndex, animationType, initialPosition } in cardsInTransition"
+        :key="`anim-${itemId}`"
+        :data-item-id="itemId"
+        class="flashcards__card-wrapper flashcards__card-wrapper--animating"
+        :style="{ zIndex }"
+      >
+        <FlashCard
+          v-bind="flashCardProps"
+          class="flashcards__card flashcards__card--animating"
+          :initial-position="initialPosition"
+          :animation-type="animationType"
+          :animation-state="state?.type"
+          @animationend="() => removeAnimatingCard(itemId, { withHistory: animationType === 'restore' })"
+        >
+          <template #default>
+            <slot :item="item" />
+          </template>
           <template #reject="{ delta }">
             <slot name="reject" :item="item" :delta="delta" />
           </template>
@@ -190,6 +261,7 @@ defineExpose({
       :reject="reject"
       :approve="approve"
       :is-end="isEnd"
+      :is-start="isStart"
       :can-restore="canRestore"
     />
   </div>
@@ -199,32 +271,15 @@ defineExpose({
 .flashcards {
   position: relative;
   display: grid;
-  grid-row: 1;
   isolation: isolate;
   overflow: visible;
 }
-
-.flashcards__height-reference {
-  opacity: 0;
-  pointer-events: none;
-}
-
 .flashcards__card-wrapper {
   pointer-events: none;
   contain: layout;
   grid-area: 1 / 1;
-  transition: transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
 }
-
-.flashcards__card--active {
-  pointer-events: all;
-}
-
-.flashcards-empty-state {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
+.flashcards__card--active { pointer-events: all; }
+.flashcards-empty-state { grid-area:1/1; display:flex;align-items:center;justify-content:center;pointer-events:none; }
 </style>

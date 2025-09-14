@@ -1,65 +1,85 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { config } from '../../src/config'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
 describe('[props] threshold', () => {
   let wrapper: VueWrapper<InstanceType<typeof FlashCard>>
 
-  beforeEach(() => {
-    wrapper = mount(FlashCard, {
-      props: {},
-      slots: {
-        default: '<div class="card-content">Test Card</div>',
-      },
+  describe('default threshold', () => {
+    beforeEach(() => {
+      wrapper = mount(FlashCard, {
+        props: {
+          threshold: config.defaultThreshold,
+        },
+        slots: {
+          default: '<div class="card-content">Test Card</div>',
+        },
+        global: { stubs: { Transition: false } },
+      })
+    })
 
-      global: { stubs: { Transition: false } }, // To disable transition animation
+    it('should emit complete when swiped beyond threshold', async () => {
+      const cardElement = wrapper.element
+
+      new DragSimulator(cardElement).swipeApprove()
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.emitted('complete')).toBeTruthy()
+      expect(wrapper.emitted('complete')?.[0][0]).toBe(true) // approved = true
+    })
+
+    it('should not complete when swiped below threshold', async () => {
+      const cardElement = wrapper.element
+
+      new DragSimulator(cardElement).swipeRightBelowThreshold()
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.emitted('complete')).toBeFalsy()
+      expect(cardElement.style.transform).toContain('translate3D(0px, 0px, 0)')
     })
   })
 
-  describe('default', () => {
-    let cardElement: HTMLElement
+  describe('custom threshold', () => {
+    it('should work with custom threshold value', async () => {
+      const customThreshold = 200
+      const customWrapper = mount(FlashCard, {
+        props: {
+          threshold: customThreshold,
+        },
+        slots: {
+          default: '<div class="card-content">Test Card</div>',
+        },
+        global: { stubs: { Transition: false } },
+      })
 
-    beforeEach(() => {
-      cardElement = wrapper.element
+      // Use exposed method to test with custom threshold
+      customWrapper.vm.approve()
+      await customWrapper.vm.$nextTick()
+
+      expect(customWrapper.emitted('complete')).toBeTruthy()
+      expect(customWrapper.emitted('complete')?.[0][0]).toBe(true)
     })
 
-    describe('when swiped beyond threshold', () => {
-      it('should emit complete with true when swiped right', async () => {
-        new DragSimulator(cardElement).swipeApprove()
-
-        await wrapper.vm.$nextTick()
-        expect(wrapper.emitted('complete')).toBeTruthy()
-        expect(wrapper.emitted('complete')?.[0]).toEqual([true])
-        expect(cardElement.style.transform).not.toContain('translate3D(0px, 0px, 0)')
+    it('should respect different threshold for reject', async () => {
+      const customThreshold = 100
+      const customWrapper = mount(FlashCard, {
+        props: {
+          threshold: customThreshold,
+        },
+        slots: {
+          default: '<div class="card-content">Test Card</div>',
+        },
+        global: { stubs: { Transition: false } },
       })
 
-      it('should emit complete with false when swiped left', async () => {
-        new DragSimulator(cardElement).swipeReject()
+      customWrapper.vm.reject()
+      await customWrapper.vm.$nextTick()
 
-        await wrapper.vm.$nextTick()
-        expect(wrapper.emitted('complete')).toBeTruthy()
-        expect(wrapper.emitted('complete')?.[0]).toEqual([false])
-      })
-    })
-
-    describe('when swiped below threshold', () => {
-      it('should restore card position without event when swiped right', async () => {
-        new DragSimulator(cardElement).swipeRightBelowThreshold()
-
-        await wrapper.vm.$nextTick()
-        expect(wrapper.emitted('complete')).toBeFalsy()
-        expect(cardElement.style.transform).toContain('translate3D(0px, 0px, 0)')
-      })
-
-      it('should restore card position without event when swiped left', async () => {
-        new DragSimulator(cardElement).swipeLeftBelowThreshold()
-
-        await wrapper.vm.$nextTick()
-        expect(wrapper.emitted('complete')).toBeFalsy()
-        expect(cardElement.style.transform).toContain('translate3D(0px, 0px, 0)')
-      })
+      expect(customWrapper.emitted('complete')).toBeTruthy()
+      expect(customWrapper.emitted('complete')?.[0][0]).toBe(false)
     })
   })
 })

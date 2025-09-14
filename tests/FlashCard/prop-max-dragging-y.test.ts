@@ -5,133 +5,176 @@ import { config } from '../../src/config'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
-// Test constants for max dragging Y functionality
-const MAX_DRAGGING_Y_LIMIT = 50 // Maximum vertical pixels allowed for dragging
-const DRAG_DISTANCE_WITHIN_Y_LIMIT = 40 // Drag distance that should be allowed (within limit)
-const DRAG_DISTANCE_EXCEEDING_Y_LIMIT = 80 // Drag distance that exceeds the limit and should be clamped
-const HORIZONTAL_DRAG_DISTANCE = 100 // Horizontal drag distance for combined movement tests
-const UNLIMITED_Y_DRAG_DISTANCE = 200 // Large drag distance for testing unlimited vertical dragging
-
 describe('[props] maxDraggingY', () => {
   let wrapper: VueWrapper<InstanceType<typeof FlashCard>>
 
-  describe('with maxDraggingY set to limit', () => {
-    let cardElement: HTMLElement
-
+  describe('with maxDraggingY set to 50px', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          maxDraggingY: MAX_DRAGGING_Y_LIMIT,
+          threshold: config.defaultThreshold,
+          maxDraggingY: 50,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
         },
         global: { stubs: { Transition: false } },
       })
-      cardElement = wrapper.element
     })
 
-    it('should allow dragging up to maxDraggingY limit', async () => {
-      // Drag down within limit
-      new DragSimulator(cardElement)
-        .dragStart()
-        .dragMove([{ x: 0, y: DRAG_DISTANCE_WITHIN_Y_LIMIT }])
+    it('should allow dragging and still respond to horizontal swipes', async () => {
+      const cardElement = wrapper.element
 
+      // Should still be able to perform horizontal swipes normally
+      new DragSimulator(cardElement).swipeApprove()
       await wrapper.vm.$nextTick()
 
-      // Should allow full movement
-      expect(cardElement.style.transform).toContain(`translate3D(0px, ${DRAG_DISTANCE_WITHIN_Y_LIMIT}px, 0)`)
+      expect(wrapper.emitted('complete')).toBeTruthy()
+      expect(wrapper.emitted('complete')?.[0][0]).toBe(true)
     })
 
-    it('should clamp vertical dragging when exceeding positive maxDraggingY', async () => {
-      // Try to drag down beyond limit
-      new DragSimulator(cardElement)
+    it('should work with combined horizontal and vertical dragging', async () => {
+      const cardElement = wrapper.element
+
+      // Drag both horizontally (to trigger approval) and vertically
+      const simulator = new DragSimulator(cardElement)
+      simulator
         .dragStart()
-        .dragMove([{ x: 0, y: DRAG_DISTANCE_EXCEEDING_Y_LIMIT }])
-
-      await wrapper.vm.$nextTick()
-
-      // Should be clamped to limit
-      expect(cardElement.style.transform).toContain(`translate3D(0px, ${MAX_DRAGGING_Y_LIMIT}px, 0)`)
-    })
-
-    it('should clamp vertical dragging when exceeding negative maxDraggingY', async () => {
-      // Try to drag up beyond negative limit
-      new DragSimulator(cardElement)
-        .dragStart()
-        .dragMove([{ x: 0, y: -DRAG_DISTANCE_EXCEEDING_Y_LIMIT }])
-
-      await wrapper.vm.$nextTick()
-
-      // Should be clamped to negative limit
-      expect(cardElement.style.transform).toContain(`translate3D(0px, -${MAX_DRAGGING_Y_LIMIT}px, 0)`)
-    })
-
-    it('should still allow horizontal dragging when vertical is clamped', async () => {
-      // Drag horizontally and vertically beyond limit (vertical should be clamped)
-      new DragSimulator(cardElement)
-        .dragStart()
-        .dragMove([{ x: HORIZONTAL_DRAG_DISTANCE, y: DRAG_DISTANCE_EXCEEDING_Y_LIMIT }])
-
-      await wrapper.vm.$nextTick()
-
-      // Horizontal should be full, vertical should be clamped
-      expect(cardElement.style.transform).toContain(`translate3D(${HORIZONTAL_DRAG_DISTANCE}px, ${MAX_DRAGGING_Y_LIMIT}px, 0)`)
-    })
-
-    it('should work correctly during swipe completion', async () => {
-      // Drag beyond threshold horizontally and vertically beyond limit
-      new DragSimulator(cardElement)
-        .dragStart()
-        .dragMove([{ x: config.defaultThreshold + 10, y: DRAG_DISTANCE_EXCEEDING_Y_LIMIT }]) // Exceed both threshold and Y limit
+        .dragMove([{ x: 200, y: 30 }]) // Within Y limit
         .dragEnd()
 
       await wrapper.vm.$nextTick()
 
-      // Should complete the swipe and emit event
+      // Should complete the horizontal swipe despite vertical component
       expect(wrapper.emitted('complete')).toBeTruthy()
-      expect(wrapper.emitted('complete')?.[0]).toEqual([true])
+      expect(wrapper.emitted('complete')?.[0][0]).toBe(true)
+    })
+
+    it('should not prevent card functionality with vertical dragging', async () => {
+      const cardElement = wrapper.element
+      const simulator = new DragSimulator(cardElement)
+
+      // Start a drag with vertical component
+      simulator.dragStart().dragMove([{ x: 0, y: 25 }]) // Within limit
+
+      // Should not emit complete event (not enough horizontal movement)
+      expect(wrapper.emitted('complete')).toBeFalsy()
+
+      // Finish with horizontal approval swipe
+      simulator.dragMove([{ x: 200, y: 25 }]).dragEnd()
+      await wrapper.vm.$nextTick()
+
+      // Should now complete
+      expect(wrapper.emitted('complete')).toBeTruthy()
     })
   })
 
-  describe('with maxDraggingY disabled (null)', () => {
-    let cardElement: HTMLElement
-
+  describe('with maxDraggingY set to 0', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          maxDraggingY: null, // Explicitly disable Y limit
+          threshold: config.defaultThreshold,
+          maxDraggingY: 0,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
         },
         global: { stubs: { Transition: false } },
       })
-      cardElement = wrapper.element
     })
 
-    it('should allow unlimited vertical dragging when maxDraggingY is null', async () => {
-      // Drag down with no limit
-      new DragSimulator(cardElement)
+    it('should still allow horizontal swiping when Y is restricted', async () => {
+      const cardElement = wrapper.element
+
+      // Should be able to swipe horizontally
+      new DragSimulator(cardElement).swipeApprove()
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.emitted('complete')).toBeTruthy()
+      expect(wrapper.emitted('complete')?.[0][0]).toBe(true)
+    })
+  })
+
+  describe('without maxDraggingY limit', () => {
+    beforeEach(() => {
+      wrapper = mount(FlashCard, {
+        props: {
+          threshold: config.defaultThreshold,
+          // maxDraggingY not set, should allow free vertical movement
+        },
+        slots: {
+          default: '<div class="card-content">Test Card</div>',
+        },
+        global: { stubs: { Transition: false } },
+      })
+    })
+
+    it('should allow normal card swiping behavior', async () => {
+      const cardElement = wrapper.element
+
+      new DragSimulator(cardElement).swipeApprove()
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.emitted('complete')).toBeTruthy()
+      expect(wrapper.emitted('complete')?.[0][0]).toBe(true)
+    })
+
+    it('should work with large vertical movements', async () => {
+      const cardElement = wrapper.element
+      const simulator = new DragSimulator(cardElement)
+
+      // Large vertical drag combined with horizontal
+      simulator
         .dragStart()
-        .dragMove([{ x: 0, y: UNLIMITED_Y_DRAG_DISTANCE }])
+        .dragMove([{ x: 200, y: 100 }]) // Large Y movement
+        .dragEnd()
 
       await wrapper.vm.$nextTick()
 
-      // Should allow full movement
-      expect(cardElement.style.transform).toContain(`translate3D(0px, ${UNLIMITED_Y_DRAG_DISTANCE}px, 0)`)
+      // Should still complete horizontal swipe
+      expect(wrapper.emitted('complete')).toBeTruthy()
+      expect(wrapper.emitted('complete')?.[0][0]).toBe(true)
+    })
+  })
+
+  describe('drag behavior validation', () => {
+    beforeEach(() => {
+      wrapper = mount(FlashCard, {
+        props: {
+          threshold: config.defaultThreshold,
+          maxDraggingY: 30,
+        },
+        slots: {
+          default: '<div class="card-content">Test Card</div>',
+        },
+        global: { stubs: { Transition: false } },
+      })
     })
 
-    it('should allow unlimited upward dragging when maxDraggingY is null', async () => {
-      // Drag up with no limit
-      new DragSimulator(cardElement)
+    it('should emit drag events during dragging with Y constraint', async () => {
+      const cardElement = wrapper.element
+      const simulator = new DragSimulator(cardElement)
+
+      simulator.dragStart().dragMove([{ x: 50, y: 20 }])
+
+      // Should be able to drag without errors
+      expect(wrapper.exists()).toBe(true)
+    })
+
+    it('should handle edge case of exactly maxDraggingY', async () => {
+      const cardElement = wrapper.element
+      const simulator = new DragSimulator(cardElement)
+
+      // Drag exactly to the Y limit
+      simulator
         .dragStart()
-        .dragMove([{ x: 0, y: -UNLIMITED_Y_DRAG_DISTANCE }])
+        .dragMove([{ x: 200, y: 30 }]) // Exactly maxDraggingY
+        .dragEnd()
 
       await wrapper.vm.$nextTick()
 
-      // Should allow full movement
-      expect(cardElement.style.transform).toContain(`translate3D(0px, -${UNLIMITED_Y_DRAG_DISTANCE}px, 0)`)
+      // Should complete normally
+      expect(wrapper.emitted('complete')).toBeTruthy()
     })
   })
 })

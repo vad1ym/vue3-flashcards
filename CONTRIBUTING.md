@@ -182,7 +182,7 @@ Documentation is built with VitePress and located in `docs/`:
 
 - **API Reference**: `docs/api/` - Component props, slots, events
 - **Examples**: `docs/examples.md` - Interactive demos
-- **Guides**: `docs/guide/` - Getting started and configuration
+- **Guides**: `docs/guide/` - Getting started
 
 ### Documentation Guidelines
 

@@ -9,15 +9,11 @@ This page has been reorganized! The documentation is now split into focused sect
 ### 🚀 **[Getting Started →](/guide/getting-started)**
 Installation, quick start guide, and first steps.
 
-### ⚙️ **[Configuration →](/guide/configuration)**
-Comprehensive guide to props, performance optimization, and customization.
-
 ### 📚 **[API Reference →](/api/flashcards)**
 Complete API documentation for FlashCards and FlipCard components.
 
 ### 💡 **[Examples →](/examples)**
 Interactive examples and use cases.
-
 
 ---
 
@@ -26,7 +22,7 @@ Interactive examples and use cases.
 A powerful, flexible Vue 3 component library for creating Tinder-like card interfaces. Perfect for:
 
 - 📚 **Learning apps** - Flashcards, vocabulary training
-- 🎮 **Gaming** - Card matching, swiping mechanics  
+- 🎮 **Gaming** - Card matching, swiping mechanics
 - 📱 **Dating apps** - Profile browsing, matching interfaces
 - 🛍️ **E-commerce** - Product discovery, wishlists
 - 📊 **Data presentation** - Interactive card-based layouts
@@ -46,6 +42,6 @@ A powerful, flexible Vue 3 component library for creating Tinder-like card inter
 This package is currently in active development. The API may change between minor versions until v1.0.0 is released.
 :::
 
-**Current Version:** v0.7.0  
-**Vue.js Compatibility:** ^3.0.0  
+**Current Version:** v0.7.0
+**Vue.js Compatibility:** ^3.0.0
 **TypeScript Support:** ✅ Full support

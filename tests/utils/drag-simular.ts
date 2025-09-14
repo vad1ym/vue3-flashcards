@@ -104,8 +104,15 @@ export class DragSimulator {
    * Drag to a specific distance without ending
    * @param distance - Distance to drag (positive = right, negative = left)
    */
-  dragTo(distance: number) {
-    return this.dragStart().dragMove([{ x: distance }])
+  dragTo(distance: number): DragSimulator
+  dragTo(coords: { x?: number, y?: number }): DragSimulator
+  dragTo(distanceOrCoords: number | { x?: number, y?: number }) {
+    if (typeof distanceOrCoords === 'number') {
+      return this.dragStart().dragMove([{ x: distanceOrCoords }])
+    }
+    else {
+      return this.dragStart().dragMove([{ x: distanceOrCoords.x || 0, y: distanceOrCoords.y || 0 }])
+    }
   }
 
   /**

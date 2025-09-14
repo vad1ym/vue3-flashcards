@@ -7,13 +7,6 @@ import { config } from './config'
 import { DragType, useDragSetup } from './utils/useDragSetup'
 
 export interface FlashCardProps extends DragSetupParams {
-  // Transition config managed by parent stack due to virtualization
-  transitionName?: string
-
-  // System params
-  transitionShow?: boolean
-  transitionType?: DragType | null
-
   // Completely disable dragging feature
   disableDrag?: boolean
 
@@ -25,33 +18,41 @@ export interface FlashCardProps extends DragSetupParams {
   // By default slightly rotate the card to the direction of the swipe
   // Default value: `transform: rotate(${position.delta * maxRotation}deg)`
   transformStyle?: (position: DragPosition) => string
+
+  // Initial position for animation start, !just for internal usage!
+  initialPosition?: DragPosition
+
+  // Animation type for card transitions
+  animationType?: 'approve' | 'reject' | 'restore'
+
+  // State for restore animations
+  animationState?: 'approve' | 'reject'
 }
 
 const {
   maxRotation = config.defaultMaxRotation,
   transformStyle: customTransformStyle,
-  transitionName = config.defaultTransitionName,
-
-  // System params
-  transitionShow = false,
-  transitionType = null,
+  initialPosition,
+  animationType,
+  animationState,
   ...params
 } = defineProps<FlashCardProps>()
-
-const transformStyle = (position: DragPosition) =>
-  (customTransformStyle ?? ((pos: DragPosition) =>
-    `transform: rotate(${pos.delta * maxRotation}deg)`))(position)
 
 const emit = defineEmits<{
   /**
    * Event fired when card is swiped to the end and passed result
    */
-  complete: [approved: boolean]
+  complete: [approved: boolean, position: DragPosition]
 
   /**
    * Event fired when card is mounted, passed element height
    */
   mounted: [height: number]
+
+  /**
+   * Event fired when animation ends
+   */
+  animationend: []
 }>()
 
 defineSlots<{
@@ -59,6 +60,14 @@ defineSlots<{
   reject?: (props: { delta: number }) => any
   approve?: (props: { delta: number }) => any
 }>()
+
+// Apply custom transform style or default
+function transformStyle(position: DragPosition): string | null {
+  if (customTransformStyle) {
+    return customTransformStyle(position)
+  }
+  return `transform: rotate(${position.delta * maxRotation}deg)`
+}
 
 // Current card element ref
 const el = useTemplateRef('flash-card')
@@ -73,8 +82,9 @@ const {
   cleanupInteract,
 } = useDragSetup(el, () => ({
   ...params,
+  initialPosition,
   onComplete(approved) {
-    emit('complete', approved)
+    emit('complete', approved, position)
   },
 }))
 
@@ -94,6 +104,7 @@ defineExpose({
   reject,
   restore,
   approve,
+  position,
 })
 </script>
 
@@ -107,32 +118,32 @@ defineExpose({
     }"
     :style="{ transform: `translate3D(${position.x}px, ${position.y}px, 0)` }"
   >
-    <Transition :name="transitionName" mode="out-in">
-      <div
-        v-show="transitionShow"
-        class="flash-card__transition"
-        :class="{
-          [`${transitionName}--approved`]: transitionType === DragType.APPROVE,
-          [`${transitionName}--rejected`]: transitionType === DragType.REJECT,
-        }"
-      >
-        <div class="flash-card__transform" :style="transformStyle(position)">
-          <slot :is-dragging="isDragging" />
+    <div
+      class="flash-card__animation-wrapper"
+      :class="{
+        'flash-card__animation-wrapper--approve': animationType === 'approve',
+        'flash-card__animation-wrapper--reject': animationType === 'reject',
+        'flash-card__animation-wrapper--restore-approve': animationType === 'restore' && animationState === 'approve',
+        'flash-card__animation-wrapper--restore-reject': animationType === 'restore' && animationState === 'reject',
+      }"
+      @animationend="emit('animationend')"
+    >
+      <div class="flash-card__transform" :style="transformStyle(position)">
+        <slot :is-dragging="isDragging" />
 
-          <div v-show="position.type === DragType.REJECT">
-            <slot name="reject" :delta="position.delta">
-              <RejectIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
-            </slot>
-          </div>
+        <div v-show="position.type === DragType.REJECT">
+          <slot name="reject" :delta="position.delta">
+            <RejectIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
+          </slot>
+        </div>
 
-          <div v-show="position.type === DragType.APPROVE">
-            <slot name="approve" :delta="position.delta">
-              <ApproveIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
-            </slot>
-          </div>
+        <div v-show="position.type === DragType.APPROVE">
+          <slot name="approve" :delta="position.delta">
+            <ApproveIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
+          </slot>
         </div>
       </div>
-    </Transition>
+    </div>
   </div>
 </template>
 
@@ -149,7 +160,6 @@ defineExpose({
   touch-action: none;
 }
 
-.flash-card__transition,
 .flash-card__transform {
   touch-action: inherit;
 }
@@ -167,24 +177,14 @@ defineExpose({
   pointer-events: none;
 }
 
-.card-transition-enter-active,
-.card-transition-leave-active {
-  will-change: transform opacity;
-  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-}
+/* Default animations */
+.flash-card__animation-wrapper--approve { animation: approve 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card__animation-wrapper--reject { animation: reject 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card__animation-wrapper--restore-approve { animation: restore-approve 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card__animation-wrapper--restore-reject { animation: restore-reject 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 
-.card-transition-enter-from,
-.card-transition-leave-to {
-  opacity: 0;
-}
-
-.card-transition-enter-from.card-transition--rejected,
-.card-transition-leave-to.card-transition--rejected {
-  transform: translateX(-300px) rotate(-20deg);
-}
-
-.card-transition-enter-from.card-transition--approved,
-.card-transition-leave-to.card-transition--approved {
-  transform: translateX(300px) rotate(20deg);
-}
+@keyframes approve { 0%{opacity:1;} 100%{transform:translateX(320px) rotate(15deg);opacity:0;} }
+@keyframes reject { 0%{opacity:1;} 100%{transform:translateX(-320px) rotate(-15deg);opacity:0;} }
+@keyframes restore-approve { 0%{transform:translateX(320px) rotate(15deg);opacity:0;} 100%{transform:translateX(0) rotate(0deg);opacity:1;} }
+@keyframes restore-reject { 0%{transform:translateX(-320px) rotate(-15deg);opacity:0;} 100%{transform:translateX(0) rotate(0deg);opacity:1;} }
 </style>

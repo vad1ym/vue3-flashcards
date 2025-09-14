@@ -61,7 +61,6 @@ function handleReject(item) {
     </FlashCards>
   </div>
 </template>
-
 ```
 
 ## Development Notice
@@ -72,6 +71,5 @@ This package is currently in development. The API may change between minor versi
 
 ## What's Next?
 
-- **[Configuration Guide →](./configuration)** - Learn about props, performance, and customization
-- **[Examples →](../examples)** - Interactive demos and use cases  
-- **[API Reference →](../api/)** - Complete component documentation
+- **[API Reference →](../api/flashcards)** - Complete component documentation
+- **[Examples →](../examples)** - Interactive demos and use cases
