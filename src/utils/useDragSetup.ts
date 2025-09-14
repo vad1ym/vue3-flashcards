@@ -34,7 +34,7 @@ export interface DragSetupCallbacks {
   onDragStart?: () => void
   onDragMove?: (type: DragType | null, delta: number) => void
   onDragEnd?: () => void
-  onComplete?: (approved: boolean) => void
+  onDragComplete?: (approved: boolean) => void
 }
 
 export type DragSetupOptions = DragSetupParams & DragSetupCallbacks
@@ -57,7 +57,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     onDragStart = () => {},
     onDragMove = () => {},
     onDragEnd = () => {},
-    onComplete = () => {},
+    onDragComplete = () => {},
   } = options.value
 
   const threshold = computed(() => options.value.threshold ?? config.defaultThreshold)
@@ -158,12 +158,12 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     isDragging.value = false
 
     if (position.x >= threshold.value) {
-      onComplete(true)
+      onDragComplete(true)
       position.delta = 1
       position.type = DragType.APPROVE
     }
     else if (position.x <= -threshold.value) {
-      onComplete(false)
+      onDragComplete(false)
       position.delta = -1
       position.type = DragType.REJECT
     }
@@ -195,12 +195,6 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     window.addEventListener('pointerup', handleDragEnd, { passive: true })
   }
 
-  function complete(type: DragType) {
-    isDragging.value = false
-
-    onComplete(type === DragType.APPROVE)
-  }
-
   onMounted(async () => {
     await nextTick()
     setupInteract()
@@ -222,7 +216,5 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     position,
     isDragging,
     restore,
-    reject: () => complete(DragType.REJECT),
-    approve: () => complete(DragType.APPROVE),
   }
 }

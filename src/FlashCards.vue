@@ -127,10 +127,6 @@ const {
  * Handles card swipe completion
  */
 function handleCardSwipe(item: T, itemId: string | number, approved: boolean, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
-  const cardWithAnimation = cardsInTransition.value.find(card => card.itemId === itemId)
-  if (cardWithAnimation)
-    return
-
   swipeCard(itemId, approved, position)
   approved ? emit('approve', item) : emit('reject', item)
 }
@@ -140,15 +136,16 @@ function handleCardSwipe(item: T, itemId: string | number, approved: boolean, po
  */
 function performCardAction(type: 'approve' | 'reject' | 'restore') {
   if (type === 'restore')
-    return restore()
+    return restoreCard()
 
-  const currentCard = stackList.value.find(item => item.index === currentIndex.value)
-  if (!currentCard)
+  // If there's a card currently restoring, target that card instead of current card
+  const restoringCard = cardsInTransition.value.find(card => card.animationType === 'restore')
+  const targetCard = restoringCard || stackList.value.find(item => item.index === currentIndex.value)
+
+  if (!targetCard)
     return
 
-  const cardRef = cardInstanceRefs.value.get(currentCard.index)
-  cardRef?.[type]()
-  handleCardSwipe(currentCard.item, currentCard.itemId, type === 'approve')
+  handleCardSwipe(targetCard.item, targetCard.itemId, type === 'approve')
 }
 
 /**
@@ -164,17 +161,7 @@ const reject = () => performCardAction('reject')
 /**
  * Restores card
  */
-function restore() {
-  const restored = restoreCard()
-  if (restored) {
-    cardsInTransition.value.forEach((visItem) => {
-      if (visItem.animationType === 'restore') {
-        const cardRef = cardInstanceRefs.value.get(visItem.index)
-        cardRef?.restore()
-      }
-    })
-  }
-}
+const restore = () => performCardAction('restore')
 
 defineExpose({
   restore,
@@ -232,7 +219,7 @@ defineExpose({
       <!-- Animating cards -->
       <div
         v-for="({ item, itemId, state, zIndex, animationType, initialPosition }, domIndex) in cardsInTransition"
-        :key="`anim-${itemId}`"
+        :key="`anim-${itemId}-${animationType}`"
         :data-item-id="itemId"
         class="flashcards__card-wrapper flashcards__card-wrapper--animating"
         :style="[{ zIndex }, getCardStyle(cardsInTransition.length - domIndex - 1)]"

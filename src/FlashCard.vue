@@ -75,15 +75,12 @@ const el = useTemplateRef('flash-card')
 const {
   position,
   isDragging,
-  restore,
-  reject,
-  approve,
   setupInteract,
   cleanupInteract,
 } = useDragSetup(el, () => ({
   ...params,
   initialPosition,
-  onComplete(approved) {
+  onDragComplete(approved) {
     emit('complete', approved, position)
   },
 }))
@@ -101,9 +98,6 @@ onMounted(() => {
 })
 
 defineExpose({
-  reject,
-  restore,
-  approve,
   position,
 })
 </script>
