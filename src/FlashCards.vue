@@ -204,7 +204,10 @@ defineExpose({
         :key="`stack-${itemId}`"
         :data-item-id="itemId"
         class="flashcards__card-wrapper"
-        :style="[{ zIndex }, getCardStyle(domIndex)]"
+        :style="[
+          { zIndex },
+          getCardStyle(domIndex + cardsInTransition.filter(c => c.animationType === 'restore').length),
+        ]"
       >
         <FlashCard
           :ref="el => el && cardInstanceRefs.set(index, el as InstanceType<typeof FlashCard>)"
@@ -228,11 +231,11 @@ defineExpose({
 
       <!-- Animating cards -->
       <div
-        v-for="{ item, itemId, state, zIndex, animationType, initialPosition } in cardsInTransition"
+        v-for="({ item, itemId, state, zIndex, animationType, initialPosition }, domIndex) in cardsInTransition"
         :key="`anim-${itemId}`"
         :data-item-id="itemId"
         class="flashcards__card-wrapper flashcards__card-wrapper--animating"
-        :style="{ zIndex }"
+        :style="[{ zIndex }, getCardStyle(cardsInTransition.length - domIndex - 1)]"
       >
         <FlashCard
           v-bind="flashCardProps"
@@ -278,7 +281,7 @@ defineExpose({
   pointer-events: none;
   contain: layout;
   grid-area: 1 / 1;
-  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s cubic-bezier(0.4,0,0.2,1);
 }
 .flashcards__card--active { pointer-events: all; }
 .flashcards-empty-state { grid-area:1/1; display:flex;align-items:center;justify-content:center;pointer-events:none; }

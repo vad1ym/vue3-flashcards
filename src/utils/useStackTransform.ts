@@ -59,7 +59,7 @@ export function useStackTransform(_options: MaybeRefOrGetter<StackTransformOptio
         break
     }
 
-    return `${transform}; opacity: ${isStacked ? 1 : 0}; color: ${isStacked ? 'black' : 'red'}`
+    return `${transform}; opacity: ${isStacked ? 1 : 0};`
   }
 
   return {
