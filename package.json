@@ -94,5 +94,8 @@
     "*.{vue,ts}": [
       "eslint --fix"
     ]
+  },
+  "changelog": {
+    "output": false
   }
 }
