@@ -200,11 +200,12 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
   // -------------------
   // Restore
   // -------------------
-  function restoreCard(): boolean {
-    if (!canRestore.value)
-      return false
+  function restoreCard(): T | undefined {
+    if (!canRestore.value) {
+      return
+    }
 
-    const { items } = options.value
+    const { items, virtualBuffer } = options.value
 
     // Simple index-based restore (LIFO order by index)
     for (let i = currentIndex.value - 1; i >= 0; i--) {
@@ -229,18 +230,17 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
             item,
             index: i,
             itemId,
-            zIndex: options.value.virtualBuffer + 1,
+            zIndex: virtualBuffer + 1,
             animationType: 'restore',
             state: { ...state, type: restoreFromType as 'approve' | 'reject' },
           }
 
           // Replace existing approve/reject animation or add new restore
           addOrReplaceCard(newCard, ['approve', 'reject'])
-          return true
+          return item
         }
       }
     }
-    return false
   }
 
   return {

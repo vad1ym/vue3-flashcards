@@ -12,7 +12,7 @@ import InteractiveCard from './InteractiveCard.vue'
 import ItemsManager from './ItemsManager.vue'
 
 interface Event {
-  type: 'approve' | 'reject'
+  type: 'approve' | 'reject' | 'restore'
   item: CardItem
   timestamp: string
 }
@@ -79,6 +79,15 @@ function onApprove(item: CardItem) {
 function onReject(item: CardItem) {
   events.value.push({
     type: 'reject',
+    item,
+    timestamp: new Date().toLocaleTimeString(),
+  })
+  eventsLogRef.value?.scrollToBottom()
+}
+
+function onRestore(item: CardItem) {
+  events.value.push({
+    type: 'restore',
     item,
     timestamp: new Date().toLocaleTimeString(),
   })
@@ -203,6 +212,7 @@ function resetConfig() {
                       track-by="id"
                       @approve="onApprove"
                       @reject="onReject"
+                      @restore="onRestore"
                     >
                       <template #default="{ item }">
                         <InteractiveCard :item="item" />

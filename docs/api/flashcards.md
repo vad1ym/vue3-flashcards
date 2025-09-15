@@ -254,6 +254,11 @@ function blurTransform(position) {
 - **Payload:** `item: T`
 - **Description:** Emitted when a card is rejected (swiped left or rejected via actions).
 
+### `restore`
+
+- **Payload:** `item: T`
+- **Description:** Emitted when a card is restored (returned to the stack via restore action).
+
 ```vue
 <script setup>
 function handleApprove(item) {
@@ -265,6 +270,11 @@ function handleReject(item) {
   console.log('Rejected:', item)
   // Add to rejected list, save to database, etc.
 }
+
+function handleRestore(item) {
+  console.log('Restored:', item)
+  // Remove from approved/rejected lists, etc.
+}
 </script>
 
 <template>
@@ -272,6 +282,7 @@ function handleReject(item) {
     :items="cards"
     @approve="handleApprove"
     @reject="handleReject"
+    @restore="handleRestore"
   >
     <!-- slots -->
   </FlashCards>

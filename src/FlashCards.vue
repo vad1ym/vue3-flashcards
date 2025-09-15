@@ -58,6 +58,7 @@ const {
 const emit = defineEmits<{
   approve: [item: T]
   reject: [item: T]
+  restore: [item: T]
 }>()
 
 defineSlots<{
@@ -135,8 +136,13 @@ function handleCardSwipe(item: T, itemId: string | number, approved: boolean, po
  * Helper to perform card action
  */
 function performCardAction(type: 'approve' | 'reject' | 'restore') {
-  if (type === 'restore')
-    return restoreCard()
+  if (type === 'restore') {
+    const restoredItem = restoreCard()
+    if (restoredItem) {
+      emit('restore', restoredItem)
+    }
+    return
+  }
 
   // If there's a card currently restoring, target that card instead of current card
   const restoringCard = cardsInTransition.value.find(card => card.animationType === 'restore')

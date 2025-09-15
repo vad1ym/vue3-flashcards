@@ -129,6 +129,7 @@ function blurTransform(position) {
 |------------|---------|-------------|
 | approve | `item: T` | Emitted when a card is approved (swiped right or approved via actions) |
 | reject | `item: T` | Emitted when a card is rejected (swiped left or rejected via actions) |
+| restore | `item: T` | Emitted when a card is restored (returned to the stack via restore action) |
 
 ## Exposed
 | Method/Property | Type | Description |

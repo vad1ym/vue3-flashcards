@@ -3,7 +3,7 @@ import type { CardItem } from './InteractiveCard.vue'
 import { nextTick, ref } from 'vue'
 
 interface Event {
-  type: 'approve' | 'reject'
+  type: 'approve' | 'reject' | 'restore'
   item: CardItem
   timestamp: string
 }
@@ -59,10 +59,10 @@ defineExpose({
             v-for="(event, index) in events"
             :key="index"
             class="flex items-start gap-2 py-0.5"
-            :class="event.type === 'approve' ? 'text-green-400' : 'text-red-400'"
+            :class="event.type === 'approve' ? 'text-green-400' : event.type === 'reject' ? 'text-red-400' : 'text-gray-400'"
           >
             <span class="text-gray-500 shrink-0">{{ event.timestamp }}</span>
-            <span class="shrink-0">{{ event.type === 'approve' ? '[✓]' : '[✗]' }}</span>
+            <span class="shrink-0">{{ event.type === 'approve' ? '[✓]' : event.type === 'reject' ? '[✗]' : '' }}</span>
             <span class="text-gray-300">{{ event.type }}:</span>
             <span class="truncate">{{ event.item.title }} (id={{ event.item.id }})</span>
           </div>

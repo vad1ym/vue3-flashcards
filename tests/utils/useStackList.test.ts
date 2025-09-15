@@ -290,11 +290,11 @@ describe('useStackList', () => {
       await stackList.swipeCard(1, true)
       const firstAnimatingCount = stackList.cardsInTransition.value.length
 
-      // Try to set approval again
-      await stackList.swipeCard(1, false) // Should be ignored
+      // Try to set approval again with different type
+      await stackList.swipeCard(1, false) // This will add new animation
 
-      expect(stackList.cardsInTransition.value.length).toBe(firstAnimatingCount)
-      expect(stackList.history.get(1)?.type).toBe('approve') // Should remain 'approve'
+      expect(stackList.cardsInTransition.value.length).toBe(firstAnimatingCount + 1)
+      expect(stackList.history.get(1)?.type).toBe('reject') // Should be updated to 'reject'
     })
 
     it('should not change already completed items', async () => {
@@ -311,10 +311,10 @@ describe('useStackList', () => {
       await stackList.swipeCard(1, true)
       expect(stackList.cardsInTransition.value[0].animationType).toBe('approve')
 
-      // Try to change to rejection while animating - should be ignored since item is already completed
+      // Try to change to rejection while animating - this will add new animation
       await stackList.swipeCard(1, false)
-      expect(stackList.cardsInTransition.value).toHaveLength(1) // Still one animation
-      expect(stackList.cardsInTransition.value[0].animationType).toBe('approve') // Type unchanged
+      expect(stackList.cardsInTransition.value).toHaveLength(2) // Now two animations
+      expect(stackList.history.get(1)?.type).toBe('reject') // Type changed to reject
     })
 
     it('should handle non-existent item ids gracefully', async () => {
@@ -389,8 +389,8 @@ describe('useStackList', () => {
       expect(stackList.canRestore.value).toBe(false)
 
       await stackList.swipeCard(1, true)
-      // Still animating, so can't restore yet
-      expect(stackList.canRestore.value).toBe(false)
+      // Card is completed and can be restored (even while animating)
+      expect(stackList.canRestore.value).toBe(true)
 
       // Complete animation
       stackList.removeAnimatingCard(1)
@@ -430,7 +430,8 @@ describe('useStackList', () => {
       expect(stackList.canRestore.value).toBe(true)
 
       const restored = stackList.restoreCard()
-      expect(restored).toBe(true)
+      expect(restored).toBeTruthy()
+      expect(restored).toEqual({ id: 2, title: 'Item 2' })
 
       // Should restore item 2 (most recent)
       expect(stackList.cardsInTransition.value).toHaveLength(1)
@@ -457,7 +458,8 @@ describe('useStackList', () => {
 
       stackList.removeAnimatingCard(1, { withHistory: true })
       expect(stackList.cardsInTransition.value).toHaveLength(0)
-      expect(stackList.history.has(1)).toBe(false)
+      expect(stackList.history.has(1)).toBe(true)
+      expect(stackList.history.get(1)?.completed).toBe(false)
     })
 
     it('should not restore if no items can be restored', () => {
@@ -471,7 +473,7 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
 
       const restored = stackList.restoreCard()
-      expect(restored).toBe(false)
+      expect(restored).toBeUndefined()
       expect(stackList.cardsInTransition.value).toHaveLength(0)
     })
 
@@ -495,7 +497,8 @@ describe('useStackList', () => {
 
       // Should restore card 2, not card 1 (which is still animating)
       const restored = stackList.restoreCard()
-      expect(restored).toBe(true)
+      expect(restored).toBeTruthy()
+      expect(restored).toEqual({ id: 2, title: 'Item 2' })
       expect(stackList.cardsInTransition.value.find(c => c.animationType === 'restore')?.item.id).toBe(2)
     })
   })
