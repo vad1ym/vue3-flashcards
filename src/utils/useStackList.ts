@@ -51,6 +51,12 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     return result
   })
 
+  // Expected index after restoring animation, to better handle isStart & isEnd
+  const expectedIndex = computed(() => {
+    const restoreAnimations = cardsInTransition.value.filter(card => card.animationType === 'restore')
+    return currentIndex.value - restoreAnimations.length
+  })
+
   // For infinite mode reset history on new cycle (when index points outside of source array)
   watch(currentIndex, (ci) => {
     const { infinite, items } = options.value
@@ -112,25 +118,22 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
   })
 
   // Is start is true if current index is 0
-  const isStart = computed(() => currentIndex.value === 0)
+  const isStart = computed(() => expectedIndex.value === 0)
 
   // Is end is true if current index is greater or equal to items length
-  const isEnd = computed(() => {
-    return currentIndex.value >= options.value.items.length
-  })
+  const isEnd = computed(() => expectedIndex.value >= options.value.items.length)
 
   // Can restore is true if there is at least one completed card before current index
   // Also check animating card
   const canRestore = computed(() => {
-    if (options.value.items.length <= 1)
+    if (options.value.items.length <= 1 || isStart.value)
       return false
 
     const { items } = options.value
-    const animatingIds = new Set(cardsInTransition.value.map(card => card.itemId))
 
     for (let i = currentIndex.value - 1; i >= 0; i--) {
       const id = getId(items[i], i)
-      if (history.get(id)?.completed && !animatingIds.has(id))
+      if (history.get(id)?.completed)
         return true
     }
     return false
