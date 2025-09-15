@@ -12,7 +12,7 @@
 [![Coverage](https://codecov.io/gh/vad1ym/vue3-flashcards/branch/main/graph/badge.svg)](https://codecov.io/gh/vad1ym/vue3-flashcards)
 [![License](https://img.shields.io/npm/l/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://github.com/vad1ym/vue3-flashcards/blob/main/LICENSE)
 
-[**📚 Documentation**](https://vad1ym.github.io/vue3-flashcards) • [**🎮 Examples**](https://vad1ym.github.io/vue3-flashcards/examples) • [**🚀 Getting Started**](https://vad1ym.github.io/vue3-flashcards/guide/getting-started) • [**▶️ Interactive Demo**](https://vad1ym.github.io/vue3-flashcards/guide/interactive-demo)
+[**📚 Documentation**](https://vad1ym.github.io/vue3-flashcards) • [**🎮 Examples**](https://vad1ym.github.io/vue3-flashcards/examples) • [**🚀 Getting Started**](https://vad1ym.github.io/vue3-flashcards/guide/getting-started) • [**▶️ Interactive Demo**](https://vad1ym.github.io/vue3-flashcards/interactive-demo.html)
 
 </div>
 
@@ -21,7 +21,7 @@
 ## ✨ Features
 
 - **🎯 Tinder-style interactions** - Intuitive swipe gestures with smooth animations
-- **🔄 Card flipping** - Two-sided cards with beautiful flip animations  
+- **🔄 Card flipping** - Two-sided cards with beautiful flip animations
 - **⚡ Zero dependencies** - Lightweight and performant, built purely with Vue 3 and CSS
 - **🪶 Ultra-lightweight** - Minimal bundle size with no external dependencies
 - **🎨 Smooth animations** - Hardware-accelerated CSS transitions for 60fps performance
