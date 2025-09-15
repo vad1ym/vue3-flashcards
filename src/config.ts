@@ -16,4 +16,7 @@ export const config = {
   // Flip card
   defaultFlipWaitAnimationEnd: true,
   defaultFlipAxis: 'y',
+
+  // Extra
+  defaultResetAnimationDelay: 90,
 }

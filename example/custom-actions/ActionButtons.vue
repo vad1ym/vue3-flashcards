@@ -3,6 +3,7 @@ defineProps<{
   approve: () => void
   reject: () => void
   restore: () => void
+  reset: (options?: { animate?: boolean }) => void
 }>()
 </script>
 
@@ -21,10 +22,22 @@ defineProps<{
       ✅ Learn
     </button>
     <button
-      class="col-span-2 px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
+      class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
       @click="restore"
     >
       ↩️ Restore Last
+    </button>
+    <button
+      class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
+      @click="reset()"
+    >
+      🔄 Reset All
+    </button>
+    <button
+      class="px-6 col-span-2 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
+      @click="reset({ animate: true })"
+    >
+      🔄 Reset All Animated
     </button>
   </div>
 </template>

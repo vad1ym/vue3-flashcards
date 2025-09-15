@@ -75,6 +75,7 @@ defineSlots<{
     restore: () => void
     reject: () => void
     approve: () => void
+    reset: () => void
     isEnd: boolean
     isStart: boolean
     canRestore: boolean
@@ -107,6 +108,7 @@ const {
   swipeCard,
   restoreCard,
   removeAnimatingCard,
+  reset,
 } = useStackList<T>(() => ({
   items,
   infinite,
@@ -184,6 +186,7 @@ defineExpose({
   restore,
   approve,
   reject,
+  reset,
   canRestore,
   isEnd,
   isStart,
@@ -198,7 +201,7 @@ defineExpose({
         key="empty-state"
         class="flashcards-empty-state"
       >
-        <slot name="empty">
+        <slot name="empty" :reset="reset">
           No more cards!
         </slot>
       </div>
@@ -266,6 +269,7 @@ defineExpose({
       :restore="restore"
       :reject="reject"
       :approve="approve"
+      :reset="reset"
       :is-end="isEnd"
       :is-start="isStart"
       :can-restore="canRestore"
@@ -287,5 +291,5 @@ defineExpose({
   transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s cubic-bezier(0.4,0,0.2,1);
 }
 .flashcards__card--active { pointer-events: all; }
-.flashcards-empty-state { grid-area:1/1; display:flex;align-items:center;justify-content:center;pointer-events:none; }
+.flashcards-empty-state { grid-area:1/1; display:flex;align-items:center;justify-content:center; }
 </style>

@@ -8,12 +8,8 @@ const cards = ref([
   { id: 1, text: 'Business Strategy', description: 'Learn the fundamentals of strategic planning', icon: '💼' },
   { id: 2, text: 'Data Science', description: 'Master statistical analysis and machine learning', icon: '📊' },
   { id: 3, text: 'UI/UX Design', description: 'Create beautiful and intuitive user experiences', icon: '🎨' },
-  // { id: 4, text: 'Business Strategy', description: 'Learn the fundamentals of strategic planning', icon: '💼' },
-  // { id: 5, text: 'Data Science', description: 'Master statistical analysis and machine learning', icon: '📊' },
-  // { id: 6, text: 'UI/UX Design', description: 'Create beautiful and intuitive user experiences', icon: '🎨' },
-  // { id: 7, text: 'Business Strategy', description: 'Learn the fundamentals of strategic planning', icon: '💼' },
-  // { id: 8, text: 'Data Science', description: 'Master statistical analysis and machine learning', icon: '📊' },
-  // { id: 9, text: 'UI/UX Design', description: 'Create beautiful and intuitive user experiences', icon: '🎨' },
+  { id: 4, text: 'Frontend Development', description: 'Build responsive and interactive web applications', icon: '💻' },
+  { id: 5, text: 'DevOps', description: 'Gain hands-on experience with DevOps tools and practices', icon: '🚀' },
 ])
 
 const disableDrag = ref(false)
@@ -38,11 +34,12 @@ const disableDrag = ref(false)
           <LearningCard :item="item" />
         </template>
 
-        <template #actions="{ approve, reject, restore }">
+        <template #actions="{ approve, reject, restore, reset }">
           <ActionButtons
             :approve="approve"
             :reject="reject"
             :restore="restore"
+            :reset="reset"
           />
         </template>
       </FlashCards>

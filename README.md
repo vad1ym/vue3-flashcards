@@ -12,7 +12,7 @@
 [![Coverage](https://codecov.io/gh/vad1ym/vue3-flashcards/branch/main/graph/badge.svg)](https://codecov.io/gh/vad1ym/vue3-flashcards)
 [![License](https://img.shields.io/npm/l/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://github.com/vad1ym/vue3-flashcards/blob/main/LICENSE)
 
-[**📚 Documentation**](https://vad1ym.github.io/vue3-flashcards) • [**🎮 Examples**](https://vad1ym.github.io/vue3-flashcards/examples) • [**🚀 Getting Started**](https://vad1ym.github.io/vue3-flashcards/guide/getting-started)
+[**📚 Documentation**](https://vad1ym.github.io/vue3-flashcards) • [**🎮 Examples**](https://vad1ym.github.io/vue3-flashcards/examples) • [**🚀 Getting Started**](https://vad1ym.github.io/vue3-flashcards/guide/getting-started) • [**▶️ Interactive Demo**](https://vad1ym.github.io/vue3-flashcards/guide/interactive-demo)
 
 </div>
 
@@ -146,6 +146,7 @@ function blurTransform(position) {
 | restore | `() => void` | Returns to the previous card if available |
 | approve | `() => void` | Triggers approval animation on current card |
 | reject | `() => void` | Triggers rejection animation on current card |
+| reset | `(options?) => void` | Resets all cards to initial state. Options: `{ animated?: boolean, delay?: number }` |
 | canRestore | `boolean` | Whether there is a previous card to restore to |
 | isEnd | `boolean` | Whether all cards have been swiped |
 

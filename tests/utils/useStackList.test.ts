@@ -723,4 +723,199 @@ describe('useStackList', () => {
       expect(stackList.history.get(3)).toBeUndefined()
     })
   })
+
+  describe('reset functionality', () => {
+    it('should reset all state to initial values', async () => {
+      const options = ref<StackListOptions<TestItem>>({
+        items: createTestItems(3),
+        infinite: false,
+        virtualBuffer: 3,
+        trackBy: 'id',
+      })
+
+      const stackList = useStackList(options)
+
+      // Initial state
+      expect(stackList.currentIndex.value).toBe(0)
+      expect(stackList.isStart.value).toBe(true)
+      expect(stackList.canRestore.value).toBe(false)
+      expect(stackList.cardsInTransition.value).toHaveLength(0)
+      expect(stackList.history.size).toBe(0)
+
+      // Perform some operations
+      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(2, false)
+      stackList.restoreCard()
+
+      // State should be changed
+      expect(stackList.currentIndex.value).toBeGreaterThanOrEqual(0)
+      expect(stackList.isStart.value).toBe(false)
+      expect(stackList.canRestore.value).toBe(true)
+      expect(stackList.cardsInTransition.value.length).toBeGreaterThan(0)
+      expect(stackList.history.size).toBeGreaterThan(0)
+
+      // Reset everything
+      stackList.reset()
+
+      // Should be back to initial state (basic checks only, as cards may still be animating)
+      expect(stackList.currentIndex.value).toBe(0)
+      expect(stackList.canRestore.value).toBe(false)
+      expect(stackList.history.size).toBe(0)
+
+      // Note: isStart may not be true immediately if cards are still animating
+    })
+
+    it('should clear all history entries', async () => {
+      const options = ref<StackListOptions<TestItem>>({
+        items: createTestItems(5),
+        infinite: false,
+        virtualBuffer: 3,
+        trackBy: 'id',
+      })
+
+      const stackList = useStackList(options)
+
+      // Create some history
+      await stackList.swipeCard(1, true)
+      stackList.removeAnimatingCard(1)
+      await stackList.swipeCard(2, false)
+      stackList.removeAnimatingCard(2)
+      await stackList.swipeCard(3, true)
+      stackList.removeAnimatingCard(3)
+
+      expect(stackList.history.size).toBe(3)
+      expect(stackList.history.get(1)?.completed).toBe(true)
+      expect(stackList.history.get(2)?.completed).toBe(true)
+      expect(stackList.history.get(3)?.completed).toBe(true)
+
+      // Reset
+      stackList.reset()
+
+      // History should be empty
+      expect(stackList.history.size).toBe(0)
+      expect(stackList.history.get(1)).toBeUndefined()
+      expect(stackList.history.get(2)).toBeUndefined()
+      expect(stackList.history.get(3)).toBeUndefined()
+    })
+
+    it('should reset state without clearing animating cards', async () => {
+      const options = ref<StackListOptions<TestItem>>({
+        items: createTestItems(3),
+        infinite: false,
+        virtualBuffer: 3,
+        trackBy: 'id',
+      })
+
+      const stackList = useStackList(options)
+
+      // Start some animations
+      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(2, false)
+      await stackList.swipeCard(3, true)
+
+      expect(stackList.cardsInTransition.value.length).toBeGreaterThan(0)
+
+      // Reset
+      stackList.reset()
+
+      // Should reset state but not clear animating cards (they clear themselves)
+      expect(stackList.currentIndex.value).toBe(0)
+      expect(stackList.canRestore.value).toBe(false)
+      expect(stackList.history.size).toBe(0)
+    })
+
+    it('should work with infinite mode', async () => {
+      const options = ref<StackListOptions<TestItem>>({
+        items: createTestItems(3),
+        infinite: true,
+        virtualBuffer: 3,
+        trackBy: 'id',
+      })
+
+      const stackList = useStackList(options)
+
+      // Swipe through all items in infinite mode
+      await stackList.swipeCard(1, true)
+      stackList.removeAnimatingCard(1)
+      await stackList.swipeCard(2, false)
+      stackList.removeAnimatingCard(2)
+      await stackList.swipeCard(3, true)
+      stackList.removeAnimatingCard(3)
+
+      // In infinite mode, history may vary, let's just check that operations completed without errors
+
+      // Reset
+      stackList.reset()
+
+      // Should be back to start
+      expect(stackList.currentIndex.value).toBe(0)
+      expect(stackList.isStart.value).toBe(true)
+      expect(stackList.history.size).toBe(0)
+    })
+
+    it('should handle reset when already at initial state', () => {
+      const options = ref<StackListOptions<TestItem>>({
+        items: createTestItems(3),
+        infinite: false,
+        virtualBuffer: 3,
+        trackBy: 'id',
+      })
+
+      const stackList = useStackList(options)
+
+      // Reset at initial state should not cause errors
+      expect(() => stackList.reset()).not.toThrow()
+
+      // State should remain initial
+      expect(stackList.currentIndex.value).toBe(0)
+      expect(stackList.isStart.value).toBe(true)
+      expect(stackList.canRestore.value).toBe(false)
+      expect(stackList.cardsInTransition.value).toHaveLength(0)
+      expect(stackList.history.size).toBe(0)
+    })
+
+    it('should handle reset with empty items array', () => {
+      const options = ref<StackListOptions<TestItem>>({
+        items: [],
+        infinite: false,
+        virtualBuffer: 3,
+        trackBy: 'id',
+      })
+
+      const stackList = useStackList(options)
+
+      // Reset with empty items should not cause errors
+      expect(() => stackList.reset()).not.toThrow()
+
+      expect(stackList.currentIndex.value).toBe(0)
+      expect(stackList.cardsInTransition.value).toHaveLength(0)
+      expect(stackList.history.size).toBe(0)
+    })
+
+    it('should make isEnd false after reset if there are items', async () => {
+      const options = ref<StackListOptions<TestItem>>({
+        items: createTestItems(2),
+        infinite: false,
+        virtualBuffer: 3,
+        trackBy: 'id',
+      })
+
+      const stackList = useStackList(options)
+
+      // Swipe all cards to reach end
+      await stackList.swipeCard(1, true)
+      stackList.removeAnimatingCard(1)
+      await stackList.swipeCard(2, true)
+      stackList.removeAnimatingCard(2)
+
+      expect(stackList.isEnd.value).toBe(true)
+
+      // Reset
+      stackList.reset()
+
+      // Should not be at end anymore
+      expect(stackList.isEnd.value).toBe(false)
+      expect(stackList.isStart.value).toBe(true)
+    })
+  })
 })

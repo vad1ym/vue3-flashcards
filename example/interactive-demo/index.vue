@@ -237,7 +237,7 @@ function resetConfig() {
                         </div>
                       </template>
 
-                      <template #actions="{ restore, reject, approve, isEnd, isStart, canRestore }">
+                      <template #actions="{ restore, reject, approve, reset, isEnd, isStart, canRestore }">
                         <Actions
                           :is-end="isEnd"
                           :is-start="isStart"
@@ -246,11 +246,12 @@ function resetConfig() {
                           @restore="restore"
                           @reject="reject"
                           @approve="approve"
+                          @reset="reset"
                         />
                       </template>
 
-                      <template #empty>
-                        <EmptyState @reset-items="resetItems" />
+                      <template #empty="{ reset }">
+                        <EmptyState @reset-items="reset" />
                       </template>
                     </FlashCards>
                   </div>

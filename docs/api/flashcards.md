@@ -185,22 +185,41 @@ function blurTransform(position) {
 
 ### `actions`
 
-- **Props:** `{ restore: () => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }`
+- **Props:** `{ restore: () => void, reject: () => void, approve: () => void, reset: (options?) => void, isEnd: boolean, canRestore: boolean }`
 - **Description:** Custom actions UI for controlling card behavior programmatically.
+
+**Available actions:**
+- `restore()` - Returns to the previous card if available
+- `reject()` - Triggers rejection animation on current card  
+- `approve()` - Triggers approval animation on current card
+- `reset(options?)` - Resets all cards with optional animation settings
+- `isEnd` - Boolean indicating if all cards have been swiped
+- `canRestore` - Boolean indicating if there's a previous card to restore
 
 ```vue
 <template>
   <FlashCards :items="cards">
-    <template #actions="{ approve, reject, restore, isEnd, canRestore }">
+    <template #actions="{ approve, reject, restore, reset, isEnd, canRestore }">
       <div class="action-buttons">
         <button :disabled="isEnd" @click="reject">
-          ❌
+          ❌ Reject
         </button>
         <button :disabled="!canRestore" @click="restore">
-          ↩️
+          ↩️ Restore
         </button>
         <button :disabled="isEnd" @click="approve">
-          ✅
+          ✅ Approve
+        </button>
+        
+        <!-- Reset with different options -->
+        <button @click="reset()">
+          🔄 Reset Instantly
+        </button>
+        <button @click="reset({ animated: true })">
+          ✨ Reset with Animation
+        </button>
+        <button @click="reset({ animated: true, delay: 500 })">
+          🎬 Slow Reset Animation
         </button>
       </div>
     </template>
@@ -311,12 +330,19 @@ const flashcardsRef = ref()
 function programmaticApprove() {
   flashcardsRef.value.approve()
 }
+
+function animatedReset() {
+  flashcardsRef.value.reset({ animated: true, delay: 300 })
+}
 </script>
 
 <template>
   <FlashCards ref="flashcardsRef" :items="cards" />
   <button @click="programmaticApprove">
     Approve
+  </button>
+  <button @click="animatedReset">
+    Animated Reset
   </button>
 </template>
 ```
@@ -335,6 +361,31 @@ function programmaticApprove() {
 
 - **Type:** `() => void`
 - **Description:** Triggers rejection animation on the current card.
+
+### `reset(options?)`
+
+- **Type:** `(options?: ResetOptions) => void`
+- **Description:** Resets all cards to their initial state. Clears the swipe history and removes all animating cards, effectively returning the component to its starting state.
+
+**ResetOptions:**
+```typescript
+interface ResetOptions {
+  animated?: boolean  // If true, restores cards one by one with animations (default: false)
+  delay?: number      // Delay between animations in ms when animated=true (default: 200)
+}
+```
+
+**Examples:**
+```javascript
+// Instant reset (default)
+flashcardsRef.value.reset()
+
+// Animated reset with default delay (200ms)
+flashcardsRef.value.reset({ animated: true })
+
+// Animated reset with custom delay
+flashcardsRef.value.reset({ animated: true, delay: 500 })
+```
 
 ### `canRestore`
 
@@ -356,6 +407,11 @@ interface Card {
   title: string
   description: string
   image?: string
+}
+
+interface ResetOptions {
+  animated?: boolean  // Show restore animations (default: false)
+  delay?: number      // Delay between animations in ms (default: 200)
 }
 
 const cards = ref<Card[]>([

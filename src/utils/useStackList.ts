@@ -1,6 +1,7 @@
 import type { MaybeRefOrGetter, Ref } from 'vue'
 import type { DragPosition } from './useDragSetup'
 import { computed, reactive, shallowRef, toRef, watch } from 'vue'
+import { config } from '../config'
 import { DragType } from './useDragSetup'
 
 export interface CardState {
@@ -24,6 +25,11 @@ export interface StackListOptions<T> {
   virtualBuffer: number
   trackBy?: keyof T | 'id'
   waitAnimationEnd?: boolean
+}
+
+export interface ResetOptions {
+  animate?: boolean
+  delay?: number
 }
 
 export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>) {
@@ -261,6 +267,27 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     }
   }
 
+  // -------------------
+  // Reset
+  // -------------------
+  async function reset(options?: ResetOptions) {
+    // Reset with cascading effect
+    if (options?.animate) {
+      const completedCards = [...history.entries()].filter(([_, state]) => state.completed)
+      for (let i = 0; i < completedCards.length; i++) {
+        const card = restoreCard()
+        if (card) {
+          // Delay before next card to make cascading effect
+          await new Promise(resolve =>
+            setTimeout(resolve, options?.delay ?? config.defaultResetAnimationDelay),
+          )
+        }
+      }
+    }
+
+    history.clear()
+  }
+
   return {
     history,
     currentIndex,
@@ -272,5 +299,6 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     swipeCard,
     restoreCard,
     removeAnimatingCard,
+    reset,
   }
 }
