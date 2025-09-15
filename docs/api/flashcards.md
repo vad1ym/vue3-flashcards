@@ -111,6 +111,17 @@ When stack is greater than virtualBuffer, virtualBuffer is automatically increas
 <FlashCards :items="cards" :stack="3" stack-direction="right" />
 ```
 
+### `waitAnimationEnd`
+
+- **Type:** `boolean`
+- **Default:** `false`
+- **Description:** Wait for animation to end before performing next action. When enabled, prevents rapid successive swipes and ensures smooth animations by blocking new actions until current animations complete.
+
+**Example:**
+```vue
+<FlashCards :items="cards" :wait-animation-end="true" />
+```
+
 ### `transformStyle`
 
 - **Type:** `(position: DragPosition) => string | null`

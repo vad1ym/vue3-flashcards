@@ -28,6 +28,7 @@ const config = ref<ConfigPanelProps>({
   threshold: defaultConfig.defaultThreshold,
   dragThreshold: defaultConfig.defaultDragThreshold,
   maxRotation: defaultConfig.defaultMaxRotation,
+  waitAnimationEnd: defaultConfig.defaultWaitAnimationEnd,
   maxDraggingX: null,
   maxDraggingY: null,
   disableDrag: false,
@@ -148,6 +149,7 @@ function resetConfig() {
   config.value.maxDraggingX = null
   config.value.maxDraggingY = null
   config.value.disableDrag = false
+  config.value.waitAnimationEnd = defaultConfig.defaultWaitAnimationEnd
   enableXLimit.value = false
   enableYLimit.value = false
 }
@@ -209,6 +211,7 @@ function resetConfig() {
                       :max-dragging-x="enableXLimit ? config.maxDraggingX : null"
                       :max-dragging-y="enableYLimit ? config.maxDraggingY : null"
                       :disable-drag="config.disableDrag"
+                      :wait-animation-end="config.waitAnimationEnd"
                       track-by="id"
                       @approve="onApprove"
                       @reject="onReject"

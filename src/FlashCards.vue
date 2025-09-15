@@ -41,6 +41,11 @@ export interface FlashCardsProps<Item> extends FlashCardProps {
    * Key to track items by (is required if you are going to modify items array)
    */
   trackBy?: keyof Item | 'id'
+
+  /**
+   * Wait for animation to end before performing next action
+   */
+  waitAnimationEnd?: boolean
 }
 
 const {
@@ -52,6 +57,7 @@ const {
   stackOffset = config.defaultStackOffset,
   stackDirection = config.defaultStackDirection,
   trackBy = config.defaultTrackBy,
+  waitAnimationEnd = config.defaultWaitAnimationEnd,
   ...flashCardProps
 } = defineProps<FlashCardsProps<T>>()
 
@@ -76,7 +82,6 @@ defineSlots<{
   empty?: () => any
 }>()
 
-const cardInstanceRefs = ref<Map<number, InstanceType<typeof FlashCard>>>(new Map())
 const containerHeight = ref(0)
 
 /**
@@ -107,6 +112,7 @@ const {
   infinite,
   virtualBuffer: calculateVirtualBuffer.value,
   trackBy,
+  waitAnimationEnd,
 }))
 
 /**
@@ -127,31 +133,36 @@ const {
 /**
  * Handles card swipe completion
  */
-function handleCardSwipe(item: T, itemId: string | number, approved: boolean, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
-  swipeCard(itemId, approved, position)
-  approved ? emit('approve', item) : emit('reject', item)
+function handleCardSwipe(itemId: string | number, approved: boolean, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
+  const swipedCard = swipeCard(itemId, approved, position)
+
+  if (!swipedCard)
+    return
+
+  approved
+    ? emit('approve', swipedCard)
+    : emit('reject', swipedCard)
 }
 
 /**
  * Helper to perform card action
  */
 function performCardAction(type: 'approve' | 'reject' | 'restore') {
-  if (type === 'restore') {
-    const restoredItem = restoreCard()
-    if (restoredItem) {
-      emit('restore', restoredItem)
+  switch (type) {
+    case 'restore': {
+      const restoredItem = restoreCard()
+      return restoredItem && emit('restore', restoredItem)
     }
-    return
+
+    case 'approve':
+    case 'reject': {
+      // If there's a card currently restoring, target that card instead of current card
+      const restoringCard = cardsInTransition.value.find(card => card.animationType === 'restore')
+      const targetCard = restoringCard || stackList.value.find(item => item.index === currentIndex.value)
+
+      return targetCard && handleCardSwipe(targetCard.itemId, type === 'approve')
+    }
   }
-
-  // If there's a card currently restoring, target that card instead of current card
-  const restoringCard = cardsInTransition.value.find(card => card.animationType === 'restore')
-  const targetCard = restoringCard || stackList.value.find(item => item.index === currentIndex.value)
-
-  if (!targetCard)
-    return
-
-  handleCardSwipe(targetCard.item, targetCard.itemId, type === 'approve')
 }
 
 /**
@@ -203,11 +214,10 @@ defineExpose({
         ]"
       >
         <FlashCard
-          :ref="el => el && cardInstanceRefs.set(index, el as InstanceType<typeof FlashCard>)"
           v-bind="flashCardProps"
           class="flashcards__card"
           :class="{ 'flashcards__card--active': index === currentIndex }"
-          @complete="(approved, pos) => handleCardSwipe(item, itemId, approved, pos)"
+          @complete="(approved, pos) => handleCardSwipe(itemId, approved, pos)"
           @mounted="containerHeight = Math.max($event, 0)"
         >
           <template #default>

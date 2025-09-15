@@ -11,6 +11,7 @@ export const config = {
   defaultStackScale: 0.05,
   defaultStackDirection: StackDirection.BOTTOM,
   defaultTrackBy: 'id',
+  defaultWaitAnimationEnd: false,
 
   // Flip card
   defaultFlipWaitAnimationEnd: true,

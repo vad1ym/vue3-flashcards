@@ -23,6 +23,7 @@ export interface StackListOptions<T> {
   infinite: boolean
   virtualBuffer: number
   trackBy?: keyof T | 'id'
+  waitAnimationEnd?: boolean
 }
 
 export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>) {
@@ -33,6 +34,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
 
   // Cards that are currently animating (using shallowRef for less re-renders)
   const cardsInTransition = shallowRef<StackItem<T>[]>([])
+  const hasCardsInTransition = computed(() => cardsInTransition.value.length > 0)
 
   // Generate ID for card
   function getId(item: T, index: number) {
@@ -171,20 +173,29 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
   // -------------------
   // Swiping functions
   // -------------------
-  async function swipeCard(itemId: string | number, approved: boolean, initialPosition?: DragPosition) {
-    const { items } = options.value
+  function swipeCard(itemId: string | number, approved: boolean, initialPosition?: DragPosition): T | undefined {
+    const { items, waitAnimationEnd } = options.value
 
-    const itemIndex = items.findIndex((item, index) => getId(item, index) === itemId)
-    if (itemIndex === -1)
+    // If some cards are in animation and waitAnimationEnd is true, prevent action
+    if (hasCardsInTransition.value && waitAnimationEnd) {
       return
+    }
+
+    // Check if current item still exist in source items array
+    const itemIndex = items.findIndex((item, index) => getId(item, index) === itemId)
+    if (itemIndex === -1) {
+      return
+    }
 
     const state = {
       type: approved ? DragType.APPROVE : DragType.REJECT,
       completed: true,
     }
 
+    const item = items[itemIndex]
+
     addOrReplaceCard({
-      item: items[itemIndex],
+      item,
       index: itemIndex,
       itemId,
       animationType: state.type,
@@ -195,6 +206,8 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
 
     // Always update history
     history.set(itemId, state)
+
+    return item
   }
 
   // -------------------
@@ -205,7 +218,12 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
       return
     }
 
-    const { items, virtualBuffer } = options.value
+    const { items, virtualBuffer, waitAnimationEnd } = options.value
+
+    // If some cards is in animation and waitAnimationEnd is true, prevent action
+    if (hasCardsInTransition.value && waitAnimationEnd) {
+      return
+    }
 
     // Simple index-based restore (LIFO order by index)
     for (let i = currentIndex.value - 1; i >= 0; i--) {

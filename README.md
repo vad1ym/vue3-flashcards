@@ -21,8 +21,16 @@
 ## ✨ Features
 
 - **🎯 Tinder-style interactions** - Intuitive swipe gestures with smooth animations
-- **🔄 Card flipping** - Two-sided cards with beautiful flip animations
+- **🔄 Card flipping** - Two-sided cards with beautiful flip animations  
 - **⚡ Zero dependencies** - Lightweight and performant, built purely with Vue 3 and CSS
+- **🪶 Ultra-lightweight** - Minimal bundle size with no external dependencies
+- **🎨 Smooth animations** - Hardware-accelerated CSS transitions for 60fps performance
+- **🔧 Highly customizable** - Extensive API with props, slots, events, and custom transforms
+- **📱 Touch & Mouse support** - Works seamlessly on desktop and mobile devices
+- **♾️ Infinite mode** - Loop through cards endlessly for continuous swiping
+- **🎯 Stack visualization** - Show multiple cards stacked with customizable depth and direction
+- **⚙️ Virtual rendering** - Efficient rendering for large datasets with virtual buffer
+- **🔄 Restore functionality** - Undo swipes and bring cards back to the stack
 
 ## 📦 Installation
 
@@ -87,6 +95,7 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `stackOffset` | `number` | `20` | Offset in pixels between stacked cards. |
 | `stackScale` | `number` | `0.05` | Scale reduction factor for stacked cards. Each card behind is scaled down by this amount × depth. |
 | `stackDirection` | `'top' \| 'bottom' \| 'left' \| 'right'` | `'bottom'` | Direction where stacked cards appear relative to the active card. |
+| `waitAnimationEnd` | `boolean` | `false` | Wait for animation to end before performing next action |
 | `transformStyle` | `(position: DragPosition) => string \| null` | `null` | Custom transform function for card movement during drag |
 
 #### Transform Style Function

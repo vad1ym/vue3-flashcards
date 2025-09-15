@@ -12,6 +12,7 @@ export interface ConfigPanelProps {
   maxDraggingX: number | null
   maxDraggingY: number | null
   disableDrag: boolean
+  waitAnimationEnd: boolean
 }
 
 interface Props {
@@ -358,6 +359,24 @@ defineEmits<Emits>()
               type="checkbox"
               class="checkbox checkbox-primary"
               @change="$emit('update:config', { ...config, disableDrag: ($event.target as HTMLInputElement).checked })"
+            >
+          </label>
+        </div>
+
+        <div>
+          <div class="mb-1">
+            <span class="label-text font-medium">Wait for Animation</span>
+          </div>
+          <div class="text-xs text-gray-500 mb-2">
+            Wait for animation to end before performing next action
+          </div>
+          <!-- Wait Animation End -->
+          <label class="cursor-pointer">
+            <input
+              :checked="config.waitAnimationEnd"
+              type="checkbox"
+              class="checkbox checkbox-primary"
+              @change="$emit('update:config', { ...config, waitAnimationEnd: ($event.target as HTMLInputElement).checked })"
             >
           </label>
         </div>
