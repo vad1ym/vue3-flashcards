@@ -23,7 +23,6 @@
 - **🎯 Tinder-style interactions** - Intuitive swipe gestures with smooth animations
 - **🔄 Card flipping** - Two-sided cards with beautiful flip animations
 - **⚡ Zero dependencies** - Lightweight and performant, built purely with Vue 3 and CSS
-- **🪶 Ultra-lightweight** - Minimal bundle size with no external dependencies
 - **🎨 Smooth animations** - Hardware-accelerated CSS transitions for 60fps performance
 - **🔧 Highly customizable** - Extensive API with props, slots, events, and custom transforms
 - **📱 Touch & Mouse support** - Works seamlessly on desktop and mobile devices
