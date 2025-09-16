@@ -2,20 +2,15 @@ import type { MaybeRefOrGetter, Ref } from 'vue'
 import type { DragPosition } from './useDragSetup'
 import { computed, reactive, shallowRef, toRef, watch } from 'vue'
 import { config } from '../config'
-import { DragType } from './useDragSetup'
-
-export interface CardState {
-  type: 'approve' | 'reject'
-  completed: boolean
-}
 
 export interface StackItem<T> {
   item: T
   index: number
   itemId: string | number
-  zIndex: number
-  animationType?: 'approve' | 'reject' | 'restore'
-  state?: CardState
+  animation?: {
+    type: string
+    isRestoring: boolean
+  }
   initialPosition?: DragPosition
 }
 
@@ -36,7 +31,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
   const options = toRef(_options) as Ref<StackListOptions<T>>
 
   // Swiping history
-  const history = reactive<Map<string | number, CardState>>(new Map())
+  const history = reactive<Map<string | number, string>>(new Map())
 
   // Cards that are currently animating (using shallowRef for less re-renders)
   const cardsInTransition = shallowRef<StackItem<T>[]>([])
@@ -54,14 +49,16 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
   // It is the pointer for the first card in the stack, to detect current active card
   const currentIndex = computed(() => {
     const { items } = options.value
-    const idx = items.findIndex((item, index) => !history.get(getId(item, index))?.completed)
+    const idx = items.findIndex((item, index) => !history.has(getId(item, index)))
     const result = idx === -1 ? items.length : idx
     return result
   })
 
   // Expected index after restoring animation, to better handle isStart & isEnd
   const expectedIndex = computed(() => {
-    const restoreAnimations = cardsInTransition.value.filter(card => card.animationType === 'restore')
+    const restoreAnimations = cardsInTransition.value.filter(card =>
+      card.animation?.isRestoring,
+    )
     return currentIndex.value - restoreAnimations.length
   })
 
@@ -97,8 +94,6 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
           item,
           index,
           itemId,
-          zIndex: virtualBuffer - i,
-          state: history.get(itemId),
         })
       }
     }
@@ -116,8 +111,6 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
           item,
           index: i,
           itemId,
-          zIndex: endIndex - i,
-          state: history.get(itemId),
         })
       }
     }
@@ -141,23 +134,27 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
 
     for (let i = currentIndex.value - 1; i >= 0; i--) {
       const id = getId(items[i], i)
-      if (history.get(id)?.completed)
+      if (history.has(id))
         return true
     }
     return false
   })
 
   // Helper function to add or replace card in transition
-  function addOrReplaceCard(newCard: StackItem<T>, replaceTypes: ('approve' | 'reject' | 'restore')[]) {
+  function addOrReplaceCard(transitionCard: StackItem<T>) {
+    // Try find oposite animation (approve/reject or restore)
     const existingCardIndex = cardsInTransition.value.findIndex(c =>
-      c.itemId === newCard.itemId && replaceTypes.includes(c.animationType!),
+      c.itemId === transitionCard.itemId
+      && c.animation?.isRestoring === !transitionCard.animation?.isRestoring,
     )
 
+    // If has oposite animation, replace it
     if (existingCardIndex !== -1) {
-      cardsInTransition.value.splice(existingCardIndex, 1, newCard)
+      cardsInTransition.value.splice(existingCardIndex, 1, transitionCard)
     }
+    // Otherwise add new
     else {
-      cardsInTransition.value.push(newCard)
+      cardsInTransition.value.push(transitionCard)
     }
 
     // Trigger reactivity for shallowRef
@@ -165,21 +162,24 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
   }
 
   // Remove animating card and optionally clear from history
-  function removeAnimatingCard(itemId: string | number, options?: { withHistory?: boolean }) {
-    cardsInTransition.value = cardsInTransition.value.filter(c => c.itemId !== itemId)
+  function removeAnimatingCard(itemId: string | number) {
+    const card = cardsInTransition.value.find(c => c.itemId === itemId)
+    if (!card)
+      return
 
-    if (options?.withHistory) {
-      const existingState = history.get(itemId)
-      if (existingState) {
-        history.set(itemId, { ...existingState, completed: false })
-      }
+    // If card was restored - remove card from history
+    if (card.animation?.isRestoring) {
+      history.delete(itemId)
     }
+
+    // Remove card from transitions (faster filter for performance)
+    cardsInTransition.value = cardsInTransition.value.filter(c => c.itemId !== itemId)
   }
 
   // -------------------
   // Swiping functions
   // -------------------
-  function swipeCard(itemId: string | number, approved: boolean, initialPosition?: DragPosition): T | undefined {
+  function swipeCard(itemId: string | number, action: string, initialPosition?: DragPosition): T | undefined {
     const { items, waitAnimationEnd } = options.value
 
     // If some cards are in animation and waitAnimationEnd is true, prevent action
@@ -193,10 +193,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
       return
     }
 
-    const state = {
-      type: approved ? DragType.APPROVE : DragType.REJECT,
-      completed: true,
-    }
+    // action parameter is already StackAction, no conversion needed
 
     const item = items[itemIndex]
 
@@ -204,14 +201,15 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
       item,
       index: itemIndex,
       itemId,
-      animationType: state.type,
-      state,
-      zIndex: options.value.virtualBuffer + 1,
+      animation: {
+        type: action,
+        isRestoring: false,
+      },
       initialPosition,
-    }, ['restore'])
+    })
 
     // Always update history
-    history.set(itemId, state)
+    history.set(itemId, action)
 
     return item
   }
@@ -224,7 +222,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
       return
     }
 
-    const { items, virtualBuffer, waitAnimationEnd } = options.value
+    const { items, waitAnimationEnd } = options.value
 
     // If some cards is in animation and waitAnimationEnd is true, prevent action
     if (hasCardsInTransition.value && waitAnimationEnd) {
@@ -235,32 +233,31 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     for (let i = currentIndex.value - 1; i >= 0; i--) {
       const item = items[i]
       const itemId = getId(item, i)
-      const state = history.get(itemId)
+      const action = history.get(itemId)
 
-      if (state?.completed) {
+      if (action) {
         // Skip cards that are already restoring (to allow parallel restores of different cards)
         const isAlreadyRestoring = cardsInTransition.value.some(c =>
-          c.itemId === itemId && c.animationType === 'restore',
+          c.itemId === itemId && c.animation?.isRestoring,
         )
 
         if (!isAlreadyRestoring) {
           // Find card that's animating approve/reject to determine restore type
           const animatingCard = cardsInTransition.value.find(c =>
-            c.itemId === itemId && ['approve', 'reject'].includes(c.animationType!),
+            c.itemId === itemId && c.animation && !c.animation.isRestoring,
           )
-          const restoreFromType = animatingCard?.animationType || state?.type
+          const restoreFromType = animatingCard?.animation?.type || action
 
-          const newCard: StackItem<T> = {
+          // Replace existing approve/reject animation or add new restore
+          addOrReplaceCard({
             item,
             index: i,
             itemId,
-            zIndex: virtualBuffer + 1,
-            animationType: 'restore',
-            state: { ...state, type: restoreFromType as 'approve' | 'reject' },
-          }
-
-          // Replace existing approve/reject animation or add new restore
-          addOrReplaceCard(newCard, ['approve', 'reject'])
+            animation: {
+              type: restoreFromType,
+              isRestoring: true,
+            },
+          })
           return item
         }
       }
@@ -273,19 +270,22 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
   async function reset(options?: ResetOptions) {
     // Reset with cascading effect
     if (options?.animate) {
-      const completedCards = [...history.entries()].filter(([_, state]) => state.completed)
+      const completedCards = [...history.entries()]
       for (let i = 0; i < completedCards.length; i++) {
-        const card = restoreCard()
-        if (card) {
+        if (restoreCard()) {
           // Delay before next card to make cascading effect
           await new Promise(resolve =>
             setTimeout(resolve, options?.delay ?? config.defaultResetAnimationDelay),
           )
         }
       }
+      // History will be cleared by removeAnimatingCard when restore animations finish
     }
-
-    history.clear()
+    else {
+      // No animation - clear everything immediately
+      history.clear()
+      cardsInTransition.value = []
+    }
   }
 
   return {

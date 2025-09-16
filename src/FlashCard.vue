@@ -4,7 +4,7 @@ import { onMounted, useTemplateRef, watch } from 'vue'
 import ApproveIcon from './components/icons/ApproveIcon.vue'
 import RejectIcon from './components/icons/RejectIcon.vue'
 import { config } from './config'
-import { DragType, useDragSetup } from './utils/useDragSetup'
+import { SwipeAction, useDragSetup } from './utils/useDragSetup'
 
 export interface FlashCardProps extends DragSetupParams {
   // Completely disable dragging feature
@@ -22,19 +22,18 @@ export interface FlashCardProps extends DragSetupParams {
   // Initial position for animation start, !just for internal usage!
   initialPosition?: DragPosition
 
-  // Animation type for card transitions
-  animationType?: 'approve' | 'reject' | 'restore'
-
-  // State for restore animations
-  animationState?: 'approve' | 'reject'
+  // Animation for card transitions
+  animation?: {
+    type: SwipeAction
+    isRestoring: boolean
+  }
 }
 
 const {
   maxRotation = config.defaultMaxRotation,
   transformStyle: customTransformStyle,
   initialPosition,
-  animationType,
-  animationState,
+  animation,
   ...params
 } = defineProps<FlashCardProps>()
 
@@ -42,7 +41,7 @@ const emit = defineEmits<{
   /**
    * Event fired when card is swiped to the end and passed result
    */
-  complete: [approved: boolean, position: DragPosition]
+  complete: [action: SwipeAction, position: DragPosition]
 
   /**
    * Event fired when card is mounted, passed element height
@@ -80,8 +79,8 @@ const {
 } = useDragSetup(el, () => ({
   ...params,
   initialPosition,
-  onDragComplete(approved) {
-    emit('complete', approved, position)
+  onDragComplete(action) {
+    emit('complete', action, position)
   },
 }))
 
@@ -115,23 +114,21 @@ defineExpose({
     <div
       class="flash-card__animation-wrapper"
       :class="{
-        'flash-card__animation-wrapper--approve': animationType === 'approve',
-        'flash-card__animation-wrapper--reject': animationType === 'reject',
-        'flash-card__animation-wrapper--restore-approve': animationType === 'restore' && animationState === 'approve',
-        'flash-card__animation-wrapper--restore-reject': animationType === 'restore' && animationState === 'reject',
+        [`flash-card-animation--${animation?.type}`]: animation?.type,
+        [`flash-card-animation--restore-${animation?.type}`]: animation?.isRestoring,
       }"
       @animationend="emit('animationend')"
     >
       <div class="flash-card__transform" :style="transformStyle(position)">
         <slot :is-dragging="isDragging" />
 
-        <div v-show="position.type === DragType.REJECT">
+        <div v-show="position.type === SwipeAction.REJECT">
           <slot name="reject" :delta="position.delta">
             <RejectIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
           </slot>
         </div>
 
-        <div v-show="position.type === DragType.APPROVE">
+        <div v-show="position.type === SwipeAction.APPROVE">
           <slot name="approve" :delta="position.delta">
             <ApproveIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
           </slot>
@@ -172,10 +169,10 @@ defineExpose({
 }
 
 /* Default animations */
-.flash-card__animation-wrapper--approve { animation: approve 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card__animation-wrapper--reject { animation: reject 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card__animation-wrapper--restore-approve { animation: restore-approve 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card__animation-wrapper--restore-reject { animation: restore-reject 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--approve { animation: approve 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--reject { animation: reject 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--restore-approve { animation: restore-approve 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--restore-reject { animation: restore-reject 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 
 @keyframes approve { 0%{opacity:1;} 100%{transform:translateX(320px) rotate(15deg);opacity:0;} }
 @keyframes reject { 0%{opacity:1;} 100%{transform:translateX(-320px) rotate(-15deg);opacity:0;} }

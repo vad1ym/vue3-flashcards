@@ -28,7 +28,7 @@ describe('[props] threshold', () => {
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
-      expect(wrapper.emitted('complete')?.[0][0]).toBe(true) // approved = true
+      expect(wrapper.emitted('complete')?.[0][0]).toBe('approve') // approved = true
     })
 
     it('should not complete when swiped below threshold', async () => {

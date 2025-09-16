@@ -5,6 +5,7 @@ import type { StackDirection } from './utils/useStackTransform'
 import { computed, ref } from 'vue'
 import { config } from './config'
 import FlashCard from './FlashCard.vue'
+import { SwipeAction } from './utils/useDragSetup'
 import { useStackList } from './utils/useStackList'
 import { useStackTransform } from './utils/useStackTransform'
 
@@ -135,13 +136,13 @@ const {
 /**
  * Handles card swipe completion
  */
-function handleCardSwipe(itemId: string | number, approved: boolean, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
-  const swipedCard = swipeCard(itemId, approved, position)
+function handleCardSwipe(itemId: string | number, action: string, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
+  const swipedCard = swipeCard(itemId, action, position)
 
   if (!swipedCard)
     return
 
-  approved
+  action === SwipeAction.APPROVE
     ? emit('approve', swipedCard)
     : emit('reject', swipedCard)
 }
@@ -149,22 +150,20 @@ function handleCardSwipe(itemId: string | number, approved: boolean, position: D
 /**
  * Helper to perform card action
  */
-function performCardAction(type: 'approve' | 'reject' | 'restore') {
-  switch (type) {
-    case 'restore': {
-      const restoredItem = restoreCard()
-      return restoredItem && emit('restore', restoredItem)
-    }
+function performCardAction(type: SwipeAction) {
+  // If there's a card currently restoring, target that card instead of current card
+  const restoringCard = cardsInTransition.value.find(card => card.animation?.isRestoring)
+  const targetCard = restoringCard || stackList.value.find(item => item.index === currentIndex.value)
 
-    case 'approve':
-    case 'reject': {
-      // If there's a card currently restoring, target that card instead of current card
-      const restoringCard = cardsInTransition.value.find(card => card.animationType === 'restore')
-      const targetCard = restoringCard || stackList.value.find(item => item.index === currentIndex.value)
+  return targetCard && handleCardSwipe(targetCard.itemId, type)
+}
 
-      return targetCard && handleCardSwipe(targetCard.itemId, type === 'approve')
-    }
-  }
+/**
+ * Restores card
+ */
+function restore() {
+  const restoredItem = restoreCard()
+  return restoredItem && emit('restore', restoredItem)
 }
 
 /**
@@ -176,11 +175,6 @@ const approve = () => performCardAction('approve')
  * Rejects card
  */
 const reject = () => performCardAction('reject')
-
-/**
- * Restores card
- */
-const restore = () => performCardAction('restore')
 
 defineExpose({
   restore,
@@ -207,20 +201,22 @@ defineExpose({
       </div>
       <!-- Обычные карточки стека -->
       <div
-        v-for="({ item, itemId, index, zIndex }, domIndex) in stackList"
+        v-for="({ item, itemId, index }, domIndex) in stackList"
         :key="`stack-${itemId}`"
         :data-item-id="itemId"
         class="flashcards__card-wrapper"
         :style="[
-          { zIndex },
-          getCardStyle(domIndex + cardsInTransition.filter(c => c.animationType === 'restore').length),
+          { zIndex: stackList.length - domIndex },
+          getCardStyle(domIndex + cardsInTransition.filter(c =>
+            c.animation?.isRestoring,
+          ).length),
         ]"
       >
         <FlashCard
           v-bind="flashCardProps"
           class="flashcards__card"
           :class="{ 'flashcards__card--active': index === currentIndex }"
-          @complete="(approved, pos) => handleCardSwipe(itemId, approved, pos)"
+          @complete="(action, pos) => handleCardSwipe(itemId, action, pos)"
           @mounted="containerHeight = Math.max($event, 0)"
         >
           <template #default>
@@ -237,19 +233,18 @@ defineExpose({
 
       <!-- Animating cards -->
       <div
-        v-for="({ item, itemId, state, zIndex, animationType, initialPosition }, domIndex) in cardsInTransition"
-        :key="`anim-${itemId}-${animationType}`"
+        v-for="({ item, itemId, animation, initialPosition }, domIndex) in cardsInTransition"
+        :key="`anim-${itemId}`"
         :data-item-id="itemId"
         class="flashcards__card-wrapper flashcards__card-wrapper--animating"
-        :style="[{ zIndex }, getCardStyle(cardsInTransition.length - domIndex - 1)]"
+        :style="[{ zIndex: stackList.length * 2 + domIndex }, getCardStyle(cardsInTransition.length - domIndex - 1)]"
       >
         <FlashCard
           v-bind="flashCardProps"
           class="flashcards__card flashcards__card--animating"
           :initial-position="initialPosition"
-          :animation-type="animationType"
-          :animation-state="state?.type"
-          @animationend="() => removeAnimatingCard(itemId, { withHistory: animationType === 'restore' })"
+          :animation="animation"
+          @animationend="() => removeAnimatingCard(itemId)"
         >
           <template #default>
             <slot :item="item" />

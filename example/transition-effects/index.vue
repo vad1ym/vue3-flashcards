@@ -82,10 +82,10 @@ const cards = [
 
 <style>
 /* Fast Rotate Animation */
-.fast-rotate .flash-card__animation-wrapper--approve { animation: fast-rotate-approve 0.4s linear forwards !important; transform-origin: 50% 50% !important; }
-.fast-rotate .flash-card__animation-wrapper--reject { animation: fast-rotate-reject 0.4s linear forwards !important; transform-origin: 50% 50% !important; }
-.fast-rotate .flash-card__animation-wrapper--restore-approve { animation: fast-rotate-restore-approve 0.4s linear forwards !important; transform-origin: 50% 50% !important; }
-.fast-rotate .flash-card__animation-wrapper--restore-reject { animation: fast-rotate-restore-reject 0.4s linear forwards !important; transform-origin: 50% 50% !important; }
+.fast-rotate .flash-card-animation--approve { animation: fast-rotate-approve 0.4s linear forwards !important; transform-origin: 50% 50% !important; }
+.fast-rotate .flash-card-animation--reject { animation: fast-rotate-reject 0.4s linear forwards !important; transform-origin: 50% 50% !important; }
+.fast-rotate .flash-card-animation--restore-approve { animation: fast-rotate-restore-approve 0.4s linear forwards !important; transform-origin: 50% 50% !important; }
+.fast-rotate .flash-card-animation--restore-reject { animation: fast-rotate-restore-reject 0.4s linear forwards !important; transform-origin: 50% 50% !important; }
 
 @keyframes fast-rotate-approve { 0%{opacity:1;} 100%{transform:translateX(300px) rotate(360deg);opacity:0;} }
 @keyframes fast-rotate-reject { 0%{opacity:1;} 100%{transform:translateX(-300px) rotate(-360deg);opacity:0;} }
@@ -93,10 +93,10 @@ const cards = [
 @keyframes fast-rotate-restore-reject { 0%{transform:translateX(-300px) rotate(-360deg);opacity:0;} 100%{transform:translateX(0) rotate(0deg);opacity:1;} }
 
 /* Scale Out Animation */
-.scale-out .flash-card__animation-wrapper--approve { animation: scale-out-approve 0.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards !important; }
-.scale-out .flash-card__animation-wrapper--reject { animation: scale-out-reject 0.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards !important; }
-.scale-out .flash-card__animation-wrapper--restore-approve { animation: scale-out-restore-approve 0.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards !important; }
-.scale-out .flash-card__animation-wrapper--restore-reject { animation: scale-out-restore-reject 0.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards !important; }
+.scale-out .flash-card-animation--approve { animation: scale-out-approve 0.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards !important; }
+.scale-out .flash-card-animation--reject { animation: scale-out-reject 0.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards !important; }
+.scale-out .flash-card-animation--restore-approve { animation: scale-out-restore-approve 0.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards !important; }
+.scale-out .flash-card-animation--restore-reject { animation: scale-out-restore-reject 0.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards !important; }
 
 @keyframes scale-out-approve { 0%{opacity:1;} 100%{transform:translateX(300px) scale(0);opacity:0;} }
 @keyframes scale-out-reject { 0%{opacity:1;} 100%{transform:translateX(-300px) scale(0);opacity:0;} }
@@ -104,10 +104,10 @@ const cards = [
 @keyframes scale-out-restore-reject { 0%{transform:translateX(-300px) scale(0);opacity:0;} 100%{transform:translateX(0) scale(1);opacity:1;} }
 
 /* 3D Flip Animation */
-.flip-3d .flash-card__animation-wrapper--approve { animation: flip-3d-approve 0.5s ease-in-out forwards !important; }
-.flip-3d .flash-card__animation-wrapper--reject { animation: flip-3d-reject 0.5s ease-in-out forwards !important; }
-.flip-3d .flash-card__animation-wrapper--restore-approve { animation: flip-3d-restore-approve 0.5s ease-in-out forwards !important; }
-.flip-3d .flash-card__animation-wrapper--restore-reject { animation: flip-3d-restore-reject 0.5s ease-in-out forwards !important; }
+.flip-3d .flash-card-animation--approve { animation: flip-3d-approve 0.5s ease-in-out forwards !important; }
+.flip-3d .flash-card-animation--reject { animation: flip-3d-reject 0.5s ease-in-out forwards !important; }
+.flip-3d .flash-card-animation--restore-approve { animation: flip-3d-restore-approve 0.5s ease-in-out forwards !important; }
+.flip-3d .flash-card-animation--restore-reject { animation: flip-3d-restore-reject 0.5s ease-in-out forwards !important; }
 
 @keyframes flip-3d-approve { 0%{opacity:1;} 100%{transform:translateX(300px) rotateY(180deg) rotateX(45deg);opacity:0;} }
 @keyframes flip-3d-reject { 0%{opacity:1;} 100%{transform:translateX(-300px) rotateY(-180deg) rotateX(45deg);opacity:0;} }
@@ -115,10 +115,10 @@ const cards = [
 @keyframes flip-3d-restore-reject { 0%{transform:translateX(-300px) rotateY(-180deg) rotateX(45deg);opacity:0;} 100%{transform:translateX(0) rotateY(0deg) rotateX(0deg);opacity:1;} }
 
 /* Elastic Bounce Animation */
-.elastic-bounce .flash-card__animation-wrapper--approve { animation: elastic-bounce-approve 0.6s cubic-bezier(0.68,-0.55,0.265,1.55) forwards !important; }
-.elastic-bounce .flash-card__animation-wrapper--reject { animation: elastic-bounce-reject 0.4s cubic-bezier(0.55,0.055,0.675,0.19) forwards !important; }
-.elastic-bounce .flash-card__animation-wrapper--restore-approve { animation: elastic-bounce-restore-approve 0.6s cubic-bezier(0.68,-0.55,0.265,1.55) forwards !important; }
-.elastic-bounce .flash-card__animation-wrapper--restore-reject { animation: elastic-bounce-restore-reject 0.4s cubic-bezier(0.55,0.055,0.675,0.19) forwards !important; }
+.elastic-bounce .flash-card-animation--approve { animation: elastic-bounce-approve 0.6s cubic-bezier(0.68,-0.55,0.265,1.55) forwards !important; }
+.elastic-bounce .flash-card-animation--reject { animation: elastic-bounce-reject 0.4s cubic-bezier(0.55,0.055,0.675,0.19) forwards !important; }
+.elastic-bounce .flash-card-animation--restore-approve { animation: elastic-bounce-restore-approve 0.6s cubic-bezier(0.68,-0.55,0.265,1.55) forwards !important; }
+.elastic-bounce .flash-card-animation--restore-reject { animation: elastic-bounce-restore-reject 0.4s cubic-bezier(0.55,0.055,0.675,0.19) forwards !important; }
 
 @keyframes elastic-bounce-approve { 0%{opacity:1;} 100%{transform:translateX(300px) scale(1.3) rotate(15deg);opacity:0;} }
 @keyframes elastic-bounce-reject { 0%{opacity:1;} 100%{transform:translateX(-300px) scale(1.3) rotate(-15deg);opacity:0;} }

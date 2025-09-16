@@ -2,12 +2,12 @@ import type { InjectionKey, MaybeRefOrGetter, Ref } from 'vue'
 import { computed, nextTick, onMounted, onUnmounted, provide, reactive, readonly, ref, toRef } from 'vue'
 import { config } from '../config'
 
-export const DragType = {
+export const SwipeAction = {
   APPROVE: 'approve',
   REJECT: 'reject',
 } as const
 
-export type DragType = typeof DragType[keyof typeof DragType]
+export type SwipeAction = typeof SwipeAction[keyof typeof SwipeAction]
 
 export interface DragSetupParams {
   // Distance in pixels the card must be dragged to complete swiping
@@ -32,9 +32,9 @@ export interface DragSetupParams {
 
 export interface DragSetupCallbacks {
   onDragStart?: () => void
-  onDragMove?: (type: DragType | null, delta: number) => void
+  onDragMove?: (type: SwipeAction | null, delta: number) => void
   onDragEnd?: () => void
-  onDragComplete?: (approved: boolean) => void
+  onDragComplete?: (action: SwipeAction) => void
 }
 
 export type DragSetupOptions = DragSetupParams & DragSetupCallbacks
@@ -46,7 +46,7 @@ export interface DragPosition {
   x: number
   y: number
   delta: number
-  type?: DragType | null
+  type?: SwipeAction | null
 }
 
 export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _options: MaybeRefOrGetter<DragSetupOptions>) {
@@ -82,7 +82,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     x: initialPos?.x || 0,
     y: initialPos?.y || 0,
     delta: initialPos?.delta || 0,
-    type: initialPos?.delta ? (initialPos.delta > 0 ? DragType.APPROVE : DragType.REJECT) : null,
+    type: initialPos?.delta ? (initialPos.delta > 0 ? SwipeAction.APPROVE : SwipeAction.REJECT) : null,
   })
 
   function restore() {
@@ -143,8 +143,8 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     position.delta = delta
 
     position.type = delta && delta > 0
-      ? DragType.APPROVE
-      : DragType.REJECT
+      ? SwipeAction.APPROVE
+      : SwipeAction.REJECT
 
     onDragMove(position.type, position.delta)
   }
@@ -158,14 +158,14 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     isDragging.value = false
 
     if (position.x >= threshold.value) {
-      onDragComplete(true)
+      onDragComplete('approve')
       position.delta = 1
-      position.type = DragType.APPROVE
+      position.type = SwipeAction.APPROVE
     }
     else if (position.x <= -threshold.value) {
-      onDragComplete(false)
+      onDragComplete('reject')
       position.delta = -1
-      position.type = DragType.REJECT
+      position.type = SwipeAction.REJECT
     }
     else {
       restore()
@@ -181,7 +181,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
       x: initialPos?.x || 0,
       y: initialPos?.y || 0,
       delta: initialPos?.delta || 0,
-      type: initialPos?.delta ? (initialPos.delta > 0 ? DragType.APPROVE : DragType.REJECT) : null,
+      type: initialPos?.delta ? (initialPos.delta > 0 ? SwipeAction.APPROVE : SwipeAction.REJECT) : null,
     })
 
     // Don't add event listeners if dragging is disabled

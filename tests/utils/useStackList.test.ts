@@ -1,6 +1,7 @@
 import type { StackListOptions } from '../../src/utils/useStackList'
 import { describe, expect, it } from 'vitest'
 import { nextTick, ref } from 'vue'
+import { SwipeAction } from '../../src/utils/useDragSetup'
 import { useStackList } from '../../src/utils/useStackList'
 
 describe('useStackList', () => {
@@ -65,11 +66,8 @@ describe('useStackList', () => {
 
       expect(stack).toHaveLength(3)
       expect(stack[0].item.id).toBe(1) // First item
-      expect(stack[0].zIndex).toBe(3) // Highest z-index
       expect(stack[1].item.id).toBe(2)
-      expect(stack[1].zIndex).toBe(2)
       expect(stack[2].item.id).toBe(3)
-      expect(stack[2].zIndex).toBe(1) // Lowest z-index
     })
   })
 
@@ -87,11 +85,11 @@ describe('useStackList', () => {
       expect(stackList.currentIndex.value).toBe(0)
 
       // Complete first item
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       expect(stackList.currentIndex.value).toBe(1)
 
       // Complete second item
-      await stackList.swipeCard(2, false)
+      await stackList.swipeCard(2, SwipeAction.REJECT)
       expect(stackList.currentIndex.value).toBe(2)
     })
 
@@ -108,7 +106,7 @@ describe('useStackList', () => {
 
       // Complete all items
       for (let i = 1; i <= 3; i++) {
-        await stackList.swipeCard(i, true)
+        await stackList.swipeCard(i, SwipeAction.APPROVE)
       }
 
       expect(stackList.currentIndex.value).toBe(3)
@@ -132,7 +130,8 @@ describe('useStackList', () => {
       expect(stack).toHaveLength(4)
       expect(stack.map(s => s.item.id)).toEqual([1, 2, 3, 4])
       expect(stack.map(s => s.index)).toEqual([0, 1, 2, 3])
-      expect(stack.map(s => s.zIndex)).toEqual([4, 3, 2, 1])
+      // zIndex is no longer part of StackItem - it's computed in template
+      // expect(stack.map(s => s.zIndex)).toEqual([4, 3, 2, 1])
     })
 
     it('should limit stack size when approaching end of items', async () => {
@@ -147,9 +146,9 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
 
       // Complete first 3 items
-      await stackList.swipeCard(1, true)
-      await stackList.swipeCard(2, true)
-      await stackList.swipeCard(3, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
+      await stackList.swipeCard(2, SwipeAction.APPROVE)
+      await stackList.swipeCard(3, SwipeAction.APPROVE)
 
       const stack = stackList.stackList.value
       expect(stack).toHaveLength(2) // Only items 4 and 5 left
@@ -173,7 +172,8 @@ describe('useStackList', () => {
       expect(stack).toHaveLength(5)
       // Should cycle: [1, 2, 3, 1, 2]
       expect(stack.map(s => s.item.id)).toEqual([1, 2, 3, 1, 2])
-      expect(stack.map(s => s.zIndex)).toEqual([5, 4, 3, 2, 1])
+      // zIndex is no longer part of StackItem - it's computed in template
+      // expect(stack.map(s => s.zIndex)).toEqual([5, 4, 3, 2, 1])
     })
 
     it('should clear history when cycling completes', async () => {
@@ -188,8 +188,8 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
 
       // Complete both items to trigger cycle
-      await stackList.swipeCard(1, true)
-      await stackList.swipeCard(2, false)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
+      await stackList.swipeCard(2, SwipeAction.REJECT)
 
       // Wait for currentIndex computation
       await nextTick()
@@ -211,7 +211,7 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
 
       // Complete first item, currentIndex becomes 1
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
 
       const stack = stackList.stackList.value
       expect(stack).toHaveLength(3)
@@ -231,14 +231,11 @@ describe('useStackList', () => {
 
       const stackList = useStackList(options)
 
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
 
-      expect(stackList.history.get(1)).toEqual({
-        type: 'approve',
-        completed: true,
-      })
+      expect(stackList.history.get(1)).toBe(SwipeAction.APPROVE)
       expect(stackList.cardsInTransition.value).toHaveLength(1)
-      expect(stackList.cardsInTransition.value[0].animationType).toBe('approve')
+      expect(stackList.cardsInTransition.value[0].animation?.type).toBe(SwipeAction.APPROVE)
     })
 
     it('should mark item as rejected and add to history', async () => {
@@ -251,14 +248,11 @@ describe('useStackList', () => {
 
       const stackList = useStackList(options)
 
-      await stackList.swipeCard(2, false)
+      await stackList.swipeCard(2, SwipeAction.REJECT)
 
-      expect(stackList.history.get(2)).toEqual({
-        type: 'reject',
-        completed: true,
-      })
+      expect(stackList.history.get(2)).toBe(SwipeAction.REJECT)
       expect(stackList.cardsInTransition.value).toHaveLength(1)
-      expect(stackList.cardsInTransition.value[0].animationType).toBe('reject')
+      expect(stackList.cardsInTransition.value[0].animation?.type).toBe(SwipeAction.REJECT)
     })
 
     it('should store initial position when provided', async () => {
@@ -272,7 +266,7 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
       const initialPosition = { x: 100, y: 50 }
 
-      await stackList.swipeCard(1, true, initialPosition)
+      await stackList.swipeCard(1, 'approve', initialPosition)
 
       expect(stackList.cardsInTransition.value[0].initialPosition).toEqual(initialPosition)
     })
@@ -287,14 +281,14 @@ describe('useStackList', () => {
 
       const stackList = useStackList(options)
 
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       const firstAnimatingCount = stackList.cardsInTransition.value.length
 
       // Try to set approval again with different type
-      await stackList.swipeCard(1, false) // This will add new animation
+      await stackList.swipeCard(1, SwipeAction.REJECT) // This will add new animation
 
       expect(stackList.cardsInTransition.value.length).toBe(firstAnimatingCount + 1)
-      expect(stackList.history.get(1)?.type).toBe('reject') // Should be updated to 'reject'
+      expect(stackList.history.get(1)).toBe(SwipeAction.REJECT) // Should be updated to 'reject'
     })
 
     it('should not change already completed items', async () => {
@@ -308,13 +302,13 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
 
       // First approval
-      await stackList.swipeCard(1, true)
-      expect(stackList.cardsInTransition.value[0].animationType).toBe('approve')
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
+      expect(stackList.cardsInTransition.value[0].animation?.type).toBe(SwipeAction.APPROVE)
 
       // Try to change to rejection while animating - this will add new animation
-      await stackList.swipeCard(1, false)
+      await stackList.swipeCard(1, SwipeAction.REJECT)
       expect(stackList.cardsInTransition.value).toHaveLength(2) // Now two animations
-      expect(stackList.history.get(1)?.type).toBe('reject') // Type changed to reject
+      expect(stackList.history.get(1)).toBe(SwipeAction.REJECT) // Type changed to reject
     })
 
     it('should handle non-existent item ids gracefully', async () => {
@@ -327,7 +321,7 @@ describe('useStackList', () => {
 
       const stackList = useStackList(options)
 
-      await stackList.swipeCard(999, true) // Non-existent id
+      await stackList.swipeCard(999, SwipeAction.APPROVE) // Non-existent id
 
       expect(stackList.history.size).toBe(0)
       expect(stackList.cardsInTransition.value).toHaveLength(0)
@@ -345,7 +339,7 @@ describe('useStackList', () => {
 
       const stackList = useStackList(options)
 
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       expect(stackList.cardsInTransition.value).toHaveLength(1)
 
       stackList.removeAnimatingCard(1)
@@ -367,7 +361,7 @@ describe('useStackList', () => {
       expect(stackList.stackList.value.map(s => s.item.id)).toEqual([1, 2, 3])
 
       // Start animating first card
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
 
       // Stack should now exclude animating card and include next card
       expect(stackList.stackList.value).toHaveLength(3)
@@ -388,7 +382,7 @@ describe('useStackList', () => {
 
       expect(stackList.canRestore.value).toBe(false)
 
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       // Card is completed and can be restored (even while animating)
       expect(stackList.canRestore.value).toBe(true)
 
@@ -407,7 +401,7 @@ describe('useStackList', () => {
 
       const stackList = useStackList(options)
 
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       expect(stackList.canRestore.value).toBe(false)
     })
 
@@ -422,9 +416,9 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
 
       // Complete first two items
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       stackList.removeAnimatingCard(1)
-      await stackList.swipeCard(2, false)
+      await stackList.swipeCard(2, SwipeAction.REJECT)
       stackList.removeAnimatingCard(2)
 
       expect(stackList.canRestore.value).toBe(true)
@@ -436,7 +430,7 @@ describe('useStackList', () => {
       // Should restore item 2 (most recent)
       expect(stackList.cardsInTransition.value).toHaveLength(1)
       expect(stackList.cardsInTransition.value[0].item.id).toBe(2)
-      expect(stackList.cardsInTransition.value[0].animationType).toBe('restore')
+      expect(stackList.cardsInTransition.value[0].animation?.isRestoring).toBe(true)
     })
 
     it('should complete restore animation and remove from history', async () => {
@@ -449,7 +443,7 @@ describe('useStackList', () => {
 
       const stackList = useStackList(options)
 
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       stackList.removeAnimatingCard(1)
 
       stackList.restoreCard()
@@ -458,8 +452,7 @@ describe('useStackList', () => {
 
       stackList.removeAnimatingCard(1, { withHistory: true })
       expect(stackList.cardsInTransition.value).toHaveLength(0)
-      expect(stackList.history.has(1)).toBe(true)
-      expect(stackList.history.get(1)?.completed).toBe(false)
+      expect(stackList.history.has(1)).toBe(false) // After restore, item is removed from history
     })
 
     it('should not restore if no items can be restored', () => {
@@ -488,18 +481,18 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
 
       // Complete and animate first card
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       // Don't complete animation
 
       // Complete second card
-      await stackList.swipeCard(2, false)
+      await stackList.swipeCard(2, SwipeAction.REJECT)
       stackList.removeAnimatingCard(2)
 
       // Should restore card 2, not card 1 (which is still animating)
       const restored = stackList.restoreCard()
       expect(restored).toBeTruthy()
       expect(restored).toEqual({ id: 2, title: 'Item 2' })
-      expect(stackList.cardsInTransition.value.find(c => c.animationType === 'restore')?.item.id).toBe(2)
+      expect(stackList.cardsInTransition.value.find(c => c.animation?.isRestoring)?.item.id).toBe(2)
     })
   })
 
@@ -516,7 +509,7 @@ describe('useStackList', () => {
 
       expect(stackList.isStart.value).toBe(true)
 
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       expect(stackList.isStart.value).toBe(false)
     })
 
@@ -532,10 +525,10 @@ describe('useStackList', () => {
 
       expect(stackList.isEnd.value).toBe(false)
 
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       expect(stackList.isEnd.value).toBe(false)
 
-      await stackList.swipeCard(2, true)
+      await stackList.swipeCard(2, SwipeAction.APPROVE)
       expect(stackList.isEnd.value).toBe(true)
     })
   })
@@ -705,21 +698,21 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
 
       // Complex sequence of operations
-      await stackList.swipeCard(1, true)
-      await stackList.swipeCard(2, false)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
+      await stackList.swipeCard(2, SwipeAction.REJECT)
       stackList.removeAnimatingCard(1)
       stackList.removeAnimatingCard(2)
 
       stackList.restoreCard() // Restore item 2
       stackList.removeAnimatingCard(2, { withHistory: true })
 
-      await stackList.swipeCard(2, true) // Re-approve item 2
+      await stackList.swipeCard(2, SwipeAction.APPROVE) // Re-approve item 2
       stackList.removeAnimatingCard(2)
 
       // Verify final state - item 2 was restored and re-approved, so only 1 and 2 are completed
       expect(stackList.currentIndex.value).toBe(2)
-      expect(stackList.history.get(1)?.completed).toBe(true)
-      expect(stackList.history.get(2)?.completed).toBe(true)
+      expect(stackList.history.get(1)).toBeTruthy()
+      expect(stackList.history.get(2)).toBeTruthy()
       expect(stackList.history.get(3)).toBeUndefined()
     })
   })
@@ -743,8 +736,8 @@ describe('useStackList', () => {
       expect(stackList.history.size).toBe(0)
 
       // Perform some operations
-      await stackList.swipeCard(1, true)
-      await stackList.swipeCard(2, false)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
+      await stackList.swipeCard(2, SwipeAction.REJECT)
       stackList.restoreCard()
 
       // State should be changed
@@ -776,17 +769,17 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
 
       // Create some history
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       stackList.removeAnimatingCard(1)
-      await stackList.swipeCard(2, false)
+      await stackList.swipeCard(2, SwipeAction.REJECT)
       stackList.removeAnimatingCard(2)
-      await stackList.swipeCard(3, true)
+      await stackList.swipeCard(3, SwipeAction.APPROVE)
       stackList.removeAnimatingCard(3)
 
       expect(stackList.history.size).toBe(3)
-      expect(stackList.history.get(1)?.completed).toBe(true)
-      expect(stackList.history.get(2)?.completed).toBe(true)
-      expect(stackList.history.get(3)?.completed).toBe(true)
+      expect(stackList.history.get(1)).toBeTruthy()
+      expect(stackList.history.get(2)).toBeTruthy()
+      expect(stackList.history.get(3)).toBeTruthy()
 
       // Reset
       stackList.reset()
@@ -809,9 +802,9 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
 
       // Start some animations
-      await stackList.swipeCard(1, true)
-      await stackList.swipeCard(2, false)
-      await stackList.swipeCard(3, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
+      await stackList.swipeCard(2, SwipeAction.REJECT)
+      await stackList.swipeCard(3, SwipeAction.APPROVE)
 
       expect(stackList.cardsInTransition.value.length).toBeGreaterThan(0)
 
@@ -835,11 +828,11 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
 
       // Swipe through all items in infinite mode
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       stackList.removeAnimatingCard(1)
-      await stackList.swipeCard(2, false)
+      await stackList.swipeCard(2, SwipeAction.REJECT)
       stackList.removeAnimatingCard(2)
-      await stackList.swipeCard(3, true)
+      await stackList.swipeCard(3, SwipeAction.APPROVE)
       stackList.removeAnimatingCard(3)
 
       // In infinite mode, history may vary, let's just check that operations completed without errors
@@ -903,9 +896,9 @@ describe('useStackList', () => {
       const stackList = useStackList(options)
 
       // Swipe all cards to reach end
-      await stackList.swipeCard(1, true)
+      await stackList.swipeCard(1, SwipeAction.APPROVE)
       stackList.removeAnimatingCard(1)
-      await stackList.swipeCard(2, true)
+      await stackList.swipeCard(2, SwipeAction.APPROVE)
       stackList.removeAnimatingCard(2)
 
       expect(stackList.isEnd.value).toBe(true)
