@@ -1,7 +1,7 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { config } from '../../src/config'
+import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import FlashCards from '../../src/FlashCards.vue'
 
 describe('[events] approve', () => {
@@ -17,7 +17,7 @@ describe('[events] approve', () => {
     wrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: config.defaultThreshold,
+        threshold: flashCardsDefaults.threshold,
       },
       slots: {
         default: '{{ item.title }}',
@@ -38,7 +38,7 @@ describe('[events] approve', () => {
     const infiniteWrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: config.defaultThreshold,
+        threshold: flashCardsDefaults.threshold,
         infinite: true,
       },
       slots: {

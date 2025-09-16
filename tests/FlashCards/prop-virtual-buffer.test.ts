@@ -1,7 +1,7 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { config } from '../../src/config'
+import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import FlashCards from '../../src/FlashCards.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
@@ -33,16 +33,16 @@ describe('[props] virtualBuffer', () => {
       })
     })
 
-    it(`should use default virtualBuffer of ${config.defaultVirtualBuffer}`, () => {
+    it(`should use default virtualBuffer of ${flashCardsDefaults.virtualBuffer}`, () => {
       // With default virtualBuffer of 3, the component renders 4 cards (virtualBuffer + 1)
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
-      expect(cardWrappers.length).toBe(config.defaultVirtualBuffer)
+      expect(cardWrappers.length).toBe(flashCardsDefaults.virtualBuffer)
     })
 
-    it(`should render first ${config.defaultVirtualBuffer} items with default virtualBuffer`, () => {
+    it(`should render first ${flashCardsDefaults.virtualBuffer} items with default virtualBuffer`, () => {
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
 
-      for (let i = 0; i < config.defaultVirtualBuffer; i++) {
+      for (let i = 0; i < flashCardsDefaults.virtualBuffer; i++) {
         expect(cardWrappers[i].text()).toContain(`Card ${i + 1}`)
       }
     })

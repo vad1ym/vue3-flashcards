@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { inject, ref } from 'vue'
-import { config } from './config'
+import { flipCardDefaults } from './config/flipcard.config'
+import { useFlipCardConfig } from './utils/useConfig'
 import { IsDraggingStateInjectionKey } from './utils/useDragSetup'
 
-const {
-  disabled = false,
-  waitAnimationEnd = config.defaultFlipWaitAnimationEnd,
-  flipAxis = config.defaultFlipAxis,
-} = defineProps<{
+export interface FlipCardProps {
   // Disable card flipping functionality
   disabled?: boolean
 
@@ -16,7 +13,9 @@ const {
 
   // Flip axis
   flipAxis?: 'x' | 'y'
-}>()
+}
+
+const props = withDefaults(defineProps<FlipCardProps>(), flipCardDefaults)
 
 const emit = defineEmits<{
   flip: [isFlipped: boolean]
@@ -26,6 +25,9 @@ defineSlots<{
   front: (props: { flip: () => void }) => any
   back?: (props: { flip: () => void }) => any
 }>()
+
+// Merge props with global config
+const config = useFlipCardConfig(() => props)
 
 /**
  * Flash cards dragging state
@@ -38,7 +40,7 @@ const isAnimating = ref(false)
  * Flips card
  */
 function flip() {
-  if (disabled || isDragging.value || (waitAnimationEnd && isAnimating.value))
+  if (config.value.disabled || isDragging.value || (config.value.waitAnimationEnd && isAnimating.value))
     return
 
   isAnimating.value = true
@@ -62,7 +64,7 @@ defineExpose({
   <div class="flip-card" @pointerup="flip">
     <div
       class="flip-card__inner"
-      :class="[`flip-card__inner--${flipAxis}`, {
+      :class="[`flip-card__inner--${config.flipAxis}`, {
         'flip-card__inner--flipped': isFlipped,
       }]"
       @transitionend="onTransitionEnd"

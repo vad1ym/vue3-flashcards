@@ -1,7 +1,6 @@
-import type { MaybeRefOrGetter, Ref } from 'vue'
+import type { MaybeRefOrGetter } from 'vue'
 import type { DragPosition } from './useDragSetup'
-import { computed, reactive, shallowRef, toRef, watch } from 'vue'
-import { config } from '../config'
+import { computed, reactive, shallowRef, toValue, watch } from 'vue'
 
 export interface StackItem<T> {
   item: T
@@ -10,13 +9,13 @@ export interface StackItem<T> {
   animation?: {
     type: string
     isRestoring: boolean
+    initialPosition?: DragPosition
   }
-  initialPosition?: DragPosition
 }
 
 export interface StackListOptions<T> {
   items: T[]
-  infinite: boolean
+  infinite?: boolean
   virtualBuffer: number
   trackBy?: keyof T | 'id'
   waitAnimationEnd?: boolean
@@ -28,7 +27,7 @@ export interface ResetOptions {
 }
 
 export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>) {
-  const options = toRef(_options) as Ref<StackListOptions<T>>
+  const options = computed(() => toValue(_options))
 
   // Swiping history
   const history = reactive<Map<string | number, string>>(new Map())
@@ -179,7 +178,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
   // -------------------
   // Swiping functions
   // -------------------
-  function swipeCard(itemId: string | number, action: string, initialPosition?: DragPosition): T | undefined {
+  function swipeCard(itemId: string | number, type: string, initialPosition?: DragPosition): T | undefined {
     const { items, waitAnimationEnd } = options.value
 
     // If some cards are in animation and waitAnimationEnd is true, prevent action
@@ -202,14 +201,14 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
       index: itemIndex,
       itemId,
       animation: {
-        type: action,
+        type,
         isRestoring: false,
+        initialPosition,
       },
-      initialPosition,
     })
 
     // Always update history
-    history.set(itemId, action)
+    history.set(itemId, type)
 
     return item
   }
@@ -274,9 +273,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
       for (let i = 0; i < completedCards.length; i++) {
         if (restoreCard()) {
           // Delay before next card to make cascading effect
-          await new Promise(resolve =>
-            setTimeout(resolve, options?.delay ?? config.defaultResetAnimationDelay),
-          )
+          await new Promise(resolve => setTimeout(resolve, options?.delay ?? 90))
         }
       }
       // History will be cleared by removeAnimatingCard when restore animations finish

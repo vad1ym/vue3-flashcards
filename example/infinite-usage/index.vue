@@ -13,7 +13,7 @@ const cards = ref([
 <template>
   <div class="w-full flex justify-center items-center py-12">
     <div class="w-80 h-80">
-      <FlashCards :items="cards" infinite #="{ item }">
+      <FlashCards :items="cards" :infinite="true" #="{ item }">
         <InfiniteCard :item="item" />
       </FlashCards>
     </div>

@@ -3,7 +3,7 @@ import type { ConfigPanelProps } from './ConfigPanel.vue'
 import type { CardItem } from './InteractiveCard.vue'
 import { computed, ref } from 'vue'
 import { FlashCards } from 'vue3-flashcards'
-import { config as defaultConfig } from '../../src/config'
+import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import Actions from './Actions.vue'
 import ConfigPanel from './ConfigPanel.vue'
 import EmptyState from './EmptyState.vue'
@@ -17,22 +17,18 @@ interface Event {
   timestamp: string
 }
 
-// Configuration reactive object
-const config = ref<ConfigPanelProps>({
+const defaultConfig = {
+  ...flashCardsDefaults,
+  waitAnimationEnd: false,
   infinite: false,
-  virtualBuffer: defaultConfig.defaultVirtualBuffer,
-  stack: defaultConfig.defaultStack,
-  stackOffset: defaultConfig.defaultStackOffset,
-  stackScale: defaultConfig.defaultStackScale,
   stackDirection: 'bottom' as 'top' | 'bottom' | 'left' | 'right',
-  threshold: defaultConfig.defaultThreshold,
-  dragThreshold: defaultConfig.defaultDragThreshold,
-  maxRotation: defaultConfig.defaultMaxRotation,
-  waitAnimationEnd: defaultConfig.defaultWaitAnimationEnd,
   maxDraggingX: null,
   maxDraggingY: null,
   disableDrag: false,
-})
+}
+
+// Configuration reactive object
+const config = ref<ConfigPanelProps>(defaultConfig)
 
 // Drag limits toggles
 const enableXLimit = ref(false)
@@ -137,19 +133,7 @@ function clearEvents() {
 }
 
 function resetConfig() {
-  config.value.infinite = false
-  config.value.virtualBuffer = defaultConfig.defaultVirtualBuffer
-  config.value.stack = defaultConfig.defaultStack
-  config.value.stackOffset = defaultConfig.defaultStackOffset
-  config.value.stackScale = defaultConfig.defaultStackScale
-  config.value.stackDirection = 'bottom'
-  config.value.threshold = defaultConfig.defaultThreshold
-  config.value.dragThreshold = defaultConfig.defaultDragThreshold
-  config.value.maxRotation = defaultConfig.defaultMaxRotation
-  config.value.maxDraggingX = null
-  config.value.maxDraggingY = null
-  config.value.disableDrag = false
-  config.value.waitAnimationEnd = defaultConfig.defaultWaitAnimationEnd
+  config.value = defaultConfig
   enableXLimit.value = false
   enableYLimit.value = false
 }

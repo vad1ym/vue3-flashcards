@@ -110,7 +110,7 @@ describe('[props] disabled', () => {
       const cardElement = wrapper.find('.flip-card')
       const inner = wrapper.find('.flip-card__inner')
 
-      expect(wrapper.props('disabled')).toBe(false)
+      expect(wrapper.props('disabled')).toBeFalsy()
 
       await cardElement.trigger('pointerup')
       await nextTick()

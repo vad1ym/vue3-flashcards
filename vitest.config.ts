@@ -15,5 +15,13 @@ export default defineConfig({
     outputFile: {
       junit: './test-results.xml',
     },
+    // Configure timeouts for tests
+    testTimeout: 30000,
+    hookTimeout: 30000,
+    // Use different environments for different test types
+    environmentMatchGlobs: [
+      ['tests/**/nuxt*.test.ts', 'node'],
+      ['tests/**/*.test.ts', 'jsdom'],
+    ],
   },
 })

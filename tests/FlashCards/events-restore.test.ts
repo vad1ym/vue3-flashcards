@@ -1,7 +1,7 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { config } from '../../src/config'
+import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import FlashCards from '../../src/FlashCards.vue'
 
 describe('[events] restore', () => {
@@ -17,7 +17,7 @@ describe('[events] restore', () => {
     wrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: config.defaultThreshold,
+        threshold: flashCardsDefaults.threshold,
       },
       slots: {
         default: '{{ item.title }}',
@@ -105,7 +105,7 @@ describe('[events] restore', () => {
     const infiniteWrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: config.defaultThreshold,
+        threshold: flashCardsDefaults.threshold,
         infinite: true,
       },
       slots: {
@@ -159,7 +159,7 @@ describe('[events] restore', () => {
     const wrapperWithActions = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: config.defaultThreshold,
+        threshold: flashCardsDefaults.threshold,
       },
       slots: {
         default: '{{ item.title }}',
@@ -197,7 +197,7 @@ describe('[events] restore', () => {
     const complexWrapper = mount(FlashCards, {
       props: {
         items: complexItems,
-        threshold: config.defaultThreshold,
+        threshold: flashCardsDefaults.threshold,
         trackBy: 'id',
       },
       slots: {

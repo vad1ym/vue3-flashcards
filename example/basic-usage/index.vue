@@ -4,9 +4,9 @@ import { FlashCards } from 'vue3-flashcards'
 import BasicCard from './BasicCard.vue'
 
 const cards = ref([
-  { text: 'Mathematics', subtitle: 'Basic algebra and geometry', color: 'from-blue-500 to-blue-600' },
-  { text: 'Science', subtitle: 'Physics and chemistry fundamentals', color: 'from-green-500 to-green-600' },
-  { text: 'Literature', subtitle: 'Classic novels and poetry', color: 'from-purple-500 to-purple-600' },
+  { id: 1, text: 'Mathematics', subtitle: 'Basic algebra and geometry', color: 'from-blue-500 to-blue-600' },
+  { id: 2, text: 'Science', subtitle: 'Physics and chemistry fundamentals', color: 'from-green-500 to-green-600' },
+  { id: 3, text: 'Literature', subtitle: 'Classic novels and poetry', color: 'from-purple-500 to-purple-600' },
 ])
 </script>
 

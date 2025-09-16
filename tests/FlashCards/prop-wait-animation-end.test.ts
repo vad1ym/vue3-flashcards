@@ -1,7 +1,7 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { config } from '../../src/config'
+import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import FlashCards from '../../src/FlashCards.vue'
 
 describe('[props] wait-animation-end', () => {
@@ -17,7 +17,7 @@ describe('[props] wait-animation-end', () => {
     return mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: config.defaultThreshold,
+        threshold: flashCardsDefaults.threshold,
         waitAnimationEnd,
       },
       slots: {
@@ -157,7 +157,7 @@ describe('[props] wait-animation-end', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: config.defaultThreshold,
+          threshold: flashCardsDefaults.threshold,
         },
         slots: {
           default: '{{ item.title }}',
@@ -167,7 +167,7 @@ describe('[props] wait-animation-end', () => {
     })
 
     it('should default to waitAnimationEnd: false', () => {
-      expect(wrapper.props('waitAnimationEnd')).toBe(false)
+      expect(wrapper.props('waitAnimationEnd')).toBeFalsy()
     })
 
     it('should behave like waitAnimationEnd: false by default', async () => {

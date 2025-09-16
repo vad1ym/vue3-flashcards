@@ -1,8 +1,29 @@
-import type { DragPosition } from '../src/index'
-import { describe, expect, it } from 'vitest'
-import { FlashCard, FlashCards, FlipCard } from '../src/index'
+import type { DragPosition } from '../src/utils/useDragSetup'
+import { describe, expect, it, vi } from 'vitest'
+import { FlashCards, FlashCardsConfigKey, FlashCardsPlugin, FlipCard } from '../src/index'
 
 describe('index exports', () => {
+  describe('plugin export', () => {
+    it('should export plugin as default', () => {
+      expect(FlashCardsPlugin).toBeDefined()
+      expect(typeof FlashCardsPlugin).toBe('function')
+    })
+
+    it('should be usable as Vue plugin', () => {
+      const mockApp = {
+        provide: vi.fn(),
+        component: vi.fn(),
+      } as any
+
+      expect(() => {
+        FlashCardsPlugin(mockApp)
+      }).not.toThrow()
+
+      expect(mockApp.provide).toHaveBeenCalled()
+      expect(mockApp.component).toHaveBeenCalled()
+    })
+  })
+
   describe('component exports', () => {
     it('should export FlashCards component', () => {
       expect(FlashCards).toBeDefined()
@@ -11,11 +32,10 @@ describe('index exports', () => {
       expect(FlashCards).toBeTruthy()
     })
 
-    it('should export FlashCard component', () => {
-      expect(FlashCard).toBeDefined()
-      expect(typeof FlashCard).toBe('object')
-      // Vue 3 script setup components are valid objects
-      expect(FlashCard).toBeTruthy()
+    it('should NOT export FlashCard component', () => {
+      // FlashCard should not be exported from main index
+      const exports = { FlashCards, FlipCard, FlashCardsConfigKey }
+      expect(Object.keys(exports)).not.toContain('FlashCard')
     })
 
     it('should export FlipCard component', () => {
@@ -25,14 +45,19 @@ describe('index exports', () => {
       expect(FlipCard).toBeTruthy()
     })
 
-    it('should export all main components', () => {
-      const exports = { FlashCard, FlashCards, FlipCard }
+    it('should export main components (excluding FlashCard)', () => {
+      const exports = { FlashCards, FlipCard }
       const exportNames = Object.keys(exports)
 
-      expect(exportNames).toHaveLength(3)
-      expect(exportNames).toContain('FlashCard')
+      expect(exportNames).toHaveLength(2)
       expect(exportNames).toContain('FlashCards')
       expect(exportNames).toContain('FlipCard')
+      expect(exportNames).not.toContain('FlashCard')
+    })
+
+    it('should export FlashCardsConfigKey', () => {
+      expect(FlashCardsConfigKey).toBeDefined()
+      expect(typeof FlashCardsConfigKey).toBe('symbol')
     })
   })
 
@@ -55,17 +80,49 @@ describe('index exports', () => {
       expect(approvePosition.delta).toBe(100)
       expect(rejectPosition.delta).toBe(-100)
     })
+
+    it('should export FlashCardsGlobalConfig type', () => {
+      // Test that the type can be used
+      const config = {
+        stack: 3,
+        stackOffset: 25,
+        infinite: true,
+      }
+      expect(config.stack).toBe(3)
+      expect(config.stackOffset).toBe(25)
+      expect(config.infinite).toBe(true)
+    })
+
+    it('should export FlashCardsPluginOptions type', () => {
+      // Test that the type can be used
+      const options = {
+        config: { stack: 2 },
+        registerComponents: false,
+      }
+      expect(options.config?.stack).toBe(2)
+      expect(options.registerComponents).toBe(false)
+    })
   })
 
   describe('library structure', () => {
     it('should provide clean API surface', () => {
-      // Check that main components are exported correctly
-      const exports = { FlashCard, FlashCards, FlipCard }
+      // Check that main components are exported correctly (excluding FlashCard)
+      const exports = { FlashCards, FlipCard, FlashCardsConfigKey }
       const exportKeys = Object.keys(exports)
 
-      // Should export main components
-      expect(exportKeys).toEqual(expect.arrayContaining(['FlashCard', 'FlashCards', 'FlipCard']))
+      // Should export main components and utilities (no FlashCard)
+      expect(exportKeys).toEqual(expect.arrayContaining(['FlashCards', 'FlipCard', 'FlashCardsConfigKey']))
       expect(exportKeys).toHaveLength(3)
+      expect(exportKeys).not.toContain('FlashCard')
+    })
+
+    it('should export plugin as default with expected signature', () => {
+      expect(FlashCardsPlugin).toBeDefined()
+      expect(typeof FlashCardsPlugin).toBe('function')
+
+      // Should be callable as Vue plugin
+      const mockApp = { provide: vi.fn(), component: vi.fn() } as any
+      expect(() => FlashCardsPlugin(mockApp)).not.toThrow()
     })
   })
 })

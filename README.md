@@ -46,6 +46,8 @@ pnpm add vue3-flashcards
 
 ## 🚀 Quick Start
 
+### Basic Usage
+
 ```vue
 <script setup>
 import { ref } from 'vue'
@@ -69,6 +71,97 @@ const cards = ref([
   </FlashCards>
 </template>
 ```
+
+### Vue Plugin (Global Configuration)
+
+Install the plugin to register components globally and set default configuration:
+
+```typescript
+// main.ts
+import { createApp } from 'vue'
+import { FlashCardsPlugin } from 'vue3-flashcards'
+import App from './App.vue'
+
+const app = createApp(App)
+
+app.use(FlashCardsPlugin, {
+  flashCards: {
+    // Global defaults for FlashCards components
+    stack: 3,
+    stackOffset: 25,
+    threshold: 150,
+    infinite: true,
+  },
+  flipCard: {
+    // Global defaults for FlipCard components
+    flipAxis: 'x',
+    waitAnimationEnd: false,
+  }
+})
+
+app.mount('#app')
+```
+
+Now components are globally available without imports:
+
+```vue
+<template>
+  <!-- No imports needed! -->
+  <FlashCards :items="cards">
+    <template #default="{ item }">
+      <div>{{ item.title }}</div>
+    </template>
+  </FlashCards>
+
+  <FlipCard>
+    <template #front>Front</template>
+    <template #back>Back</template>
+  </FlipCard>
+</template>
+```
+
+### Nuxt Module
+
+For Nuxt applications, use the dedicated module:
+
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['vue3-flashcards/nuxt'],
+
+  // Global configuration
+  flashcards: {
+    stack: 3,
+    stackOffset: 25,
+    threshold: 150,
+    infinite: true,
+  }
+})
+```
+
+Components are auto-imported and globally available:
+
+```vue
+<template>
+  <!-- Auto-imported, no imports needed! -->
+  <FlashCards :items="cards">
+    <template #default="{ item }">
+      <div>{{ item.title }}</div>
+    </template>
+  </FlashCards>
+
+  <FlipCard>
+    <template #front>Front</template>
+    <template #back>Back</template>
+  </FlipCard>
+</template>
+```
+
+**Features:**
+- ✅ **SSR Compatible** - Works perfectly with server-side rendering
+- ✅ **Auto-import** - Components available without imports
+- ✅ **Global Config** - Set defaults for all components
+- ✅ **TypeScript** - Full IntelliSense in `nuxt.config.ts`
 
 ---
 

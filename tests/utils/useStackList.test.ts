@@ -268,7 +268,7 @@ describe('useStackList', () => {
 
       await stackList.swipeCard(1, 'approve', initialPosition)
 
-      expect(stackList.cardsInTransition.value[0].initialPosition).toEqual(initialPosition)
+      expect(stackList.cardsInTransition.value[0].animation?.initialPosition).toEqual(initialPosition)
     })
 
     it('should not re-approve already completed items', async () => {

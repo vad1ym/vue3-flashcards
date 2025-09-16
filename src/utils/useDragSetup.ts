@@ -1,6 +1,6 @@
 import type { InjectionKey, MaybeRefOrGetter, Ref } from 'vue'
-import { computed, nextTick, onMounted, onUnmounted, provide, reactive, readonly, ref, toRef } from 'vue'
-import { config } from '../config'
+import { computed, nextTick, onMounted, onUnmounted, provide, reactive, readonly, ref, toRef, toValue } from 'vue'
+import { flashCardsDefaults } from '../config/flashcards.config'
 
 export const SwipeAction = {
   APPROVE: 'approve',
@@ -51,7 +51,7 @@ export interface DragPosition {
 
 export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _options: MaybeRefOrGetter<DragSetupOptions>) {
   const element = toRef(el)
-  const options = toRef(_options)
+  const options = computed(() => toValue(_options))
 
   const {
     onDragStart = () => {},
@@ -60,8 +60,8 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     onDragComplete = () => {},
   } = options.value
 
-  const threshold = computed(() => options.value.threshold ?? config.defaultThreshold)
-  const dragThreshold = computed(() => options.value.dragThreshold ?? config.defaultDragThreshold)
+  const threshold = computed(() => options.value.threshold ?? flashCardsDefaults.threshold)
+  const dragThreshold = computed(() => options.value.dragThreshold ?? flashCardsDefaults.dragThreshold)
   const maxDraggingY = computed(() => options.value.maxDraggingY ?? null)
   const maxDraggingX = computed(() => options.value.maxDraggingX ?? null)
 

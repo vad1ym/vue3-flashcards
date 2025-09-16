@@ -1,7 +1,7 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { config } from '../../src/config'
+import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
@@ -87,13 +87,13 @@ describe('[props] dragThreshold', () => {
     })
 
     it('should use default dragThreshold from config', async () => {
-      new DragSimulator(cardElement, { threshold: config.defaultDragThreshold })
+      new DragSimulator(cardElement, { threshold: flashCardsDefaults.dragThreshold })
         .dragRightBelowThreshold()
 
       await wrapper.vm.$nextTick()
       expect(cardElement.classList.contains('flash-card--dragging')).toBe(false)
 
-      new DragSimulator(cardElement, { threshold: config.defaultDragThreshold })
+      new DragSimulator(cardElement, { threshold: flashCardsDefaults.dragThreshold })
         .reset()
         .dragRightBeyondThreshold()
 

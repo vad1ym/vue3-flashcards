@@ -57,6 +57,14 @@
       "import": "./dist/flashcards.js",
       "require": "./dist/flashcards.umd.cjs"
     },
+    "./nuxt": {
+      "types": "./nuxt/module.ts",
+      "import": "./nuxt/module.ts"
+    },
+    "./plugin": {
+      "types": "./src/plugin.ts",
+      "import": "./src/plugin.ts"
+    },
     "./dist/*": "./dist/*"
   },
   "main": "./dist/flashcards.umd.cjs",
@@ -64,6 +72,7 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
+    "nuxt",
     "src"
   ],
   "scripts": {
@@ -75,6 +84,8 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:quiet": "vitest run --reporter=dot --silent",
+    "test:nuxt": "vitest run tests/nuxt*.test.ts",
+    "test:unit": "vitest run --exclude '**/nuxt*.test.ts'",
     "lint": "eslint ./src ./tests ./example --fix",
     "commitlint": "commitlint",
     "docs:dev": "vitepress dev docs",
@@ -91,6 +102,8 @@
     "@antfu/eslint-config": "^5.2.2",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "@nuxt/kit": "^4.1.2",
+    "@nuxt/test-utils": "^3.19.2",
     "@tailwindcss/vite": "^4.1.13",
     "@types/node": "^24.3.1",
     "@vitejs/plugin-vue": "^6.0.1",
@@ -103,6 +116,7 @@
     "eslint": "^9.15.0",
     "jsdom": "^26.1.0",
     "lint-staged": "^16.1.6",
+    "nuxt": "^4.1.2",
     "simple-git-hooks": "^2.13.1",
     "tailwindcss": "^4.1.13",
     "typescript": "~5.9.2",

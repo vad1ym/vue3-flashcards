@@ -1,5 +1,5 @@
 import type { DOMWrapper } from '@vue/test-utils'
-import { config } from '../../src/config'
+import { flashCardsDefaults } from '../../src/config/flashcards.config'
 
 export interface DragPosition {
   x: number | string
@@ -29,7 +29,7 @@ export class DragSimulator {
   constructor(element: HTMLElement | DOMWrapper<Element>, options: DragOptions = {}) {
     this.element = element instanceof Element ? element : element.element
     this.options = {
-      threshold: options.threshold ?? config.defaultThreshold,
+      threshold: options.threshold ?? flashCardsDefaults.threshold,
       ...options,
     }
   }
@@ -118,18 +118,18 @@ export class DragSimulator {
   /**
    * Drag to a percentage of threshold (useful for testing rotation/indicators)
    * @param percentage - Percentage of threshold (0.5 = 50%, 1.0 = 100%, etc.)
-   * @param threshold - The threshold value (defaults to config.defaultThreshold)
+   * @param threshold - The threshold value (defaults to flashCardsDefaults.threshold)
    */
-  dragToThreshold(percentage: number, threshold = config.defaultThreshold) {
+  dragToThreshold(percentage: number, threshold = flashCardsDefaults.threshold) {
     return this.dragTo(threshold * percentage)
   }
 
   /**
    * Drag to a percentage of threshold and end (complete drag cycle)
    * @param percentage - Percentage of threshold (0.5 = 50%, 1.0 = 100%, etc.)
-   * @param threshold - The threshold value (defaults to config.defaultThreshold)
+   * @param threshold - The threshold value (defaults to flashCardsDefaults.threshold)
    */
-  dragAndRelease(percentage: number, threshold = config.defaultThreshold) {
+  dragAndRelease(percentage: number, threshold = flashCardsDefaults.threshold) {
     return this.dragToThreshold(percentage, threshold).dragEnd()
   }
 

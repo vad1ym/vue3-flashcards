@@ -1,4 +1,8 @@
-export { default as FlashCard } from './FlashCard.vue'
-export { default as FlashCards } from './FlashCards.vue'
-export { default as FlipCard } from './FlipCard.vue'
-export { type DragPosition } from './utils/useDragSetup'
+// Export Vue plugin
+export { default as FlashCardsPlugin } from './plugin'
+
+// Export components for manual registration
+export { FlashCards, FlashCardsConfigKey, FlipCard, FlipCardConfigKey } from './plugin'
+
+// Export types
+export type { FlashCardsPluginOptions, FlipCardConfig } from './plugin'

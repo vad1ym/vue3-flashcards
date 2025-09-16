@@ -1,7 +1,7 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { config } from '../../src/config'
+import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
@@ -12,7 +12,7 @@ describe('[props] maxDraggingY', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: config.defaultThreshold,
+          threshold: flashCardsDefaults.threshold,
           maxDraggingY: 50,
         },
         slots: {
@@ -73,7 +73,7 @@ describe('[props] maxDraggingY', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: config.defaultThreshold,
+          threshold: flashCardsDefaults.threshold,
           maxDraggingY: 0,
         },
         slots: {
@@ -99,7 +99,7 @@ describe('[props] maxDraggingY', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: config.defaultThreshold,
+          threshold: flashCardsDefaults.threshold,
           // maxDraggingY not set, should allow free vertical movement
         },
         slots: {
@@ -141,7 +141,7 @@ describe('[props] maxDraggingY', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: config.defaultThreshold,
+          threshold: flashCardsDefaults.threshold,
           maxDraggingY: 30,
         },
         slots: {

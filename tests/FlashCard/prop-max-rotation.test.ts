@@ -1,7 +1,7 @@
 import type { DOMWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { config } from '../../src/config'
+import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
@@ -10,7 +10,9 @@ describe('[props] max-rotation', () => {
 
   beforeEach(() => {
     wrapper = mount(FlashCard, {
-      props: {},
+      props: {
+        maxRotation: flashCardsDefaults.maxRotation,
+      },
       slots: {
         default: '<div class="card-content">Test Card</div>',
       },
@@ -32,19 +34,19 @@ describe('[props] max-rotation', () => {
 
     it('should apply rotation transform during drag based on maxRotation', async () => {
       const simulator = new DragSimulator(cardElement).dragRightToThreshold(0.5) // 50% of threshold
-      await checkRotation(config.defaultMaxRotation * 0.5) // Should be 10deg (50% of 20deg)
+      await checkRotation(flashCardsDefaults.maxRotation * 0.5) // Should be 10deg (50% of 20deg)
       simulator.dragEnd()
     })
 
     it('should cap rotation at maxRotation when drag distance exceeds threshold', async () => {
       const simulator = new DragSimulator(cardElement).dragRightToThreshold(1.5) // 150% of threshold
-      await checkRotation(config.defaultMaxRotation) // Should be 20deg (max rotation)
+      await checkRotation(flashCardsDefaults.maxRotation) // Should be 20deg (max rotation)
       simulator.dragEnd()
     })
 
     it('should restore rotation to 0 when drag ends', async () => {
       const simulator = new DragSimulator(cardElement).dragRightToThreshold(0.5) // 50% of threshold
-      await checkRotation(config.defaultMaxRotation * 0.5) // Should be 10deg during drag
+      await checkRotation(flashCardsDefaults.maxRotation * 0.5) // Should be 10deg during drag
 
       simulator.dragEnd()
       await checkRotation(0) // Should be zero

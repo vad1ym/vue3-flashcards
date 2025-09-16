@@ -1,5 +1,5 @@
 import type { MaybeRefOrGetter } from 'vue'
-import { toRef } from 'vue'
+import { computed, toValue } from 'vue'
 
 export const StackDirection = {
   TOP: 'top',
@@ -20,7 +20,7 @@ export interface StackTransformOptions {
 }
 
 export function useStackTransform(_options: MaybeRefOrGetter<StackTransformOptions>) {
-  const options = toRef(_options)
+  const options = computed(() => toValue(_options))
 
   // Stack can't be greater than virtual buffer - 1
 

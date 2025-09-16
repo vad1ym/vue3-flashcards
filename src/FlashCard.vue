@@ -3,7 +3,6 @@ import type { DragPosition, DragSetupParams } from './utils/useDragSetup'
 import { onMounted, useTemplateRef, watch } from 'vue'
 import ApproveIcon from './components/icons/ApproveIcon.vue'
 import RejectIcon from './components/icons/RejectIcon.vue'
-import { config } from './config'
 import { SwipeAction, useDragSetup } from './utils/useDragSetup'
 
 export interface FlashCardProps extends DragSetupParams {
@@ -19,20 +18,17 @@ export interface FlashCardProps extends DragSetupParams {
   // Default value: `transform: rotate(${position.delta * maxRotation}deg)`
   transformStyle?: (position: DragPosition) => string
 
-  // Initial position for animation start, !just for internal usage!
-  initialPosition?: DragPosition
-
   // Animation for card transitions
   animation?: {
-    type: SwipeAction
+    type: string
     isRestoring: boolean
+    initialPosition?: DragPosition
   }
 }
 
 const {
-  maxRotation = config.defaultMaxRotation,
-  transformStyle: customTransformStyle,
-  initialPosition,
+  maxRotation = 0,
+  transformStyle,
   animation,
   ...params
 } = defineProps<FlashCardProps>()
@@ -61,9 +57,9 @@ defineSlots<{
 }>()
 
 // Apply custom transform style or default
-function transformStyle(position: DragPosition): string | null {
-  if (customTransformStyle) {
-    return customTransformStyle(position)
+function getTransformStyle(position: DragPosition): string | null {
+  if (transformStyle) {
+    return transformStyle(position)
   }
   return `transform: rotate(${position.delta * maxRotation}deg)`
 }
@@ -78,7 +74,7 @@ const {
   cleanupInteract,
 } = useDragSetup(el, () => ({
   ...params,
-  initialPosition,
+  ...animation,
   onDragComplete(action) {
     emit('complete', action, position)
   },
@@ -119,7 +115,7 @@ defineExpose({
       }"
       @animationend="emit('animationend')"
     >
-      <div class="flash-card__transform" :style="transformStyle(position)">
+      <div class="flash-card__transform" :style="getTransformStyle(position)">
         <slot :is-dragging="isDragging" />
 
         <div v-show="position.type === SwipeAction.REJECT">

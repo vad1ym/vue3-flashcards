@@ -3,8 +3,9 @@ import type { FlashCardProps } from './FlashCard.vue'
 import type { DragPosition } from './utils/useDragSetup'
 import type { StackDirection } from './utils/useStackTransform'
 import { computed, ref } from 'vue'
-import { config } from './config'
+import { flashCardsDefaults } from './config/flashcards.config'
 import FlashCard from './FlashCard.vue'
+import { useFlashCardsConfig } from './utils/useConfig'
 import { SwipeAction } from './utils/useDragSetup'
 import { useStackList } from './utils/useStackList'
 import { useStackTransform } from './utils/useStackTransform'
@@ -49,18 +50,10 @@ export interface FlashCardsProps<Item> extends FlashCardProps {
   waitAnimationEnd?: boolean
 }
 
-const {
-  items = [],
-  infinite = false,
-  virtualBuffer = config.defaultVirtualBuffer,
-  stack = config.defaultStack,
-  stackScale = config.defaultStackScale,
-  stackOffset = config.defaultStackOffset,
-  stackDirection = config.defaultStackDirection,
-  trackBy = config.defaultTrackBy,
-  waitAnimationEnd = config.defaultWaitAnimationEnd,
-  ...flashCardProps
-} = defineProps<FlashCardsProps<T>>()
+const props = withDefaults(defineProps<FlashCardsProps<T>>(), {
+  items: () => [],
+  ...flashCardsDefaults,
+})
 
 const emit = defineEmits<{
   approve: [item: T]
@@ -81,10 +74,13 @@ defineSlots<{
     isStart: boolean
     canRestore: boolean
   }) => any
-  empty?: () => any
+  empty?: (props: { reset: () => void }) => any
 }>()
 
 const containerHeight = ref(0)
+
+// Merge props with global config
+const config = useFlashCardsConfig(() => props)
 
 /**
  * VIRTUAL BUFFER
@@ -93,7 +89,7 @@ const containerHeight = ref(0)
  * If stack is not 0, it can be used to override virtual buffer if it's lower than stack + 2
  * IMPORTANT: We add 2 to stack value to account for the current card and hidden transition card
  */
-const calculateVirtualBuffer = computed(() => Math.max(stack && stack + 2, virtualBuffer, 1))
+const virtualBuffer = computed(() => Math.max(config.value.stack > 0 ? config.value.stack + 2 : config.value.virtualBuffer, 1))
 
 /**
  * STACK LIST
@@ -110,13 +106,7 @@ const {
   restoreCard,
   removeAnimatingCard,
   reset,
-} = useStackList<T>(() => ({
-  items,
-  infinite,
-  virtualBuffer: calculateVirtualBuffer.value,
-  trackBy,
-  waitAnimationEnd,
-}))
+} = useStackList<T>(() => ({ ...config.value, virtualBuffer: virtualBuffer.value }))
 
 /**
  * STACK TRANSFORM
@@ -124,14 +114,7 @@ const {
  */
 const {
   getCardStyle,
-} = useStackTransform(() => ({
-  stack,
-  stackScale,
-  stackOffset,
-  stackDirection,
-  currentIndex: currentIndex.value,
-  virtualBuffer: calculateVirtualBuffer.value,
-}))
+} = useStackTransform(() => ({ ...config.value, currentIndex: currentIndex.value }))
 
 /**
  * Handles card swipe completion
@@ -213,7 +196,7 @@ defineExpose({
         ]"
       >
         <FlashCard
-          v-bind="flashCardProps"
+          v-bind="props"
           class="flashcards__card"
           :class="{ 'flashcards__card--active': index === currentIndex }"
           @complete="(action, pos) => handleCardSwipe(itemId, action, pos)"
@@ -233,16 +216,15 @@ defineExpose({
 
       <!-- Animating cards -->
       <div
-        v-for="({ item, itemId, animation, initialPosition }, domIndex) in cardsInTransition"
+        v-for="({ item, itemId, animation }, domIndex) in cardsInTransition"
         :key="`anim-${itemId}`"
         :data-item-id="itemId"
         class="flashcards__card-wrapper flashcards__card-wrapper--animating"
         :style="[{ zIndex: stackList.length * 2 + domIndex }, getCardStyle(cardsInTransition.length - domIndex - 1)]"
       >
         <FlashCard
-          v-bind="flashCardProps"
+          v-bind="props"
           class="flashcards__card flashcards__card--animating"
-          :initial-position="initialPosition"
           :animation="animation"
           @animationend="() => removeAnimatingCard(itemId)"
         >
