@@ -152,7 +152,7 @@ function handleCardSwipe(itemId: string | number, action: string, position: Drag
  */
 function performCardAction(type: SwipeAction) {
   // If there's a card currently restoring, target that card instead of current card
-  const restoringCard = cardsInTransition.value.find(card => card.animation?.isRestoring)
+  const restoringCard = cardsInTransition.value.filter(card => card.animation?.isRestoring).pop()
   const targetCard = restoringCard || stackList.value.find(item => item.index === currentIndex.value)
 
   return targetCard && handleCardSwipe(targetCard.itemId, type)
