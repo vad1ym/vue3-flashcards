@@ -1,6 +1,7 @@
 <script lang="ts" setup generic="T extends Record<string, unknown>">
 import type { FlashCardProps } from './FlashCard.vue'
 import type { DragPosition } from './utils/useDragSetup'
+import type { ResetOptions } from './utils/useStackList'
 import type { StackDirection } from './utils/useStackTransform'
 import { computed, ref } from 'vue'
 import { flashCardsDefaults } from './config/flashcards.config'
@@ -69,12 +70,12 @@ defineSlots<{
     restore: () => void
     reject: () => void
     approve: () => void
-    reset: () => void
+    reset: (options?: ResetOptions) => void
     isEnd: boolean
     isStart: boolean
     canRestore: boolean
   }) => any
-  empty?: (props: { reset: () => void }) => any
+  empty?: (props: { reset: (options?: ResetOptions) => void }) => any
 }>()
 
 const containerHeight = ref(0)

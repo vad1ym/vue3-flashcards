@@ -179,7 +179,7 @@ function resetConfig() {
                   🎴 FlashCards Component
                 </h2>
                 <div class="flex justify-center flex-1 items-center">
-                  <div class="w-full max-w-sm">
+                  <div class="w-full max-w-sm flascards-container">
                     <FlashCards
                       :key="configKey"
                       :items="items"
@@ -234,7 +234,7 @@ function resetConfig() {
                       </template>
 
                       <template #empty="{ reset }">
-                        <EmptyState @reset-items="reset" />
+                        <EmptyState @reset-items="reset({ animate: true })" />
                       </template>
                     </FlashCards>
                   </div>
@@ -353,3 +353,13 @@ function resetConfig() {
     </div>
   </div>
 </template>
+
+<style>
+.flascards-container .flash-card {
+  cursor: grab;
+}
+
+.flascards-container .flash-card--dragging {
+  cursor: grabbing;
+}
+</style>
