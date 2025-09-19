@@ -145,6 +145,9 @@ defineExpose({
 
 .flash-card:not(.flash-card--drag-disabled) {
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .flash-card__transform {
