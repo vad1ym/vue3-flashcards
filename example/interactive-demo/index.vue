@@ -184,7 +184,7 @@ function resetConfig() {
                       :key="configKey"
                       :items="items"
                       :infinite="config.infinite"
-                      :virtual-buffer="config.virtualBuffer"
+                      :render-limit="config.renderLimit"
                       :stack="config.stack"
                       :stack-offset="config.stackOffset"
                       :stack-scale="config.stackScale"

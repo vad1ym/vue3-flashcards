@@ -5,14 +5,14 @@ import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import FlashCards from '../../src/FlashCards.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
-// Test constants for virtual buffer functionality
+// Test constants for render limit functionality
 const TEST_ITEMS_COUNT = 10
-const LARGE_VIRTUAL_BUFFER = 5 // Large buffer for performance tests
-const MINIMAL_VIRTUAL_BUFFER = 1 // Minimal buffer size
-const SMALL_VIRTUAL_BUFFER = 2 // Buffer smaller than stack size
-const EXCESSIVE_VIRTUAL_BUFFER = 15 // Buffer larger than available items
+const LARGE_RENDER_LIMIT = 5 // Large buffer for performance tests
+const MINIMAL_RENDER_LIMIT = 1 // Minimal buffer size
+const SMALL_RENDER_LIMIT = 2 // Buffer smaller than stack size
+const EXCESSIVE_RENDER_LIMIT = 15 // Buffer larger than available items
 
-describe('[props] virtualBuffer', () => {
+describe('[props] renderLimit', () => {
   let wrapper: VueWrapper
 
   const testItems = Array.from({ length: TEST_ITEMS_COUNT }, (_, i) => ({
@@ -20,7 +20,7 @@ describe('[props] virtualBuffer', () => {
     title: `Card ${i + 1}`,
   }))
 
-  describe('with default virtualBuffer', () => {
+  describe('with default renderLimit', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
@@ -33,27 +33,27 @@ describe('[props] virtualBuffer', () => {
       })
     })
 
-    it(`should use default virtualBuffer of ${flashCardsDefaults.virtualBuffer}`, () => {
-      // With default virtualBuffer of 3, the component renders 4 cards (virtualBuffer + 1)
+    it(`should use default renderLimit of ${flashCardsDefaults.renderLimit}`, () => {
+      // With default renderLimit of 3, the component renders 4 cards (renderLimit + 1)
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
-      expect(cardWrappers.length).toBe(flashCardsDefaults.virtualBuffer)
+      expect(cardWrappers.length).toBe(flashCardsDefaults.renderLimit)
     })
 
-    it(`should render first ${flashCardsDefaults.virtualBuffer} items with default virtualBuffer`, () => {
+    it(`should render first ${flashCardsDefaults.renderLimit} items with default renderLimit`, () => {
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
 
-      for (let i = 0; i < flashCardsDefaults.virtualBuffer; i++) {
+      for (let i = 0; i < flashCardsDefaults.renderLimit; i++) {
         expect(cardWrappers[i].text()).toContain(`Card ${i + 1}`)
       }
     })
   })
 
-  describe('with custom virtualBuffer of 5', () => {
+  describe('with custom renderLimit of 5', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          virtualBuffer: LARGE_VIRTUAL_BUFFER,
+          renderLimit: LARGE_RENDER_LIMIT,
         },
         slots: {
           default: '{{ item.title }}',
@@ -62,16 +62,16 @@ describe('[props] virtualBuffer', () => {
       })
     })
 
-    it(`should render exactly ${LARGE_VIRTUAL_BUFFER} cards in DOM with virtualBuffer of ${LARGE_VIRTUAL_BUFFER}`, () => {
+    it(`should render exactly ${LARGE_RENDER_LIMIT} cards in DOM with renderLimit of ${LARGE_RENDER_LIMIT}`, () => {
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
-      expect(cardWrappers.length).toBe(LARGE_VIRTUAL_BUFFER)
+      expect(cardWrappers.length).toBe(LARGE_RENDER_LIMIT)
 
-      for (let i = 0; i < LARGE_VIRTUAL_BUFFER; i++) {
+      for (let i = 0; i < LARGE_RENDER_LIMIT; i++) {
         expect(cardWrappers[i].text()).toContain(`Card ${i + 1}`)
       }
     })
 
-    it('should update virtual buffer window after swiping cards', async () => {
+    it('should update render limit window after swiping cards', async () => {
       // Swipe first card
       const activeCard = wrapper.find('.flashcards__card--active')
       new DragSimulator(activeCard).swipeApprove()
@@ -79,7 +79,7 @@ describe('[props] virtualBuffer', () => {
 
       // Should now show cards after swipe (may be 7 due to visible window shift)
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
-      expect(cardWrappers.length).toBe(LARGE_VIRTUAL_BUFFER)
+      expect(cardWrappers.length).toBe(LARGE_RENDER_LIMIT)
 
       // The active card should now be Card 2
       const newActiveCard = wrapper.find('.flashcards__card--active')
@@ -87,12 +87,12 @@ describe('[props] virtualBuffer', () => {
     })
   })
 
-  describe('with virtualBuffer of 1 (minimum)', () => {
+  describe('with renderLimit of 1 (minimum)', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          virtualBuffer: MINIMAL_VIRTUAL_BUFFER,
+          renderLimit: MINIMAL_RENDER_LIMIT,
         },
         slots: {
           default: '{{ item.title }}',
@@ -101,24 +101,24 @@ describe('[props] virtualBuffer', () => {
       })
     })
 
-    it('should render exactly 2 cards with virtualBuffer of 1', () => {
+    it('should render exactly 2 cards with renderLimit of 1', () => {
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
-      expect(cardWrappers.length).toBe(MINIMAL_VIRTUAL_BUFFER)
+      expect(cardWrappers.length).toBe(MINIMAL_RENDER_LIMIT)
     })
 
-    it('should render current and next card with virtualBuffer of 1', () => {
+    it('should render current and next card with renderLimit of 1', () => {
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
       expect(cardWrappers[0].text()).toContain('Card 1')
     })
   })
 
-  describe('with virtualBuffer smaller than stack + 1', () => {
+  describe('with renderLimit smaller than stack + 1', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          virtualBuffer: SMALL_VIRTUAL_BUFFER, // Smaller than stack + 1
-          stack: 3, // Stack of 3 requires virtualBuffer of at least 4
+          renderLimit: SMALL_RENDER_LIMIT, // Smaller than stack + 1
+          stack: 3, // Stack of 3 requires renderLimit of at least 4
         },
         slots: {
           default: '{{ item.title }}',
@@ -127,19 +127,19 @@ describe('[props] virtualBuffer', () => {
       })
     })
 
-    it('should automatically adjust virtualBuffer to stack + 1', () => {
-      // With stack=3, virtualBuffer should be adjusted to 4, so we expect 5 cards rendered
+    it('should automatically adjust renderLimit to stack + 1', () => {
+      // With stack=3, renderLimit should be adjusted to 4, so we expect 5 cards rendered
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
       expect(cardWrappers.length).toBe(5)
     })
   })
 
-  describe('with large virtualBuffer', () => {
+  describe('with large renderLimit', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          virtualBuffer: EXCESSIVE_VIRTUAL_BUFFER, // Larger than available items
+          renderLimit: EXCESSIVE_RENDER_LIMIT, // Larger than available items
         },
         slots: {
           default: '{{ item.title }}',
@@ -154,7 +154,7 @@ describe('[props] virtualBuffer', () => {
       expect(cardWrappers.length).toBeLessThanOrEqual(testItems.length)
     })
 
-    it('should render all available items when virtualBuffer exceeds items count', () => {
+    it('should render all available items when renderLimit exceeds items count', () => {
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
 
       // Should render all items from 1 to 10
@@ -164,12 +164,12 @@ describe('[props] virtualBuffer', () => {
     })
   })
 
-  describe('virtualBuffer behavior with infinite mode', () => {
+  describe('renderLimit behavior with infinite mode', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems.slice(0, 3), // Only 3 items
-          virtualBuffer: LARGE_VIRTUAL_BUFFER,
+          renderLimit: LARGE_RENDER_LIMIT,
           infinite: true,
         },
         slots: {
@@ -179,7 +179,7 @@ describe('[props] virtualBuffer', () => {
       })
     })
 
-    it('should maintain virtualBuffer size even with infinite cycling', async () => {
+    it('should maintain renderLimit size even with infinite cycling', async () => {
       // Process several cards to trigger cycling
       for (let i = 0; i < testItems.length; i++) {
         const activeCard = wrapper.find('.flashcards__card--active')
@@ -187,7 +187,7 @@ describe('[props] virtualBuffer', () => {
         await wrapper.vm.$nextTick()
       }
 
-      // Should still maintain virtualBuffer size (may show 7 cards after cycling)
+      // Should still maintain renderLimit size (may show 7 cards after cycling)
       const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
       expect(cardWrappers.length).toBe(3)
     })

@@ -22,7 +22,7 @@ export interface FlashCardsProps<Item> extends FlashCardProps {
   /**
    * Number of cards to render in dom, cant be less than 1. If stack is greater it will override this value
    */
-  virtualBuffer?: number
+  renderLimit?: number
   /**
    * Number of cards to stack
    */
@@ -83,13 +83,13 @@ const containerHeight = ref(0)
 const config = useFlashCardsConfig(() => props)
 
 /**
- * VIRTUAL BUFFER
- * The minimal buffer value is 1
- * Passed virtual buffer value is used as is
- * If stack is not 0, it can be used to override virtual buffer if it's lower than stack + 2
+ * RENDER LIMIT
+ * The minimal limit value is 1
+ * Passed limit value is used as is
+ * If stack is not 0, it can be used to override limit if it's lower than stack + 2
  * IMPORTANT: We add 2 to stack value to account for the current card and hidden transition card
  */
-const virtualBuffer = computed(() => Math.max(config.value.stack > 0 ? config.value.stack + 2 : config.value.virtualBuffer, 1))
+const renderLimit = computed(() => Math.max(config.value.stack > 0 ? config.value.stack + 2 : config.value.renderLimit, 1))
 
 /**
  * STACK LIST
@@ -106,7 +106,7 @@ const {
   restoreCard,
   removeAnimatingCard,
   reset,
-} = useStackList<T>(() => ({ ...config.value, virtualBuffer: virtualBuffer.value }))
+} = useStackList<T>(() => ({ ...config.value, renderLimit: renderLimit.value }))
 
 /**
  * STACK TRANSFORM

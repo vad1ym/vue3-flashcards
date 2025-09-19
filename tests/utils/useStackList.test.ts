@@ -21,7 +21,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -40,7 +40,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: [],
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -57,7 +57,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items,
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -76,7 +76,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -98,7 +98,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items,
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -120,7 +120,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items,
         infinite: false,
-        virtualBuffer: 4,
+        renderLimit: 4,
         trackBy: 'id',
       })
 
@@ -139,7 +139,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items,
         infinite: false,
-        virtualBuffer: 4,
+        renderLimit: 4,
         trackBy: 'id',
       })
 
@@ -162,7 +162,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items,
         infinite: true,
-        virtualBuffer: 5,
+        renderLimit: 5,
         trackBy: 'id',
       })
 
@@ -181,7 +181,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items,
         infinite: true,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -204,7 +204,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items,
         infinite: true,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -225,7 +225,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -242,7 +242,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -259,7 +259,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -275,7 +275,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -295,7 +295,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -315,7 +315,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -333,7 +333,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -350,7 +350,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -374,7 +374,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -395,7 +395,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(1),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -409,7 +409,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -437,7 +437,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -459,7 +459,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -474,7 +474,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -501,7 +501,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -517,7 +517,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(2),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -549,7 +549,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<CustomItem>>({
         items,
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'customId',
       })
 
@@ -572,7 +572,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<IncompleteItem>>({
         items,
         infinite: false,
-        virtualBuffer: 2,
+        renderLimit: 2,
         trackBy: 'id' as any, // Property doesn't exist
       })
 
@@ -589,7 +589,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: items.value,
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -602,15 +602,15 @@ describe('useStackList', () => {
       options.value = { ...options.value, items: items.value }
       await nextTick()
 
-      expect(stackList.stackList.value).toHaveLength(3) // Still limited by virtualBuffer
+      expect(stackList.stackList.value).toHaveLength(3) // Still limited by renderLimit
       expect(stackList.stackList.value.map(s => s.item.id)).toEqual([1, 2, 3])
     })
 
-    it('should react to changes in virtualBuffer', async () => {
+    it('should react to changes in renderLimit', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
         infinite: false,
-        virtualBuffer: 2,
+        renderLimit: 2,
         trackBy: 'id',
       })
 
@@ -618,8 +618,8 @@ describe('useStackList', () => {
 
       expect(stackList.stackList.value).toHaveLength(2)
 
-      // Increase virtualBuffer
-      options.value = { ...options.value, virtualBuffer: 4 }
+      // Increase renderLimit
+      options.value = { ...options.value, renderLimit: 4 }
       await nextTick()
 
       expect(stackList.stackList.value).toHaveLength(4)
@@ -629,7 +629,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 5,
+        renderLimit: 5,
         trackBy: 'id',
       })
 
@@ -647,11 +647,11 @@ describe('useStackList', () => {
   })
 
   describe('edge cases', () => {
-    it('should handle virtualBuffer larger than items array', () => {
+    it('should handle renderLimit larger than items array', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(2),
         infinite: false,
-        virtualBuffer: 5,
+        renderLimit: 5,
         trackBy: 'id',
       })
 
@@ -660,11 +660,11 @@ describe('useStackList', () => {
       expect(stackList.stackList.value).toHaveLength(2) // Limited by items count
     })
 
-    it('should handle zero virtualBuffer', () => {
+    it('should handle zero renderLimit', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
         infinite: false,
-        virtualBuffer: 0,
+        renderLimit: 0,
         trackBy: 'id',
       })
 
@@ -677,7 +677,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(1),
         infinite: true,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -691,7 +691,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -722,7 +722,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -762,7 +762,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -795,7 +795,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -821,7 +821,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: true,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -850,7 +850,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -871,7 +871,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: [],
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 
@@ -889,7 +889,7 @@ describe('useStackList', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(2),
         infinite: false,
-        virtualBuffer: 3,
+        renderLimit: 3,
         trackBy: 'id',
       })
 

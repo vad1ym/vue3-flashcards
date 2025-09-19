@@ -16,13 +16,11 @@ export interface StackTransformOptions {
   stackScale: number
   stackDirection: StackDirection
   currentIndex: number
-  virtualBuffer: number
+  renderLimit: number
 }
 
 export function useStackTransform(_options: MaybeRefOrGetter<StackTransformOptions>) {
   const options = computed(() => toValue(_options))
-
-  // Stack can't be greater than virtual buffer - 1
 
   const getCardStyle = (level: number): string => {
     const { stack, stackOffset, stackScale } = options.value

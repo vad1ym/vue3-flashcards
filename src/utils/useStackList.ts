@@ -16,7 +16,7 @@ export interface StackItem<T> {
 export interface StackListOptions<T> {
   items: T[]
   infinite?: boolean
-  virtualBuffer: number
+  renderLimit: number
   trackBy?: keyof T | 'id'
   waitAnimationEnd?: boolean
 }
@@ -71,7 +71,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
 
   // Stack generation for rendering (excluding animating cards)
   const stackList = computed(() => {
-    const { virtualBuffer, items, infinite } = options.value
+    const { renderLimit, items, infinite } = options.value
     const len = items.length
     if (!len)
       return []
@@ -80,7 +80,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     const animatingIds = new Set(cardsInTransition.value.map(card => card.itemId))
 
     if (infinite) {
-      for (let i = 0; i < virtualBuffer; i++) {
+      for (let i = 0; i < renderLimit; i++) {
         const index = (currentIndex.value + i + len) % len
         const item = items[index]
         const itemId = getId(item, index)
@@ -97,7 +97,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
       }
     }
     else {
-      const endIndex = Math.min(currentIndex.value + virtualBuffer, len)
+      const endIndex = Math.min(currentIndex.value + renderLimit, len)
       for (let i = currentIndex.value; i < endIndex; i++) {
         const item = items[i]
         const itemId = getId(item, i)

@@ -57,7 +57,7 @@ The main component for creating swipeable card interfaces.
 - **Default:** `false`
 - **Description:** Enable infinite swiping mode. When enabled, cards will loop endlessly after reaching the end. Useful for small datasets where you want continuous swiping.
 
-### `virtualBuffer`
+### `renderLimit`
 
 - **Type:** `number`
 - **Default:** `3`
@@ -70,7 +70,7 @@ The main component for creating swipeable card interfaces.
 - **Description:** Number of cards to show stacked behind the active card. Creates a visual depth effect where multiple cards are visible with scaling and positioning offsets.
 
 ::: warning
-When stack is greater than virtualBuffer, virtualBuffer is automatically increased to stack + 2 to ensure proper rendering. (1 card is currently visible and 1 is used for transition). This means that if you set `stack="5"`, `virtualBuffer` will be set to `7` and there will be 7 cards rendered in dom.
+When stack is greater than renderLimit, renderLimit is automatically increased to stack + 2 to ensure proper rendering. (1 card is currently visible and 1 is used for transition). This means that if you set `stack="5"`, `renderLimit` will be set to `7` and there will be 7 cards rendered in dom.
 :::
 
 **Example:**
