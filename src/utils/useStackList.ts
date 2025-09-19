@@ -221,12 +221,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
       return
     }
 
-    const { items, waitAnimationEnd } = options.value
-
-    // If some cards is in animation and waitAnimationEnd is true, prevent action
-    if (hasCardsInTransition.value && waitAnimationEnd) {
-      return
-    }
+    const { items } = options.value
 
     // Simple index-based restore (LIFO order by index)
     for (let i = currentIndex.value - 1; i >= 0; i--) {
@@ -297,5 +292,6 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     restoreCard,
     removeAnimatingCard,
     reset,
+    hasCardsInTransition,
   }
 }
