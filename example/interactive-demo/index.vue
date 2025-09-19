@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { ConfigPanelProps } from './ConfigPanel.vue'
 import type { CardItem } from './InteractiveCard.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { FlashCards } from 'vue3-flashcards'
 import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import Actions from './Actions.vue'
@@ -34,8 +34,14 @@ const config = ref<ConfigPanelProps>(defaultConfig)
 const enableXLimit = ref(false)
 const enableYLimit = ref(false)
 
+// Watch for enable toggles and set default values
+watchEffect(() => {
+  config.value.maxDragX = enableXLimit.value ? (config.value.maxDragX ?? 100) : null
+  config.value.maxDragY = enableYLimit.value ? (config.value.maxDragY ?? 100) : null
+})
+
 // Force re-render when config changes significantly
-const configKey = computed(() => JSON.stringify(config))
+const configKey = computed(() => JSON.stringify(config.value))
 
 // Events log
 const events = ref<Event[]>([])
