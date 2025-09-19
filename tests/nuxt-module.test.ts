@@ -84,7 +84,7 @@ describe('nuxt module integration tests', () => {
 
     // Plugin should run without browser APIs
     expect(() => {
-      plugin.default(mockApp as any, { config: { stack: 2 } })
+      plugin.default(mockApp as any, { flashCards: { stack: 2 } })
     }).not.toThrow()
 
     expect(mockApp.provide).toHaveBeenCalled()
