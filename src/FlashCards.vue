@@ -103,6 +103,7 @@ const {
   canRestore,
   stackList,
   cardsInTransition,
+  hasCardsInTransition,
   swipeCard,
   restoreCard,
   removeAnimatingCard,
@@ -146,6 +147,11 @@ function performCardAction(type: SwipeAction) {
  * Restores card
  */
 function restore() {
+  // If some cards is in animation and waitAnimationEnd is true, prevent action
+  if (hasCardsInTransition.value && config.value.waitAnimationEnd) {
+    return
+  }
+
   const restoredItem = restoreCard()
   return restoredItem && emit('restore', restoredItem)
 }
