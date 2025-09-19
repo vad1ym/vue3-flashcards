@@ -10,7 +10,7 @@ describe('nuxt module integration tests', () => {
       threshold: 100,
       infinite: false,
       maxRotation: 15,
-      virtualBuffer: 4,
+      renderLimit: 4,
       dragThreshold: 5,
       maxDraggingX: null,
       maxDraggingY: null,
@@ -38,7 +38,7 @@ describe('nuxt module integration tests', () => {
 
       // Animation props
       maxRotation: 20,
-      virtualBuffer: 5,
+      renderLimit: 5,
 
       // Interaction props
       dragThreshold: 5,

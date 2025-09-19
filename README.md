@@ -28,7 +28,7 @@
 - **📱 Touch & Mouse support** - Works seamlessly on desktop and mobile devices
 - **♾️ Infinite mode** - Loop through cards endlessly for continuous swiping
 - **🎯 Stack visualization** - Show multiple cards stacked with customizable depth and direction
-- **⚙️ Virtual rendering** - Efficient rendering for large datasets with virtual buffer
+- **⚙️ Virtual rendering** - Efficient rendering for large datasets with render limit
 - **🔄 Restore functionality** - Undo swipes and bring cards back to the stack
 
 ## 📦 Installation
@@ -114,8 +114,12 @@ Now components are globally available without imports:
   </FlashCards>
 
   <FlipCard>
-    <template #front>Front</template>
-    <template #back>Back</template>
+    <template #front>
+      Front
+    </template>
+    <template #back>
+      Back
+    </template>
   </FlipCard>
 </template>
 ```
@@ -151,8 +155,12 @@ Components are auto-imported and globally available:
   </FlashCards>
 
   <FlipCard>
-    <template #front>Front</template>
-    <template #back>Back</template>
+    <template #front>
+      Front
+    </template>
+    <template #back>
+      Back
+    </template>
   </FlipCard>
 </template>
 ```
@@ -182,8 +190,8 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `maxDraggingX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |
 | `disableDrag` | `boolean` | `false` | Completely disable dragging functionality. Manual methods and slot actions still work |
 | `infinite` | `boolean` | `false` | Enable infinite swiping mode (cards loop endlessly) |
-| `virtualBuffer` | `number` | `3` | Cards to render for virtual scrolling. Can't be lower than 1. |
-| `stack` | `number` | `0` | Number of cards to show stacked behind the active card. When stack is greater than virtualBuffer, virtualBuffer is automatically increased to stack + 2. |
+| `renderLimit` | `number` | `3` | Cards to render. Can't be lower than 1. |
+| `stack` | `number` | `0` | Number of cards to show stacked behind the active card. When stack is greater than renderLimit, renderLimit is automatically increased to stack + 2. |
 | `stackOffset` | `number` | `20` | Offset in pixels between stacked cards. |
 | `stackScale` | `number` | `0.05` | Scale reduction factor for stacked cards. Each card behind is scaled down by this amount × depth. |
 | `stackDirection` | `'top' \| 'bottom' \| 'left' \| 'right'` | `'bottom'` | Direction where stacked cards appear relative to the active card. |

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 export interface ConfigPanelProps {
   infinite: boolean
-  virtualBuffer: number
+  renderLimit: number
   stack: number
   stackOffset: number
   stackScale: number
@@ -58,26 +58,26 @@ defineEmits<Emits>()
           </label>
         </div>
 
-        <!-- Virtual Buffer -->
+        <!-- Render Limit -->
         <div class="form-control">
           <div class="mb-1">
-            <span class="label-text font-medium">Virtual Buffer</span>
+            <span class="label-text font-medium">Render Limit</span>
           </div>
           <div class="text-xs text-gray-500 mb-2">
             Number of cards rendered in DOM
           </div>
           <input
-            :value="config.virtualBuffer"
+            :value="config.renderLimit"
             type="range"
             min="1"
             max="10"
             class="range range-primary range-sm w-full"
-            @input="$emit('update:config', { ...config, virtualBuffer: Number(($event.target as HTMLInputElement).value) })"
+            @input="$emit('update:config', { ...config, renderLimit: Number(($event.target as HTMLInputElement).value) })"
           >
           <div class="w-full flex justify-between text-xs px-2">
             <span>1</span>
             <span class="opacity-50">
-              {{ config.virtualBuffer }}
+              {{ config.renderLimit }}
             </span>
             <span>10</span>
           </div>
