@@ -182,7 +182,7 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `items` | `T[]` | **required** | Array of items to display as cards |
-| `trackBy` | `string \| number` | `id` | Property to track items by. When provided, items will be tracked by this property instead of their index. Should be unique for each item. This is recommended to use when you modify items array in runtime. |
+| `itemKey` | `string \| number` | `id` | Property to track items by. When provided, items will be tracked by this property instead of their index. Should be unique for each item. This is recommended to use when you modify items array in runtime. |
 | `maxRotation` | `number` | `20` | Maximum rotation angle in degrees |
 | `swipeThreshold` | `number` | `150` | Swipe swipeThreshold in pixels |
 | `dragThreshold` | `number` | `5` | Minimum drag distance to start swiping |

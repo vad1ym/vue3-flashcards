@@ -198,7 +198,7 @@ describe('[events] restore', () => {
       props: {
         items: complexItems,
         swipeThreshold: flashCardsDefaults.swipeThreshold,
-        trackBy: 'id',
+        itemKey: 'id',
       },
       slots: {
         default: '{{ item.name }}',

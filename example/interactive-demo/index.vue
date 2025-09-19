@@ -196,7 +196,6 @@ function resetConfig() {
                       :max-drag-y="enableYLimit ? config.maxDragY : null"
                       :disable-drag="config.disableDrag"
                       :wait-animation-end="config.waitAnimationEnd"
-                      track-by="id"
                       @approve="onApprove"
                       @reject="onReject"
                       @restore="onRestore"

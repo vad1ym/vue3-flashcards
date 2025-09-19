@@ -22,7 +22,7 @@ describe('useStackList', () => {
         items: createTestItems(5),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -41,7 +41,7 @@ describe('useStackList', () => {
         items: [],
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -58,7 +58,7 @@ describe('useStackList', () => {
         items,
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -77,7 +77,7 @@ describe('useStackList', () => {
         items: createTestItems(5),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -99,7 +99,7 @@ describe('useStackList', () => {
         items,
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -121,7 +121,7 @@ describe('useStackList', () => {
         items,
         infinite: false,
         renderLimit: 4,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -140,7 +140,7 @@ describe('useStackList', () => {
         items,
         infinite: false,
         renderLimit: 4,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -163,7 +163,7 @@ describe('useStackList', () => {
         items,
         infinite: true,
         renderLimit: 5,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -182,7 +182,7 @@ describe('useStackList', () => {
         items,
         infinite: true,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -205,7 +205,7 @@ describe('useStackList', () => {
         items,
         infinite: true,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -226,7 +226,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -243,7 +243,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -260,7 +260,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -276,7 +276,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -296,7 +296,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -316,7 +316,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -334,7 +334,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -351,7 +351,7 @@ describe('useStackList', () => {
         items: createTestItems(5),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -375,7 +375,7 @@ describe('useStackList', () => {
         items: createTestItems(5),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -396,7 +396,7 @@ describe('useStackList', () => {
         items: createTestItems(1),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -410,7 +410,7 @@ describe('useStackList', () => {
         items: createTestItems(5),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -438,7 +438,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -460,7 +460,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -475,7 +475,7 @@ describe('useStackList', () => {
         items: createTestItems(5),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -502,7 +502,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -518,7 +518,7 @@ describe('useStackList', () => {
         items: createTestItems(2),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -533,8 +533,8 @@ describe('useStackList', () => {
     })
   })
 
-  describe('trackBy functionality', () => {
-    it('should use custom trackBy property', () => {
+  describe('itemKey functionality', () => {
+    it('should use custom itemKey property', () => {
       interface CustomItem {
         customId: string
         name: string
@@ -550,7 +550,7 @@ describe('useStackList', () => {
         items,
         infinite: false,
         renderLimit: 3,
-        trackBy: 'customId',
+        itemKey: 'customId',
       })
 
       const stackList = useStackList(options)
@@ -559,7 +559,7 @@ describe('useStackList', () => {
       expect(stack.map(s => s.itemId)).toEqual(['a', 'b', 'c'])
     })
 
-    it('should fall back to index when trackBy property is missing', () => {
+    it('should fall back to index when itemKey property is missing', () => {
       interface IncompleteItem {
         name: string
       }
@@ -573,7 +573,7 @@ describe('useStackList', () => {
         items,
         infinite: false,
         renderLimit: 2,
-        trackBy: 'id' as any, // Property doesn't exist
+        itemKey: 'id' as any, // Property doesn't exist
       })
 
       const stackList = useStackList(options)
@@ -590,7 +590,7 @@ describe('useStackList', () => {
         items: items.value,
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -611,7 +611,7 @@ describe('useStackList', () => {
         items: createTestItems(5),
         infinite: false,
         renderLimit: 2,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -630,7 +630,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 5,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -652,7 +652,7 @@ describe('useStackList', () => {
         items: createTestItems(2),
         infinite: false,
         renderLimit: 5,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -665,7 +665,7 @@ describe('useStackList', () => {
         items: createTestItems(5),
         infinite: false,
         renderLimit: 0,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -678,7 +678,7 @@ describe('useStackList', () => {
         items: createTestItems(1),
         infinite: true,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -692,7 +692,7 @@ describe('useStackList', () => {
         items: createTestItems(5),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -723,7 +723,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -763,7 +763,7 @@ describe('useStackList', () => {
         items: createTestItems(5),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -796,7 +796,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -822,7 +822,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: true,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -851,7 +851,7 @@ describe('useStackList', () => {
         items: createTestItems(3),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -872,7 +872,7 @@ describe('useStackList', () => {
         items: [],
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)
@@ -890,7 +890,7 @@ describe('useStackList', () => {
         items: createTestItems(2),
         infinite: false,
         renderLimit: 3,
-        trackBy: 'id',
+        itemKey: 'id',
       })
 
       const stackList = useStackList(options)

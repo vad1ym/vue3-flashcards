@@ -9,7 +9,7 @@ The main component for creating swipeable card interfaces.
 - **Type:** `T[]`
 - **Description:** Array of items to display as cards. Each item will be passed to the default and back slots.
 
-### `trackBy`
+### `itemKey`
 
 - **Type:** `string | number`
 - **Default:** `id`

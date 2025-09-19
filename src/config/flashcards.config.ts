@@ -14,7 +14,7 @@ export const flashCardsDefaults = (
     stackOffset: 20,
     stackScale: 0.05,
     stackDirection: StackDirection.BOTTOM,
-    trackBy: 'id',
+    itemKey: 'id',
     infinite: undefined,
     waitAnimationEnd: undefined,
   } as const
