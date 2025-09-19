@@ -3,7 +3,7 @@ interface Props {
   isEnd: boolean
   isStart: boolean
   canRestore: boolean
-  infinite: boolean
+  loop: boolean
 }
 
 interface Emits {
@@ -38,7 +38,7 @@ defineEmits<Emits>()
     <div class="flex justify-center gap-4">
       <button
         class="btn btn-circle btn-error"
-        :disabled="isEnd && !infinite"
+        :disabled="isEnd && !loop"
         @click="$emit('reject')"
       >
         ✗
@@ -52,7 +52,7 @@ defineEmits<Emits>()
       </button>
       <button
         class="btn btn-circle btn-success"
-        :disabled="isEnd && !infinite"
+        :disabled="isEnd && !loop"
         @click="$emit('approve')"
       >
         ✓

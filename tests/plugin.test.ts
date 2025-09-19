@@ -52,7 +52,7 @@ describe('vue Plugin', () => {
     it('should register components with custom config', () => {
       const flashCardsConfig = {
         stack: 2,
-        infinite: true,
+        loop: true,
         maxRotation: 30,
       }
 
@@ -111,7 +111,7 @@ describe('vue Plugin', () => {
       const customFlashCardsConfig = {
         stack: 4,
         stackOffset: 30,
-        infinite: true,
+        loop: true,
         swipeThreshold: 200,
       }
       const customFlipCardConfig = {
@@ -212,12 +212,12 @@ describe('vue Plugin', () => {
     it('should allow local props to override global config', () => {
       const globalConfig = {
         stack: 3,
-        infinite: false,
+        loop: false,
       }
 
       const wrapper = mount({
         template: `
-          <FlashCards :items="items" :infinite="true">
+          <FlashCards :items="items" :loop="true">
             <template #default="{ item }">
               {{ item.title }}
             </template>
@@ -236,7 +236,7 @@ describe('vue Plugin', () => {
       expect(flashCardsComponent.exists()).toBe(true)
 
       // Local prop should override global config
-      expect(flashCardsComponent.props('infinite')).toBe(true)
+      expect(flashCardsComponent.props('loop')).toBe(true)
     })
   })
 

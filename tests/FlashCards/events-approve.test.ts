@@ -34,12 +34,12 @@ describe('[events] approve', () => {
     expect(wrapper.emitted('approve')?.[0]).toEqual([testItems[0]])
   })
 
-  it('should work with infinite mode', async () => {
-    const infiniteWrapper = mount(FlashCards, {
+  it('should work with loop mode', async () => {
+    const loopWrapper = mount(FlashCards, {
       props: {
         items: testItems,
         swipeThreshold: flashCardsDefaults.swipeThreshold,
-        infinite: true,
+        loop: true,
       },
       slots: {
         default: '{{ item.title }}',
@@ -47,11 +47,11 @@ describe('[events] approve', () => {
       global: { stubs: { Transition: false } },
     })
 
-    infiniteWrapper.vm.approve()
-    await infiniteWrapper.vm.$nextTick()
+    loopWrapper.vm.approve()
+    await loopWrapper.vm.$nextTick()
 
-    expect(infiniteWrapper.emitted('approve')).toBeTruthy()
-    expect(infiniteWrapper.emitted('approve')?.[0]).toEqual([testItems[0]])
+    expect(loopWrapper.emitted('approve')).toBeTruthy()
+    expect(loopWrapper.emitted('approve')?.[0]).toEqual([testItems[0]])
   })
 
   it('should handle multiple approve calls', async () => {

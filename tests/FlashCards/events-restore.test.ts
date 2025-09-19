@@ -101,12 +101,12 @@ describe('[events] restore', () => {
     expect(wrapper.emitted('restore')).toBeFalsy()
   })
 
-  it('should work with infinite mode', async () => {
-    const infiniteWrapper = mount(FlashCards, {
+  it('should work with loop mode', async () => {
+    const loopWrapper = mount(FlashCards, {
       props: {
         items: testItems,
         swipeThreshold: flashCardsDefaults.swipeThreshold,
-        infinite: true,
+        loop: true,
       },
       slots: {
         default: '{{ item.title }}',
@@ -114,15 +114,15 @@ describe('[events] restore', () => {
       global: { stubs: { Transition: false } },
     })
 
-    // Swipe a card in infinite mode
-    infiniteWrapper.vm.approve()
-    await infiniteWrapper.vm.$nextTick()
+    // Swipe a card in loop mode
+    loopWrapper.vm.approve()
+    await loopWrapper.vm.$nextTick()
 
     // Restore it
-    infiniteWrapper.vm.restore()
-    await infiniteWrapper.vm.$nextTick()
+    loopWrapper.vm.restore()
+    await loopWrapper.vm.$nextTick()
 
-    const restoreEvents = infiniteWrapper.emitted('restore')
+    const restoreEvents = loopWrapper.emitted('restore')
     expect(restoreEvents).toBeTruthy()
 
     if (restoreEvents && restoreEvents.length > 0) {

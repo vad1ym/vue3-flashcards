@@ -26,7 +26,7 @@
 - **🎨 Smooth animations** - Hardware-accelerated CSS transitions for 60fps performance
 - **🔧 Highly customizable** - Extensive API with props, slots, events, and custom transforms
 - **📱 Touch & Mouse support** - Works seamlessly on desktop and mobile devices
-- **♾️ Infinite mode** - Loop through cards endlessly for continuous swiping
+- **♾️ loop mode** - Loop through cards endlessly for continuous swiping
 - **🎯 Stack visualization** - Show multiple cards stacked with customizable depth and direction
 - **⚙️ Virtual rendering** - Efficient rendering for large datasets with render limit
 - **🔄 Restore functionality** - Undo swipes and bring cards back to the stack
@@ -90,7 +90,7 @@ app.use(FlashCardsPlugin, {
     stack: 3,
     stackOffset: 25,
     swipeThreshold: 150,
-    infinite: true,
+    loop: true,
   },
   flipCard: {
     // Global defaults for FlipCard components
@@ -138,7 +138,7 @@ export default defineNuxtConfig({
     stack: 3,
     stackOffset: 25,
     swipeThreshold: 150,
-    infinite: true,
+    loop: true,
   }
 })
 ```
@@ -189,7 +189,7 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `maxDragY` | `number \| null` | `null` | Maximum Y dragging distance in pixels (null = unlimited) |
 | `maxDragX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |
 | `disableDrag` | `boolean` | `false` | Completely disable dragging functionality. Manual methods and slot actions still work |
-| `infinite` | `boolean` | `false` | Enable infinite swiping mode (cards loop endlessly) |
+| `loop` | `boolean` | `false` | Enable loop swiping mode (cards loop endlessly) |
 | `renderLimit` | `number` | `3` | Cards to render. Can't be lower than 1. |
 | `stack` | `number` | `0` | Number of cards to show stacked behind the active card. When stack is greater than renderLimit, renderLimit is automatically increased to stack + 2. |
 | `stackOffset` | `number` | `20` | Offset in pixels between stacked cards. |

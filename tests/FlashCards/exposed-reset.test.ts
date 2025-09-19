@@ -75,12 +75,12 @@ describe('[exposed] reset', () => {
     expect(wrapper.vm.isEnd).toBe(false)
   })
 
-  it('should reset in infinite mode', async () => {
-    const infiniteWrapper = mount(FlashCards, {
+  it('should reset in loop mode', async () => {
+    const loopWrapper = mount(FlashCards, {
       props: {
         items: testItems,
         swipeThreshold: flashCardsDefaults.swipeThreshold,
-        infinite: true,
+        loop: true,
       },
       slots: {
         default: '{{ item.title }}',
@@ -88,26 +88,26 @@ describe('[exposed] reset', () => {
       global: { stubs: { Transition: false } },
     })
 
-    // Swipe through all cards in infinite mode
-    infiniteWrapper.vm.approve()
-    await infiniteWrapper.vm.$nextTick()
+    // Swipe through all cards in loop mode
+    loopWrapper.vm.approve()
+    await loopWrapper.vm.$nextTick()
 
-    infiniteWrapper.vm.approve()
-    await infiniteWrapper.vm.$nextTick()
+    loopWrapper.vm.approve()
+    await loopWrapper.vm.$nextTick()
 
-    infiniteWrapper.vm.approve()
-    await infiniteWrapper.vm.$nextTick()
+    loopWrapper.vm.approve()
+    await loopWrapper.vm.$nextTick()
 
-    // In infinite mode, canRestore depends on completed cards
+    // In loop mode, canRestore depends on completed cards
     // We don't assert this value as it may vary in test environment
 
     // Reset
-    infiniteWrapper.vm.reset()
-    await infiniteWrapper.vm.$nextTick()
+    loopWrapper.vm.reset()
+    await loopWrapper.vm.$nextTick()
 
     // Should be back to initial state
-    expect(infiniteWrapper.vm.isStart).toBe(true)
-    expect(infiniteWrapper.vm.canRestore).toBe(false)
+    expect(loopWrapper.vm.isStart).toBe(true)
+    expect(loopWrapper.vm.canRestore).toBe(false)
   })
 
   it('should work when called multiple times', async () => {

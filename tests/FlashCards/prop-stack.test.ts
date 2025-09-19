@@ -265,13 +265,13 @@ describe('[props] stack', () => {
     })
   })
 
-  describe('stacking behavior in infinite mode', () => {
+  describe('stacking behavior in loop mode', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems.slice(0, 3), // Use fewer items to test cycling
           stack: 2,
-          infinite: true,
+          loop: true,
         },
         slots: {
           default: '{{ item.title }}',
@@ -280,7 +280,7 @@ describe('[props] stack', () => {
       })
     })
 
-    it('should maintain stacking visual effects during infinite cycling', async () => {
+    it('should maintain stacking visual effects during loop cycling', async () => {
       // Swipe through several cards to trigger cycling
       for (let i = 0; i < 5; i++) {
         const activeCard = wrapper.find('.flashcards__card--active')
@@ -312,7 +312,7 @@ describe('[props] stack', () => {
         await wrapper.vm.$nextTick()
       }
 
-      // Should have cycled back to show items again (infinite behavior)
+      // Should have cycled back to show items again (loop behavior)
       const finalActiveText = wrapper.find('.flashcards__card--active').text()
       expect(finalActiveText).toMatch(/Card [1-3]/) // Should show one of the original cards
 

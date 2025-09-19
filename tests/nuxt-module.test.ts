@@ -8,7 +8,7 @@ describe('nuxt module integration tests', () => {
       stack: 2,
       stackOffset: 20,
       swipeThreshold: 100,
-      infinite: false,
+      loop: false,
       maxRotation: 15,
       renderLimit: 4,
       dragThreshold: 5,
@@ -34,7 +34,7 @@ describe('nuxt module integration tests', () => {
       stack: 3,
       stackOffset: 25,
       swipeThreshold: 150,
-      infinite: true,
+      loop: true,
 
       // Animation props
       maxRotation: 20,
@@ -97,7 +97,7 @@ describe('nuxt module integration tests', () => {
     const globalConfig: ModuleOptions = {
       stack: 3,
       swipeThreshold: 150,
-      infinite: true,
+      loop: true,
     }
 
     const localProps = {
@@ -110,7 +110,7 @@ describe('nuxt module integration tests', () => {
 
     expect(mergedConfig.stack).toBe(3) // From global
     expect(mergedConfig.swipeThreshold).toBe(200) // Overridden by local
-    expect(mergedConfig.infinite).toBe(true) // From global
+    expect(mergedConfig.loop).toBe(true) // From global
     expect(mergedConfig.maxRotation).toBe(25) // From local
   })
 

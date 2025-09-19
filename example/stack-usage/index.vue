@@ -71,7 +71,7 @@ const directions = [
           :items="cards"
           :stack="stackSize"
           :stack-direction="stackDirection"
-          :infinite="true"
+          :loop="true"
           #="{ item }"
         >
           <StackCard :item="item" />

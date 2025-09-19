@@ -6,7 +6,7 @@ import './assets/index.css'
 const app = createApp(BasicUsage)
 app.use(FlashCardsPlugin, {
   flashCards: {
-    infinite: true,
+    loop: true,
   },
 })
 app.mount('#app')

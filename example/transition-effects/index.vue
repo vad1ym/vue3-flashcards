@@ -70,7 +70,7 @@ const cards = [
       <FlashCards
         :items="cards"
         :class="selectedTransition"
-        infinite
+        loop
       >
         <template #default="{ item }">
           <TransitionCard :card="item" />
