@@ -12,8 +12,8 @@ describe('nuxt module integration tests', () => {
       maxRotation: 15,
       renderLimit: 4,
       dragThreshold: 5,
-      maxDraggingX: null,
-      maxDraggingY: null,
+      maxDragX: null,
+      maxDragY: null,
     }
 
     expect(validOptions).toBeDefined()
@@ -42,8 +42,8 @@ describe('nuxt module integration tests', () => {
 
       // Interaction props
       dragThreshold: 5,
-      maxDraggingX: 200,
-      maxDraggingY: 100,
+      maxDragX: 200,
+      maxDragY: 100,
       disableDrag: false,
 
       // Advanced props

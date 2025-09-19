@@ -20,8 +20,8 @@ export interface DragSetupParams {
 
   // Max dragging in pixels, user cant drag moren than than value
   // Disabled by default
-  maxDraggingY?: number | null
-  maxDraggingX?: number | null
+  maxDragY?: number | null
+  maxDragX?: number | null
 
   // Completely disable dragging feature
   disableDrag?: boolean
@@ -62,8 +62,8 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
 
   const swipeThreshold = computed(() => options.value.swipeThreshold ?? flashCardsDefaults.swipeThreshold)
   const dragThreshold = computed(() => options.value.dragThreshold ?? flashCardsDefaults.dragThreshold)
-  const maxDraggingY = computed(() => options.value.maxDraggingY ?? null)
-  const maxDraggingX = computed(() => options.value.maxDraggingX ?? null)
+  const maxDragY = computed(() => options.value.maxDragY ?? null)
+  const maxDragX = computed(() => options.value.maxDragX ?? null)
 
   // Is drag started
   const isDragStarted = ref(false)
@@ -128,12 +128,12 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     let limitedX = x
     let limitedY = y
 
-    if (maxDraggingX.value !== null) {
-      limitedX = Math.max(-maxDraggingX.value, Math.min(maxDraggingX.value, x))
+    if (maxDragX.value !== null) {
+      limitedX = Math.max(-maxDragX.value, Math.min(maxDragX.value, x))
     }
 
-    if (maxDraggingY.value !== null) {
-      limitedY = Math.max(-maxDraggingY.value, Math.min(maxDraggingY.value, y))
+    if (maxDragY.value !== null) {
+      limitedY = Math.max(-maxDragY.value, Math.min(maxDragY.value, y))
     }
 
     const delta = Math.max(-1, Math.min(1, limitedX / swipeThreshold.value))

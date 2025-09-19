@@ -13,16 +13,16 @@ const HIGH_THRESHOLD_FOR_TESTING = 200 // Threshold higher than max dragging lim
 const DRAG_DISTANCE_BEYOND_THRESHOLD = 250 // Drag distance that exceeds both limit and swipeThreshold
 const UNLIMITED_DRAG_DISTANCE = 300 // Large drag distance for testing unlimited dragging
 
-describe('[props] maxDraggingX', () => {
+describe('[props] maxDragX', () => {
   let wrapper: VueWrapper<InstanceType<typeof FlashCard>>
 
-  describe('with maxDraggingX set to limit', () => {
+  describe('with maxDragX set to limit', () => {
     let cardElement: HTMLElement
 
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          maxDraggingX: MAX_DRAGGING_X_LIMIT,
+          maxDragX: MAX_DRAGGING_X_LIMIT,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -32,7 +32,7 @@ describe('[props] maxDraggingX', () => {
       cardElement = wrapper.element
     })
 
-    it('should allow dragging up to maxDraggingX limit', async () => {
+    it('should allow dragging up to maxDragX limit', async () => {
       // Drag right within limit
       new DragSimulator(cardElement)
         .dragStart()
@@ -44,7 +44,7 @@ describe('[props] maxDraggingX', () => {
       expect(cardElement.style.transform).toContain(`translate3D(${DRAG_DISTANCE_WITHIN_LIMIT}px, 0px, 0)`)
     })
 
-    it('should clamp horizontal dragging when exceeding positive maxDraggingX', async () => {
+    it('should clamp horizontal dragging when exceeding positive maxDragX', async () => {
       // Try to drag right beyond limit
       new DragSimulator(cardElement)
         .dragStart()
@@ -56,7 +56,7 @@ describe('[props] maxDraggingX', () => {
       expect(cardElement.style.transform).toContain(`translate3D(${MAX_DRAGGING_X_LIMIT}px, 0px, 0)`)
     })
 
-    it('should clamp horizontal dragging when exceeding negative maxDraggingX', async () => {
+    it('should clamp horizontal dragging when exceeding negative maxDragX', async () => {
       // Try to drag left beyond negative limit
       new DragSimulator(cardElement)
         .dragStart()
@@ -80,12 +80,12 @@ describe('[props] maxDraggingX', () => {
       expect(cardElement.style.transform).toContain(`translate3D(${MAX_DRAGGING_X_LIMIT}px, ${VERTICAL_DRAG_DISTANCE}px, 0)`)
     })
 
-    it('should affect swipe completion when swipeThreshold exceeds maxDraggingX', async () => {
-      // Set swipeThreshold higher than maxDraggingX
+    it('should affect swipe completion when swipeThreshold exceeds maxDragX', async () => {
+      // Set swipeThreshold higher than maxDragX
       wrapper = mount(FlashCard, {
         props: {
-          maxDraggingX: MAX_DRAGGING_X_LIMIT,
-          swipeThreshold: HIGH_THRESHOLD_FOR_TESTING, // Higher than maxDraggingX
+          maxDragX: MAX_DRAGGING_X_LIMIT,
+          swipeThreshold: HIGH_THRESHOLD_FOR_TESTING, // Higher than maxDragX
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -108,8 +108,8 @@ describe('[props] maxDraggingX', () => {
     })
 
     it('should clamp position even during completion logic', async () => {
-      // This test verifies that maxDraggingX affects the completion by checking the final position
-      // The card should be clamped to maxDraggingX even if user tries to drag beyond it
+      // This test verifies that maxDragX affects the completion by checking the final position
+      // The card should be clamped to maxDragX even if user tries to drag beyond it
       new DragSimulator(cardElement)
         .dragStart()
         .dragMove([{ x: DRAG_DISTANCE_EXCEEDING_LIMIT, y: 0 }]) // Try to drag beyond limit
@@ -123,13 +123,13 @@ describe('[props] maxDraggingX', () => {
     })
   })
 
-  describe('with maxDraggingX disabled (null)', () => {
+  describe('with maxDragX disabled (null)', () => {
     let cardElement: HTMLElement
 
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          maxDraggingX: null, // Explicitly disable X limit
+          maxDragX: null, // Explicitly disable X limit
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -139,7 +139,7 @@ describe('[props] maxDraggingX', () => {
       cardElement = wrapper.element
     })
 
-    it('should allow unlimited horizontal dragging when maxDraggingX is null', async () => {
+    it('should allow unlimited horizontal dragging when maxDragX is null', async () => {
       // Drag right with no limit
       new DragSimulator(cardElement)
         .dragStart()
@@ -151,7 +151,7 @@ describe('[props] maxDraggingX', () => {
       expect(cardElement.style.transform).toContain(`translate3D(${UNLIMITED_DRAG_DISTANCE}px, 0px, 0)`)
     })
 
-    it('should allow unlimited leftward dragging when maxDraggingX is null', async () => {
+    it('should allow unlimited leftward dragging when maxDragX is null', async () => {
       // Drag left with no limit
       new DragSimulator(cardElement)
         .dragStart()

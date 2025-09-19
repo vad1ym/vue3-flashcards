@@ -186,8 +186,8 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `maxRotation` | `number` | `20` | Maximum rotation angle in degrees |
 | `swipeThreshold` | `number` | `150` | Swipe swipeThreshold in pixels |
 | `dragThreshold` | `number` | `5` | Minimum drag distance to start swiping |
-| `maxDraggingY` | `number \| null` | `null` | Maximum Y dragging distance in pixels (null = unlimited) |
-| `maxDraggingX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |
+| `maxDragY` | `number \| null` | `null` | Maximum Y dragging distance in pixels (null = unlimited) |
+| `maxDragX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |
 | `disableDrag` | `boolean` | `false` | Completely disable dragging functionality. Manual methods and slot actions still work |
 | `infinite` | `boolean` | `false` | Enable infinite swiping mode (cards loop endlessly) |
 | `renderLimit` | `number` | `3` | Cards to render. Can't be lower than 1. |

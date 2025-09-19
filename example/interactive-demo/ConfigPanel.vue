@@ -9,8 +9,8 @@ export interface ConfigPanelProps {
   swipeThreshold: number
   dragThreshold: number
   maxRotation: number
-  maxDraggingX: number | null
-  maxDraggingY: number | null
+  maxDragX: number | null
+  maxDragY: number | null
   disableDrag: boolean
   waitAnimationEnd: boolean
 }
@@ -288,17 +288,17 @@ defineEmits<Emits>()
             Maximum horizontal distance
           </div>
           <input
-            :value="config.maxDraggingX"
+            :value="config.maxDragX"
             type="range"
             min="50"
             max="500"
             class="range range-primary range-sm w-full"
-            @input="$emit('update:config', { ...config, maxDraggingX: Number(($event.target as HTMLInputElement).value) })"
+            @input="$emit('update:config', { ...config, maxDragX: Number(($event.target as HTMLInputElement).value) })"
           >
           <div class="w-full flex justify-between text-xs px-2">
             <span>50</span>
             <span class="opacity-50">
-              {{ config.maxDraggingX }}px
+              {{ config.maxDragX }}px
             </span>
             <span>500</span>
           </div>
@@ -329,17 +329,17 @@ defineEmits<Emits>()
             Maximum vertical distance
           </div>
           <input
-            :value="config.maxDraggingY"
+            :value="config.maxDragY"
             type="range"
             min="0"
             max="200"
             class="range range-primary range-sm w-full"
-            @input="$emit('update:config', { ...config, maxDraggingY: Number(($event.target as HTMLInputElement).value) })"
+            @input="$emit('update:config', { ...config, maxDragY: Number(($event.target as HTMLInputElement).value) })"
           >
           <div class="w-full flex justify-between text-xs px-2">
             <span>0</span>
             <span class="opacity-50">
-              {{ config.maxDraggingY }}px
+              {{ config.maxDragY }}px
             </span>
             <span>200</span>
           </div>

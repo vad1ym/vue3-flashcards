@@ -22,8 +22,8 @@ const defaultConfig = {
   waitAnimationEnd: false,
   infinite: false,
   stackDirection: 'bottom' as 'top' | 'bottom' | 'left' | 'right',
-  maxDraggingX: null,
-  maxDraggingY: null,
+  maxDragX: null,
+  maxDragY: null,
   disableDrag: false,
 }
 
@@ -192,8 +192,8 @@ function resetConfig() {
                       :swipe-threshold="config.swipeThreshold"
                       :drag-threshold="config.dragThreshold"
                       :max-rotation="config.maxRotation"
-                      :max-dragging-x="enableXLimit ? config.maxDraggingX : null"
-                      :max-dragging-y="enableYLimit ? config.maxDraggingY : null"
+                      :max-drag-x="enableXLimit ? config.maxDragX : null"
+                      :max-drag-y="enableYLimit ? config.maxDragY : null"
                       :disable-drag="config.disableDrag"
                       :wait-animation-end="config.waitAnimationEnd"
                       track-by="id"
