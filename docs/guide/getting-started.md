@@ -82,7 +82,7 @@ app.use(FlashCardsPlugin, {
     // Global defaults for FlashCards components
     stack: 3,
     stackOffset: 25,
-    threshold: 150,
+    swipeThreshold: 150,
     infinite: true,
   },
   flipCard: {
@@ -126,7 +126,7 @@ export default defineNuxtConfig({
   flashcards: {
     stack: 3,
     stackOffset: 25,
-    threshold: 150,
+    swipeThreshold: 150,
     infinite: true,
   }
 })

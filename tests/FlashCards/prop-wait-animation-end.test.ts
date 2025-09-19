@@ -17,7 +17,7 @@ describe('[props] wait-animation-end', () => {
     return mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
         waitAnimationEnd,
       },
       slots: {
@@ -157,7 +157,7 @@ describe('[props] wait-animation-end', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: flashCardsDefaults.threshold,
+          swipeThreshold: flashCardsDefaults.swipeThreshold,
         },
         slots: {
           default: '{{ item.title }}',

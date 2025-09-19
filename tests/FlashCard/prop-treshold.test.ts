@@ -5,14 +5,14 @@ import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
-describe('[props] threshold', () => {
+describe('[props] swipeThreshold', () => {
   let wrapper: VueWrapper<InstanceType<typeof FlashCard>>
 
-  describe('default threshold', () => {
+  describe('default swipeThreshold', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: flashCardsDefaults.threshold,
+          swipeThreshold: flashCardsDefaults.swipeThreshold,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -21,7 +21,7 @@ describe('[props] threshold', () => {
       })
     })
 
-    it('should emit complete when swiped beyond threshold', async () => {
+    it('should emit complete when swiped beyond swipeThreshold', async () => {
       const cardElement = wrapper.element
 
       new DragSimulator(cardElement).swipeApprove()
@@ -31,7 +31,7 @@ describe('[props] threshold', () => {
       expect(wrapper.emitted('complete')?.[0][0]).toBe('approve') // approved = true
     })
 
-    it('should not complete when swiped below threshold', async () => {
+    it('should not complete when swiped below swipeThreshold', async () => {
       const cardElement = wrapper.element
 
       new DragSimulator(cardElement).swipeRightBelowThreshold()
@@ -42,12 +42,12 @@ describe('[props] threshold', () => {
     })
   })
 
-  describe('custom threshold', () => {
-    it('should accept custom threshold value', () => {
+  describe('custom swipeThreshold', () => {
+    it('should accept custom swipeThreshold value', () => {
       const customThreshold = 200
       const customWrapper = mount(FlashCard, {
         props: {
-          threshold: customThreshold,
+          swipeThreshold: customThreshold,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -55,7 +55,7 @@ describe('[props] threshold', () => {
         global: { stubs: { Transition: false } },
       })
 
-      expect(customWrapper.props('threshold')).toBe(customThreshold)
+      expect(customWrapper.props('swipeThreshold')).toBe(customThreshold)
     })
   })
 })

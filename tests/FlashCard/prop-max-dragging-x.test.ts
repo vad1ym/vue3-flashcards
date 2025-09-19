@@ -10,7 +10,7 @@ const DRAG_DISTANCE_WITHIN_LIMIT = 80 // Drag distance that should be allowed (w
 const DRAG_DISTANCE_EXCEEDING_LIMIT = 150 // Drag distance that exceeds the limit and should be clamped
 const VERTICAL_DRAG_DISTANCE = 50 // Vertical drag distance for combined movement tests
 const HIGH_THRESHOLD_FOR_TESTING = 200 // Threshold higher than max dragging limit for completion tests
-const DRAG_DISTANCE_BEYOND_THRESHOLD = 250 // Drag distance that exceeds both limit and threshold
+const DRAG_DISTANCE_BEYOND_THRESHOLD = 250 // Drag distance that exceeds both limit and swipeThreshold
 const UNLIMITED_DRAG_DISTANCE = 300 // Large drag distance for testing unlimited dragging
 
 describe('[props] maxDraggingX', () => {
@@ -80,12 +80,12 @@ describe('[props] maxDraggingX', () => {
       expect(cardElement.style.transform).toContain(`translate3D(${MAX_DRAGGING_X_LIMIT}px, ${VERTICAL_DRAG_DISTANCE}px, 0)`)
     })
 
-    it('should affect swipe completion when threshold exceeds maxDraggingX', async () => {
-      // Set threshold higher than maxDraggingX
+    it('should affect swipe completion when swipeThreshold exceeds maxDraggingX', async () => {
+      // Set swipeThreshold higher than maxDraggingX
       wrapper = mount(FlashCard, {
         props: {
           maxDraggingX: MAX_DRAGGING_X_LIMIT,
-          threshold: HIGH_THRESHOLD_FOR_TESTING, // Higher than maxDraggingX
+          swipeThreshold: HIGH_THRESHOLD_FOR_TESTING, // Higher than maxDraggingX
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -94,15 +94,15 @@ describe('[props] maxDraggingX', () => {
       })
       cardElement = wrapper.element
 
-      // Try to drag beyond threshold but it will be clamped
+      // Try to drag beyond swipeThreshold but it will be clamped
       new DragSimulator(cardElement)
         .dragStart()
-        .dragMove([{ x: DRAG_DISTANCE_BEYOND_THRESHOLD, y: 0 }]) // Try to drag beyond threshold
+        .dragMove([{ x: DRAG_DISTANCE_BEYOND_THRESHOLD, y: 0 }]) // Try to drag beyond swipeThreshold
         .dragEnd()
 
       await wrapper.vm.$nextTick()
 
-      // Should NOT complete because actual movement was clamped (less than threshold)
+      // Should NOT complete because actual movement was clamped (less than swipeThreshold)
       expect(wrapper.emitted('complete')).toBeFalsy()
       expect(cardElement.style.transform).toContain('translate3D(0px, 0px, 0)') // Should restore
     })
@@ -117,7 +117,7 @@ describe('[props] maxDraggingX', () => {
 
       await wrapper.vm.$nextTick()
 
-      // Since clamped distance < threshold, it should restore to origin
+      // Since clamped distance < swipeThreshold, it should restore to origin
       expect(wrapper.emitted('complete')).toBeFalsy()
       expect(cardElement.style.transform).toContain('translate3D(0px, 0px, 0)')
     })

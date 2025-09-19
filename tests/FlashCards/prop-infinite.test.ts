@@ -18,7 +18,7 @@ describe('[props] infinite', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: flashCardsDefaults.threshold,
+          swipeThreshold: flashCardsDefaults.swipeThreshold,
           infinite: true,
         },
         slots: {
@@ -63,7 +63,7 @@ describe('[props] infinite', () => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
-          threshold: flashCardsDefaults.threshold,
+          swipeThreshold: flashCardsDefaults.swipeThreshold,
           infinite: false,
         },
         slots: {

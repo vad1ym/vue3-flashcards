@@ -6,7 +6,7 @@ export interface ConfigPanelProps {
   stackOffset: number
   stackScale: number
   stackDirection: 'top' | 'bottom' | 'left' | 'right'
-  threshold: number
+  swipeThreshold: number
   dragThreshold: number
   maxRotation: number
   maxDraggingX: number | null
@@ -187,26 +187,26 @@ defineEmits<Emits>()
           </select>
         </div>
 
-        <!-- Threshold -->
+        <!-- Swipe Threshold -->
         <div class="form-control">
           <div class="mb-1">
-            <span class="label-text font-medium">Threshold</span>
+            <span class="label-text font-medium">Swipe Threshold</span>
           </div>
           <div class="text-xs text-gray-500 mb-2">
             Distance to swipe for completion
           </div>
           <input
-            :value="config.threshold"
+            :value="config.swipeThreshold"
             type="range"
             min="50"
             max="300"
             class="range range-primary range-sm w-full"
-            @input="$emit('update:config', { ...config, threshold: Number(($event.target as HTMLInputElement).value) })"
+            @input="$emit('update:config', { ...config, swipeThreshold: Number(($event.target as HTMLInputElement).value) })"
           >
           <div class="w-full flex justify-between text-xs px-2">
             <span>50</span>
             <span class="opacity-50">
-              {{ config.threshold }}px
+              {{ config.swipeThreshold }}px
             </span>
             <span>300</span>
           </div>

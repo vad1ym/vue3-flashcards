@@ -19,7 +19,7 @@ describe('[props] dragThreshold', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          dragThreshold: CUSTOM_DRAG_THRESHOLD_FOR_TESTING, // Custom threshold
+          dragThreshold: CUSTOM_DRAG_THRESHOLD_FOR_TESTING, // Custom swipeThreshold
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -30,7 +30,7 @@ describe('[props] dragThreshold', () => {
     })
 
     it('should not start dragging when moved less than dragThreshold', async () => {
-      new DragSimulator(cardElement, { threshold: CUSTOM_DRAG_THRESHOLD_FOR_TESTING })
+      new DragSimulator(cardElement, { swipeThreshold: CUSTOM_DRAG_THRESHOLD_FOR_TESTING })
         .dragRightBelowThreshold()
 
       await wrapper.vm.$nextTick()
@@ -40,7 +40,7 @@ describe('[props] dragThreshold', () => {
     })
 
     it('should start dragging when moved equal to dragThreshold', async () => {
-      new DragSimulator(cardElement, { threshold: CUSTOM_DRAG_THRESHOLD_FOR_TESTING })
+      new DragSimulator(cardElement, { swipeThreshold: CUSTOM_DRAG_THRESHOLD_FOR_TESTING })
         .dragRightToThreshold(1.0)
 
       await wrapper.vm.$nextTick()
@@ -50,7 +50,7 @@ describe('[props] dragThreshold', () => {
     })
 
     it('should start dragging when moved beyond dragThreshold', async () => {
-      new DragSimulator(cardElement, { threshold: CUSTOM_DRAG_THRESHOLD_FOR_TESTING })
+      new DragSimulator(cardElement, { swipeThreshold: CUSTOM_DRAG_THRESHOLD_FOR_TESTING })
         .dragRightBeyondThreshold()
 
       await wrapper.vm.$nextTick()
@@ -59,7 +59,7 @@ describe('[props] dragThreshold', () => {
       expect(cardElement.style.transform).not.toContain('translate3D(0px, 0px, 0)')
     })
 
-    it('should use distance calculation for threshold (not just x coordinate)', async () => {
+    it('should use distance calculation for swipeThreshold (not just x coordinate)', async () => {
       // Move diagonally: pythagorean theorem test
       new DragSimulator(cardElement)
         .dragStart()
@@ -67,7 +67,7 @@ describe('[props] dragThreshold', () => {
 
       await wrapper.vm.$nextTick()
 
-      // Should start dragging since total distance equals threshold
+      // Should start dragging since total distance equals swipeThreshold
       expect(cardElement.classList.contains('flash-card--dragging')).toBe(true)
     })
   })
@@ -87,13 +87,13 @@ describe('[props] dragThreshold', () => {
     })
 
     it('should use default dragThreshold from config', async () => {
-      new DragSimulator(cardElement, { threshold: flashCardsDefaults.dragThreshold })
+      new DragSimulator(cardElement, { swipeThreshold: flashCardsDefaults.dragThreshold })
         .dragRightBelowThreshold()
 
       await wrapper.vm.$nextTick()
       expect(cardElement.classList.contains('flash-card--dragging')).toBe(false)
 
-      new DragSimulator(cardElement, { threshold: flashCardsDefaults.dragThreshold })
+      new DragSimulator(cardElement, { swipeThreshold: flashCardsDefaults.dragThreshold })
         .reset()
         .dragRightBeyondThreshold()
 
