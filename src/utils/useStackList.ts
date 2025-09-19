@@ -17,7 +17,7 @@ export interface StackListOptions<T> {
   items: T[]
   infinite?: boolean
   renderLimit: number
-  trackBy?: keyof T | 'id'
+  itemKey?: keyof T | 'id'
   waitAnimationEnd?: boolean
 }
 
@@ -38,7 +38,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
 
   // Generate ID for card
   function getId(item: T, index: number) {
-    const trackKey = options.value.trackBy
+    const trackKey = options.value.itemKey
     return trackKey && trackKey !== 'id'
       ? item[trackKey as keyof T]
       : (item as any).id ?? index

@@ -42,7 +42,7 @@ export interface FlashCardsProps<Item> extends FlashCardProps {
   /**
    * Key to track items by (is required if you are going to modify items array)
    */
-  trackBy?: keyof Item | 'id'
+  itemKey?: keyof Item | 'id'
 
   /**
    * Wait for animation to end before performing next action
