@@ -30,8 +30,8 @@ const limitX = ref(true)
     <div class="max-w-sm w-full">
       <FlashCards
         :items="cards"
-        :max-dragging-x="limitX ? 200 : null"
-        :max-dragging-y="limitY ? 0 : null"
+        :max-drag-x="limitX ? 200 : null"
+        :max-drag-y="limitY ? 0 : null"
         #="{ item }"
       >
         <LimitCard :item="item" />

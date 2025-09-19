@@ -5,15 +5,15 @@ import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
-describe('[props] maxDraggingY', () => {
+describe('[props] maxDragY', () => {
   let wrapper: VueWrapper<InstanceType<typeof FlashCard>>
 
-  describe('with maxDraggingY set to 50px', () => {
+  describe('with maxDragY set to 50px', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
           swipeThreshold: flashCardsDefaults.swipeThreshold,
-          maxDraggingY: 50,
+          maxDragY: 50,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -69,12 +69,12 @@ describe('[props] maxDraggingY', () => {
     })
   })
 
-  describe('with maxDraggingY set to 0', () => {
+  describe('with maxDragY set to 0', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
           swipeThreshold: flashCardsDefaults.swipeThreshold,
-          maxDraggingY: 0,
+          maxDragY: 0,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -95,12 +95,12 @@ describe('[props] maxDraggingY', () => {
     })
   })
 
-  describe('without maxDraggingY limit', () => {
+  describe('without maxDragY limit', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
           swipeThreshold: flashCardsDefaults.swipeThreshold,
-          // maxDraggingY not set, should allow free vertical movement
+          // maxDragY not set, should allow free vertical movement
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -142,7 +142,7 @@ describe('[props] maxDraggingY', () => {
       wrapper = mount(FlashCard, {
         props: {
           swipeThreshold: flashCardsDefaults.swipeThreshold,
-          maxDraggingY: 30,
+          maxDragY: 30,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -161,14 +161,14 @@ describe('[props] maxDraggingY', () => {
       expect(wrapper.exists()).toBe(true)
     })
 
-    it('should handle edge case of exactly maxDraggingY', async () => {
+    it('should handle edge case of exactly maxDragY', async () => {
       const cardElement = wrapper.element
       const simulator = new DragSimulator(cardElement)
 
       // Drag exactly to the Y limit
       simulator
         .dragStart()
-        .dragMove([{ x: 200, y: 30 }]) // Exactly maxDraggingY
+        .dragMove([{ x: 200, y: 30 }]) // Exactly maxDragY
         .dragEnd()
 
       await wrapper.vm.$nextTick()
