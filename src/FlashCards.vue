@@ -108,6 +108,7 @@ const {
   restoreCard,
   removeAnimatingCard,
   reset,
+  currentItemId,
 } = useStackList<T>(() => ({ ...config.value, renderLimit: renderLimit.value }))
 
 /**
@@ -116,7 +117,7 @@ const {
  */
 const {
   getCardStyle,
-} = useStackTransform(() => ({ ...config.value, currentIndex: currentIndex.value }))
+} = useStackTransform(() => ({ ...config.value }))
 
 /**
  * Handles card swipe completion
@@ -138,7 +139,7 @@ function handleCardSwipe(itemId: string | number, action: string, position: Drag
 function performCardAction(type: SwipeAction) {
   // If there's a card currently restoring, target that card instead of current card
   const restoringCard = cardsInTransition.value.filter(card => card.animation?.isRestoring).pop()
-  const targetCard = restoringCard || stackList.value.find(item => item.index === currentIndex.value)
+  const targetCard = restoringCard || stackList.value.find(item => item.itemId === currentItemId.value)
 
   return targetCard && handleCardSwipe(targetCard.itemId, type)
 }
@@ -191,7 +192,7 @@ defineExpose({
       </div>
       <!-- Обычные карточки стека -->
       <div
-        v-for="({ item, itemId, index }, domIndex) in stackList"
+        v-for="({ item, itemId }, domIndex) in stackList"
         :key="`stack-${itemId}`"
         :data-item-id="itemId"
         class="flashcards__card-wrapper"
@@ -205,7 +206,7 @@ defineExpose({
         <FlashCard
           v-bind="props"
           class="flashcards__card"
-          :class="{ 'flashcards__card--active': index === currentIndex }"
+          :class="{ 'flashcards__card--active': itemId === currentItemId }"
           @complete="(action, pos) => handleCardSwipe(itemId, action, pos)"
           @mounted="containerHeight = Math.max($event, 0)"
         >

@@ -15,7 +15,6 @@ export interface StackTransformOptions {
   stackOffset: number
   stackScale: number
   stackDirection: StackDirection
-  currentIndex: number
   renderLimit: number
 }
 

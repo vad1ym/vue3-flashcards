@@ -129,9 +129,6 @@ describe('useStackList', () => {
 
       expect(stack).toHaveLength(4)
       expect(stack.map(s => s.item.id)).toEqual([1, 2, 3, 4])
-      expect(stack.map(s => s.index)).toEqual([0, 1, 2, 3])
-      // zIndex is no longer part of StackItem - it's computed in template
-      // expect(stack.map(s => s.zIndex)).toEqual([4, 3, 2, 1])
     })
 
     it('should limit stack size when approaching end of items', async () => {
@@ -285,9 +282,9 @@ describe('useStackList', () => {
       const firstAnimatingCount = stackList.cardsInTransition.value.length
 
       // Try to set approval again with different type
-      await stackList.swipeCard(1, SwipeAction.REJECT) // This will add new animation
+      await stackList.swipeCard(1, SwipeAction.REJECT) // This will replace the existing animation
 
-      expect(stackList.cardsInTransition.value.length).toBe(firstAnimatingCount + 1)
+      expect(stackList.cardsInTransition.value.length).toBe(firstAnimatingCount) // Same count, animation replaced
       expect(stackList.history.get(1)).toBe(SwipeAction.REJECT) // Should be updated to 'reject'
     })
 
@@ -305,9 +302,10 @@ describe('useStackList', () => {
       await stackList.swipeCard(1, SwipeAction.APPROVE)
       expect(stackList.cardsInTransition.value[0].animation?.type).toBe(SwipeAction.APPROVE)
 
-      // Try to change to rejection while animating - this will add new animation
+      // Try to change to rejection while animating - this will replace the existing animation
       await stackList.swipeCard(1, SwipeAction.REJECT)
-      expect(stackList.cardsInTransition.value).toHaveLength(2) // Now two animations
+      expect(stackList.cardsInTransition.value).toHaveLength(1) // Still one animation, but replaced
+      expect(stackList.cardsInTransition.value[0].animation?.type).toBe(SwipeAction.REJECT) // Animation type updated
       expect(stackList.history.get(1)).toBe(SwipeAction.REJECT) // Type changed to reject
     })
 
