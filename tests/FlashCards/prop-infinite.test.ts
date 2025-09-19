@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import FlashCards from '../../src/FlashCards.vue'
 
-describe('[props] infinite', () => {
+describe('[props] loop', () => {
   let wrapper: VueWrapper<InstanceType<typeof FlashCards>>
 
   const testItems = [
@@ -13,13 +13,13 @@ describe('[props] infinite', () => {
     { id: 3, title: 'Card 3' },
   ]
 
-  describe('with infinite enabled', () => {
+  describe('with loop enabled', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
           swipeThreshold: flashCardsDefaults.swipeThreshold,
-          infinite: true,
+          loop: true,
         },
         slots: {
           default: '{{ item.title }}',
@@ -28,13 +28,13 @@ describe('[props] infinite', () => {
       })
     })
 
-    it('should render cards in infinite mode', async () => {
+    it('should render cards in loop mode', async () => {
       const activeCard = wrapper.find('.flashcards__card--active')
       expect(activeCard.exists()).toBe(true)
       expect(activeCard.text()).toContain('Card 1')
     })
 
-    it('should emit events correctly in infinite mode', async () => {
+    it('should emit events correctly in loop mode', async () => {
       wrapper.vm.approve()
       await wrapper.vm.$nextTick()
 
@@ -42,7 +42,7 @@ describe('[props] infinite', () => {
       expect(wrapper.emitted('approve')?.[0]).toEqual([testItems[0]])
     })
 
-    it('should handle multiple approvals in infinite mode', async () => {
+    it('should handle multiple approvals in loop mode', async () => {
       // Approve all cards
       for (let i = 0; i < 3; i++) {
         wrapper.vm.approve()
@@ -58,13 +58,13 @@ describe('[props] infinite', () => {
     })
   })
 
-  describe('with infinite disabled', () => {
+  describe('with loop disabled', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems,
           swipeThreshold: flashCardsDefaults.swipeThreshold,
-          infinite: false,
+          loop: false,
         },
         slots: {
           default: '{{ item.title }}',

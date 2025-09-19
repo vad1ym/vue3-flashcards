@@ -20,7 +20,7 @@ interface Event {
 const defaultConfig = {
   ...flashCardsDefaults,
   waitAnimationEnd: false,
-  infinite: false,
+  loop: false,
   stackDirection: 'bottom' as 'top' | 'bottom' | 'left' | 'right',
   maxDragX: null,
   maxDragY: null,
@@ -183,7 +183,7 @@ function resetConfig() {
                     <FlashCards
                       :key="configKey"
                       :items="items"
-                      :infinite="config.infinite"
+                      :loop="config.loop"
                       :render-limit="config.renderLimit"
                       :stack="config.stack"
                       :stack-offset="config.stackOffset"
@@ -225,7 +225,7 @@ function resetConfig() {
                           :is-end="isEnd"
                           :is-start="isStart"
                           :can-restore="canRestore"
-                          :infinite="config.infinite"
+                          :loop="config.loop"
                           @restore="restore"
                           @reject="reject"
                           @approve="approve"

@@ -16,9 +16,9 @@ export interface FlashCardsProps<Item> extends FlashCardProps {
    */
   items?: Item[]
   /**
-   * Enable infinite swiping mode
+   * Enable loop swiping mode
    */
-  infinite?: boolean
+  loop?: boolean
   /**
    * Number of cards to render in dom, cant be less than 1. If stack is greater it will override this value
    */
@@ -93,7 +93,7 @@ const renderLimit = computed(() => Math.max(config.value.stack > 0 ? config.valu
 
 /**
  * STACK LIST
- * Stack list is used to render cards both finite and infinite mods, calculate indices, positions etc
+ * Stack list is used to render cards both finite and loop mods, calculate indices, positions etc
  */
 const {
   currentIndex,
@@ -174,7 +174,7 @@ defineExpose({
   <div>
     <div class="flashcards" :style="{ height: containerHeight ? `${containerHeight}px` : 'auto' }">
       <div
-        v-if="!infinite && currentIndex >= items.length - 1"
+        v-if="!loop && currentIndex >= items.length - 1"
         key="empty-state"
         class="flashcards-empty-state"
       >

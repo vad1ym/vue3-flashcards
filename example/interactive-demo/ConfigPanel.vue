@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 export interface ConfigPanelProps {
-  infinite: boolean
+  loop: boolean
   renderLimit: number
   stack: number
   stackOffset: number
@@ -40,20 +40,20 @@ defineEmits<Emits>()
 
       <!-- FlashCards Props -->
       <div class="space-y-4">
-        <!-- Infinite -->
+        <!-- Loop -->
         <div class="form-control">
           <div class="mb-1">
-            <span class="label-text font-medium">Infinite</span>
+            <span class="label-text font-medium">Loop</span>
           </div>
           <div class="text-xs text-gray-500 mb-2">
             Enable endless card swiping
           </div>
           <label class="cursor-pointer">
             <input
-              :checked="config.infinite"
+              :checked="config.loop"
               type="checkbox"
               class="checkbox checkbox-primary"
-              @change="$emit('update:config', { ...config, infinite: ($event.target as HTMLInputElement).checked })"
+              @change="$emit('update:config', { ...config, loop: ($event.target as HTMLInputElement).checked })"
             >
           </label>
         </div>

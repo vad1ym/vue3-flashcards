@@ -51,11 +51,11 @@ The main component for creating swipeable card interfaces.
 - **Default:** `false`
 - **Description:** Completely disable dragging functionality. When disabled, cards cannot be swiped with touch or mouse gestures. Manual methods (`approve()`, `reject()`, `restore()`) and slot actions still work normally.
 
-### `infinite`
+### `loop`
 
 - **Type:** `boolean`
 - **Default:** `false`
-- **Description:** Enable infinite swiping mode. When enabled, cards will loop endlessly after reaching the end. Useful for small datasets where you want continuous swiping.
+- **Description:** Enable loop swiping mode. When enabled, cards will loop endlessly after reaching the end. Useful for small datasets where you want continuous swiping.
 
 ### `renderLimit`
 

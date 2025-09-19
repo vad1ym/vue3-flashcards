@@ -93,12 +93,12 @@ describe('[exposed] restore', () => {
     expect(singleItemWrapper.vm.canRestore).toBe(false)
   })
 
-  it('should work with infinite mode', async () => {
-    const infiniteWrapper = mount(FlashCards, {
+  it('should work with loop mode', async () => {
+    const loopWrapper = mount(FlashCards, {
       props: {
         items: testItems,
         swipeThreshold: flashCardsDefaults.swipeThreshold,
-        infinite: true,
+        loop: true,
       },
       slots: {
         default: '{{ item.title }}',
@@ -106,15 +106,15 @@ describe('[exposed] restore', () => {
       global: { stubs: { Transition: false } },
     })
 
-    infiniteWrapper.vm.approve()
-    await infiniteWrapper.vm.$nextTick()
+    loopWrapper.vm.approve()
+    await loopWrapper.vm.$nextTick()
 
     // Test that restore method can be called without errors
-    infiniteWrapper.vm.restore()
-    await infiniteWrapper.vm.$nextTick()
+    loopWrapper.vm.restore()
+    await loopWrapper.vm.$nextTick()
 
     // Verify basic functionality exists
-    const hasActiveCard = infiniteWrapper.find('.flashcards__card--active').exists()
+    const hasActiveCard = loopWrapper.find('.flashcards__card--active').exists()
     expect(hasActiveCard).toBe(true)
   })
 })

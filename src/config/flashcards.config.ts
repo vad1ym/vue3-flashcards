@@ -15,7 +15,7 @@ export const flashCardsDefaults = (
     stackScale: 0.05,
     stackDirection: StackDirection.BOTTOM,
     itemKey: 'id',
-    infinite: undefined,
+    loop: undefined,
     waitAnimationEnd: undefined,
   } as const
 ) satisfies FlashCardsProps<any>

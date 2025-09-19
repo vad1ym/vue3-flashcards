@@ -164,13 +164,13 @@ describe('[props] renderLimit', () => {
     })
   })
 
-  describe('renderLimit behavior with infinite mode', () => {
+  describe('renderLimit behavior with loop mode', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
           items: testItems.slice(0, 3), // Only 3 items
           renderLimit: LARGE_RENDER_LIMIT,
-          infinite: true,
+          loop: true,
         },
         slots: {
           default: '{{ item.title }}',
@@ -179,7 +179,7 @@ describe('[props] renderLimit', () => {
       })
     })
 
-    it('should maintain renderLimit size even with infinite cycling', async () => {
+    it('should maintain renderLimit size even with loop cycling', async () => {
       // Process several cards to trigger cycling
       for (let i = 0; i < testItems.length; i++) {
         const activeCard = wrapper.find('.flashcards__card--active')

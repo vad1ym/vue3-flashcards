@@ -20,7 +20,7 @@ describe('useStackList', () => {
     it('should initialize with correct default state', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -39,7 +39,7 @@ describe('useStackList', () => {
     it('should handle empty items array', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: [],
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -56,7 +56,7 @@ describe('useStackList', () => {
       const items = createTestItems(5)
       const options = ref<StackListOptions<TestItem>>({
         items,
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -75,7 +75,7 @@ describe('useStackList', () => {
     it('should update currentIndex after marking items as completed', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -97,7 +97,7 @@ describe('useStackList', () => {
       const items = createTestItems(3)
       const options = ref<StackListOptions<TestItem>>({
         items,
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -119,7 +119,7 @@ describe('useStackList', () => {
       const items = createTestItems(10)
       const options = ref<StackListOptions<TestItem>>({
         items,
-        infinite: false,
+        loop: false,
         renderLimit: 4,
         itemKey: 'id',
       })
@@ -138,7 +138,7 @@ describe('useStackList', () => {
       const items = createTestItems(5)
       const options = ref<StackListOptions<TestItem>>({
         items,
-        infinite: false,
+        loop: false,
         renderLimit: 4,
         itemKey: 'id',
       })
@@ -156,12 +156,12 @@ describe('useStackList', () => {
     })
   })
 
-  describe('stack generation - infinite mode', () => {
+  describe('stack generation - loop mode', () => {
     it('should generate stack with cycling items', () => {
       const items = createTestItems(3)
       const options = ref<StackListOptions<TestItem>>({
         items,
-        infinite: true,
+        loop: true,
         renderLimit: 5,
         itemKey: 'id',
       })
@@ -180,7 +180,7 @@ describe('useStackList', () => {
       const items = createTestItems(2)
       const options = ref<StackListOptions<TestItem>>({
         items,
-        infinite: true,
+        loop: true,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -203,7 +203,7 @@ describe('useStackList', () => {
       const items = createTestItems(4)
       const options = ref<StackListOptions<TestItem>>({
         items,
-        infinite: true,
+        loop: true,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -224,7 +224,7 @@ describe('useStackList', () => {
     it('should mark item as approved and add to history', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -241,7 +241,7 @@ describe('useStackList', () => {
     it('should mark item as rejected and add to history', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -258,7 +258,7 @@ describe('useStackList', () => {
     it('should store initial position when provided', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -274,7 +274,7 @@ describe('useStackList', () => {
     it('should not re-approve already completed items', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -294,7 +294,7 @@ describe('useStackList', () => {
     it('should not change already completed items', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -314,7 +314,7 @@ describe('useStackList', () => {
     it('should handle non-existent item ids gracefully', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -332,7 +332,7 @@ describe('useStackList', () => {
     it('should remove card from animating list when animation completes', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -349,7 +349,7 @@ describe('useStackList', () => {
     it('should exclude animating cards from main stack', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -373,7 +373,7 @@ describe('useStackList', () => {
     it('should enable restore when items are completed and animation finished', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -394,7 +394,7 @@ describe('useStackList', () => {
     it('should not allow restore with only 1 item', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(1),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -408,7 +408,7 @@ describe('useStackList', () => {
     it('should restore most recent completed card', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -436,7 +436,7 @@ describe('useStackList', () => {
     it('should complete restore animation and remove from history', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -458,7 +458,7 @@ describe('useStackList', () => {
     it('should not restore if no items can be restored', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -473,7 +473,7 @@ describe('useStackList', () => {
     it('should not restore cards that are currently animating', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -500,7 +500,7 @@ describe('useStackList', () => {
     it('should correctly compute isStart', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -516,7 +516,7 @@ describe('useStackList', () => {
     it('should correctly compute isEnd', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(2),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -548,7 +548,7 @@ describe('useStackList', () => {
 
       const options = ref<StackListOptions<CustomItem>>({
         items,
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'customId',
       })
@@ -571,7 +571,7 @@ describe('useStackList', () => {
 
       const options = ref<StackListOptions<IncompleteItem>>({
         items,
-        infinite: false,
+        loop: false,
         renderLimit: 2,
         itemKey: 'id' as any, // Property doesn't exist
       })
@@ -588,7 +588,7 @@ describe('useStackList', () => {
       const items = ref(createTestItems(3))
       const options = ref<StackListOptions<TestItem>>({
         items: items.value,
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -609,7 +609,7 @@ describe('useStackList', () => {
     it('should react to changes in renderLimit', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
-        infinite: false,
+        loop: false,
         renderLimit: 2,
         itemKey: 'id',
       })
@@ -625,10 +625,10 @@ describe('useStackList', () => {
       expect(stackList.stackList.value).toHaveLength(4)
     })
 
-    it('should react to changes in infinite mode', async () => {
+    it('should react to changes in loop mode', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 5,
         itemKey: 'id',
       })
@@ -637,8 +637,8 @@ describe('useStackList', () => {
 
       expect(stackList.stackList.value).toHaveLength(3) // Limited by items count
 
-      // Enable infinite mode
-      options.value = { ...options.value, infinite: true }
+      // Enable loop mode
+      options.value = { ...options.value, loop: true }
       await nextTick()
 
       expect(stackList.stackList.value).toHaveLength(5) // Now can cycle
@@ -650,7 +650,7 @@ describe('useStackList', () => {
     it('should handle renderLimit larger than items array', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(2),
-        infinite: false,
+        loop: false,
         renderLimit: 5,
         itemKey: 'id',
       })
@@ -663,7 +663,7 @@ describe('useStackList', () => {
     it('should handle zero renderLimit', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
-        infinite: false,
+        loop: false,
         renderLimit: 0,
         itemKey: 'id',
       })
@@ -673,10 +673,10 @@ describe('useStackList', () => {
       expect(stackList.stackList.value).toHaveLength(0)
     })
 
-    it('should handle single item in infinite mode', () => {
+    it('should handle single item in loop mode', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(1),
-        infinite: true,
+        loop: true,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -690,7 +690,7 @@ describe('useStackList', () => {
     it('should maintain state consistency after multiple operations', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -721,7 +721,7 @@ describe('useStackList', () => {
     it('should reset all state to initial values', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -761,7 +761,7 @@ describe('useStackList', () => {
     it('should clear all history entries', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(5),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -794,7 +794,7 @@ describe('useStackList', () => {
     it('should reset state without clearing animating cards', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -817,17 +817,17 @@ describe('useStackList', () => {
       expect(stackList.history.size).toBe(0)
     })
 
-    it('should work with infinite mode', async () => {
+    it('should work with loop mode', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: true,
+        loop: true,
         renderLimit: 3,
         itemKey: 'id',
       })
 
       const stackList = useStackList(options)
 
-      // Swipe through all items in infinite mode
+      // Swipe through all items in loop mode
       await stackList.swipeCard(1, SwipeAction.APPROVE)
       stackList.removeAnimatingCard(1)
       await stackList.swipeCard(2, SwipeAction.REJECT)
@@ -835,7 +835,7 @@ describe('useStackList', () => {
       await stackList.swipeCard(3, SwipeAction.APPROVE)
       stackList.removeAnimatingCard(3)
 
-      // In infinite mode, history may vary, let's just check that operations completed without errors
+      // In loop mode, history may vary, let's just check that operations completed without errors
 
       // Reset
       stackList.reset()
@@ -849,7 +849,7 @@ describe('useStackList', () => {
     it('should handle reset when already at initial state', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -870,7 +870,7 @@ describe('useStackList', () => {
     it('should handle reset with empty items array', () => {
       const options = ref<StackListOptions<TestItem>>({
         items: [],
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })
@@ -888,7 +888,7 @@ describe('useStackList', () => {
     it('should make isEnd false after reset if there are items', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(2),
-        infinite: false,
+        loop: false,
         renderLimit: 3,
         itemKey: 'id',
       })

@@ -150,9 +150,9 @@ Interactive stack controls with adjustable size (3-10 cards) and directional pos
 <<< ../example/stack-usage/StackCard.vue [StackCard.vue]
 :::
 
-## ♾️ Infinite Swiping
+## ♾️ Loop Swiping
 
-Endless card swiping with only 3 cards that loop infinitely.
+Endless card swiping with only 3 cards that loop.
 
 <ClientOnly>
   <InfiniteUsage />

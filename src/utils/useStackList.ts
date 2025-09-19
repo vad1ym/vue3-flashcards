@@ -15,7 +15,7 @@ export interface StackItem<T> {
 
 export interface StackListOptions<T> {
   items: T[]
-  infinite?: boolean
+  loop?: boolean
   renderLimit: number
   itemKey?: keyof T | 'id'
   waitAnimationEnd?: boolean
@@ -61,17 +61,17 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     return currentIndex.value - restoreAnimations.length
   })
 
-  // For infinite mode reset history on new cycle (when index points outside of source array)
+  // For loop mode reset history on new cycle (when index points outside of source array)
   watch(currentIndex, (ci) => {
-    const { infinite, items } = options.value
-    if (infinite && ci === items.length) {
+    const { loop, items } = options.value
+    if (loop && ci === items.length) {
       history.clear()
     }
   })
 
   // Stack generation for rendering (excluding animating cards)
   const stackList = computed(() => {
-    const { renderLimit, items, infinite } = options.value
+    const { renderLimit, items, loop } = options.value
     const len = items.length
     if (!len)
       return []
@@ -79,7 +79,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     const result: StackItem<T>[] = []
     const animatingIds = new Set(cardsInTransition.value.map(card => card.itemId))
 
-    if (infinite) {
+    if (loop) {
       for (let i = 0; i < renderLimit; i++) {
         const index = (currentIndex.value + i + len) % len
         const item = items[index]

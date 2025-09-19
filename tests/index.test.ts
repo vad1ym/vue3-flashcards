@@ -86,11 +86,11 @@ describe('index exports', () => {
       const config = {
         stack: 3,
         stackOffset: 25,
-        infinite: true,
+        loop: true,
       }
       expect(config.stack).toBe(3)
       expect(config.stackOffset).toBe(25)
-      expect(config.infinite).toBe(true)
+      expect(config.loop).toBe(true)
     })
 
     it('should export FlashCardsPluginOptions type', () => {
