@@ -17,7 +17,7 @@ describe('[events] restore', () => {
     wrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
       },
       slots: {
         default: '{{ item.title }}',
@@ -105,7 +105,7 @@ describe('[events] restore', () => {
     const infiniteWrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
         infinite: true,
       },
       slots: {
@@ -159,7 +159,7 @@ describe('[events] restore', () => {
     const wrapperWithActions = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
       },
       slots: {
         default: '{{ item.title }}',
@@ -197,7 +197,7 @@ describe('[events] restore', () => {
     const complexWrapper = mount(FlashCards, {
       props: {
         items: complexItems,
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
         trackBy: 'id',
       },
       slots: {

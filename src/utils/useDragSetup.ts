@@ -12,7 +12,7 @@ export type SwipeAction = typeof SwipeAction[keyof typeof SwipeAction]
 export interface DragSetupParams {
   // Distance in pixels the card must be dragged to complete swiping
   // If the card is dragged less than this distance, it will be restored to its original position
-  threshold?: number
+  swipeThreshold?: number
 
   // Distance in pixels the card must be dragged to start swiping, small value
   // Is need to prevent false positives (e.x. for card fliping feature)
@@ -60,7 +60,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     onDragComplete = () => {},
   } = options.value
 
-  const threshold = computed(() => options.value.threshold ?? flashCardsDefaults.threshold)
+  const swipeThreshold = computed(() => options.value.swipeThreshold ?? flashCardsDefaults.swipeThreshold)
   const dragThreshold = computed(() => options.value.dragThreshold ?? flashCardsDefaults.dragThreshold)
   const maxDraggingY = computed(() => options.value.maxDraggingY ?? null)
   const maxDraggingX = computed(() => options.value.maxDraggingX ?? null)
@@ -136,7 +136,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
       limitedY = Math.max(-maxDraggingY.value, Math.min(maxDraggingY.value, y))
     }
 
-    const delta = Math.max(-1, Math.min(1, limitedX / threshold.value))
+    const delta = Math.max(-1, Math.min(1, limitedX / swipeThreshold.value))
 
     position.x = limitedX
     position.y = limitedY
@@ -157,12 +157,12 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     isDragStarted.value = false
     isDragging.value = false
 
-    if (position.x >= threshold.value) {
+    if (position.x >= swipeThreshold.value) {
       onDragComplete('approve')
       position.delta = 1
       position.type = SwipeAction.APPROVE
     }
-    else if (position.x <= -threshold.value) {
+    else if (position.x <= -swipeThreshold.value) {
       onDragComplete('reject')
       position.delta = -1
       position.type = SwipeAction.REJECT

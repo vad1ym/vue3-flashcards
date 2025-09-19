@@ -89,7 +89,7 @@ app.use(FlashCardsPlugin, {
     // Global defaults for FlashCards components
     stack: 3,
     stackOffset: 25,
-    threshold: 150,
+    swipeThreshold: 150,
     infinite: true,
   },
   flipCard: {
@@ -137,7 +137,7 @@ export default defineNuxtConfig({
   flashcards: {
     stack: 3,
     stackOffset: 25,
-    threshold: 150,
+    swipeThreshold: 150,
     infinite: true,
   }
 })
@@ -184,7 +184,7 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `items` | `T[]` | **required** | Array of items to display as cards |
 | `trackBy` | `string \| number` | `id` | Property to track items by. When provided, items will be tracked by this property instead of their index. Should be unique for each item. This is recommended to use when you modify items array in runtime. |
 | `maxRotation` | `number` | `20` | Maximum rotation angle in degrees |
-| `threshold` | `number` | `150` | Swipe threshold in pixels |
+| `swipeThreshold` | `number` | `150` | Swipe swipeThreshold in pixels |
 | `dragThreshold` | `number` | `5` | Minimum drag distance to start swiping |
 | `maxDraggingY` | `number \| null` | `null` | Maximum Y dragging distance in pixels (null = unlimited) |
 | `maxDraggingX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |

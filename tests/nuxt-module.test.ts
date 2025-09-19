@@ -7,7 +7,7 @@ describe('nuxt module integration tests', () => {
     const validOptions: ModuleOptions = {
       stack: 2,
       stackOffset: 20,
-      threshold: 100,
+      swipeThreshold: 100,
       infinite: false,
       maxRotation: 15,
       renderLimit: 4,
@@ -33,7 +33,7 @@ describe('nuxt module integration tests', () => {
       // Core props
       stack: 3,
       stackOffset: 25,
-      threshold: 150,
+      swipeThreshold: 150,
       infinite: true,
 
       // Animation props
@@ -96,12 +96,12 @@ describe('nuxt module integration tests', () => {
     // Test that global config can be overridden by local props
     const globalConfig: ModuleOptions = {
       stack: 3,
-      threshold: 150,
+      swipeThreshold: 150,
       infinite: true,
     }
 
     const localProps = {
-      threshold: 200, // Override global
+      swipeThreshold: 200, // Override global
       maxRotation: 25, // New local prop
     }
 
@@ -109,7 +109,7 @@ describe('nuxt module integration tests', () => {
     const mergedConfig = { ...globalConfig, ...localProps }
 
     expect(mergedConfig.stack).toBe(3) // From global
-    expect(mergedConfig.threshold).toBe(200) // Overridden by local
+    expect(mergedConfig.swipeThreshold).toBe(200) // Overridden by local
     expect(mergedConfig.infinite).toBe(true) // From global
     expect(mergedConfig.maxRotation).toBe(25) // From local
   })
@@ -118,7 +118,7 @@ describe('nuxt module integration tests', () => {
     const mockOptions: ModuleOptions = {
       stack: 2,
       stackOffset: 15,
-      threshold: 120,
+      swipeThreshold: 120,
     }
 
     // Simulate template generation

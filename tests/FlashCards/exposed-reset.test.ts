@@ -17,7 +17,7 @@ describe('[exposed] reset', () => {
     wrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
       },
       slots: {
         default: '{{ item.title }}',
@@ -79,7 +79,7 @@ describe('[exposed] reset', () => {
     const infiniteWrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
         infinite: true,
       },
       slots: {
@@ -141,7 +141,7 @@ describe('[exposed] reset', () => {
     const singleItemWrapper = mount(FlashCards, {
       props: {
         items: [{ id: 1, title: 'Only Card' }],
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
       },
       slots: {
         default: '{{ item.title }}',

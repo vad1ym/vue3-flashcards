@@ -7,7 +7,7 @@ import { StackDirection } from '../utils/useStackTransform'
 export const flashCardsDefaults = (
   {
     renderLimit: 3,
-    threshold: 150,
+    swipeThreshold: 150,
     dragThreshold: 5,
     maxRotation: 20,
     stack: 0,

@@ -26,7 +26,7 @@ describe('[props] disableDrag', () => {
     })
 
     it('should not respond to drag gestures when dragging is disabled', async () => {
-      // Try to drag the card beyond threshold
+      // Try to drag the card beyond swipeThreshold
       new DragSimulator(cardElement).swipeApprove()
 
       await wrapper.vm.$nextTick()
@@ -37,7 +37,7 @@ describe('[props] disableDrag', () => {
     })
 
     it('should not trigger complete event when dragging is disabled', async () => {
-      // Try to swipe beyond threshold
+      // Try to swipe beyond swipeThreshold
       new DragSimulator(cardElement).swipeApprove()
 
       await wrapper.vm.$nextTick()
@@ -48,7 +48,7 @@ describe('[props] disableDrag', () => {
 
     it('should not show drag indicators when dragging is disabled', async () => {
       // Try to drag the card but not complete (to test indicators)
-      new DragSimulator(cardElement).dragRightBelowThreshold() // 90% of threshold, without dragEnd
+      new DragSimulator(cardElement).dragRightBelowThreshold() // 90% of swipeThreshold, without dragEnd
 
       await wrapper.vm.$nextTick()
 
@@ -89,7 +89,7 @@ describe('[props] disableDrag', () => {
 
     it('should respond to drag gestures when dragging is enabled', async () => {
       // Try to drag the card but not complete (to test dragging state)
-      new DragSimulator(cardElement).dragRightBelowThreshold() // 90% of threshold, without dragEnd
+      new DragSimulator(cardElement).dragRightBelowThreshold() // 90% of swipeThreshold, without dragEnd
 
       await wrapper.vm.$nextTick()
 
@@ -121,7 +121,7 @@ describe('[props] disableDrag', () => {
     })
 
     it('should stop responding to drag when disableDrag is changed to true', async () => {
-      // Initially should respond to small drag (33% of threshold)
+      // Initially should respond to small drag (33% of swipeThreshold)
       new DragSimulator(cardElement).dragRightToThreshold(0.33)
 
       await wrapper.vm.$nextTick()
@@ -145,7 +145,7 @@ describe('[props] disableDrag', () => {
       await wrapper.setProps({ disableDrag: true })
 
       // Should not respond to drag but not complete
-      new DragSimulator(cardElement).dragRightBelowThreshold() // 90% of threshold, without dragEnd
+      new DragSimulator(cardElement).dragRightBelowThreshold() // 90% of swipeThreshold, without dragEnd
 
       await wrapper.vm.$nextTick()
       expect(cardElement.classList.contains('flash-card--dragging')).toBe(false)
@@ -156,7 +156,7 @@ describe('[props] disableDrag', () => {
       await wrapper.setProps({ disableDrag: false })
 
       // Now should respond to drag but not complete
-      new DragSimulator(cardElement).dragRightBelowThreshold() // 90% of threshold, without dragEnd
+      new DragSimulator(cardElement).dragRightBelowThreshold() // 90% of swipeThreshold, without dragEnd
 
       await wrapper.vm.$nextTick()
       expect(cardElement.classList.contains('flash-card--dragging')).toBe(true)

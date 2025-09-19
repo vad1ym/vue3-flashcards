@@ -27,7 +27,7 @@ describe('vue Plugin', () => {
       const flashCardsConfig = {
         stack: 3,
         stackOffset: 25,
-        threshold: 150,
+        swipeThreshold: 150,
       }
       const flipCardConfig = {
         flipAxis: 'x' as const,
@@ -112,7 +112,7 @@ describe('vue Plugin', () => {
         stack: 4,
         stackOffset: 30,
         infinite: true,
-        threshold: 200,
+        swipeThreshold: 200,
       }
       const customFlipCardConfig = {
         flipAxis: 'x' as const,

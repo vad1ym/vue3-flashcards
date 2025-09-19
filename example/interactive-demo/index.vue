@@ -189,7 +189,7 @@ function resetConfig() {
                       :stack-offset="config.stackOffset"
                       :stack-scale="config.stackScale"
                       :stack-direction="config.stackDirection"
-                      :threshold="config.threshold"
+                      :swipe-threshold="config.swipeThreshold"
                       :drag-threshold="config.dragThreshold"
                       :max-rotation="config.maxRotation"
                       :max-dragging-x="enableXLimit ? config.maxDraggingX : null"

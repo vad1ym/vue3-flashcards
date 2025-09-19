@@ -17,7 +17,7 @@ describe('[exposed] reject', () => {
     wrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
       },
       slots: {
         default: '{{ item.title }}',
@@ -38,7 +38,7 @@ describe('[exposed] reject', () => {
     const infiniteWrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
         infinite: true,
       },
       slots: {
@@ -58,7 +58,7 @@ describe('[exposed] reject', () => {
     const stackWrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
         stack: 2,
       },
       slots: {

@@ -21,7 +21,7 @@ The main component for creating swipeable card interfaces.
 - **Default:** `20`
 - **Description:** Maximum rotation angle in degrees when swiping cards.
 
-### `threshold`
+### `swipeThreshold`
 
 - **Type:** `number`
 - **Default:** `150`
@@ -190,7 +190,7 @@ function blurTransform(position) {
 
 **Available actions:**
 - `restore()` - Returns to the previous card if available
-- `reject()` - Triggers rejection animation on current card  
+- `reject()` - Triggers rejection animation on current card
 - `approve()` - Triggers approval animation on current card
 - `reset(options?)` - Resets all cards with optional animation settings
 - `isEnd` - Boolean indicating if all cards have been swiped
@@ -210,7 +210,7 @@ function blurTransform(position) {
         <button :disabled="isEnd" @click="approve">
           ✅ Approve
         </button>
-        
+
         <!-- Reset with different options -->
         <button @click="reset()">
           🔄 Reset Instantly
@@ -230,7 +230,7 @@ function blurTransform(position) {
 ### `approve`
 
 - **Props:** `{ item: T, delta: number }`
-- **Description:** Content shown when swiping right (approval indicator). The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the approval threshold.
+- **Description:** Content shown when swiping right (approval indicator). The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the approval swipeThreshold.
 
 ```vue
 <template #approve="{ item, delta }">
@@ -246,7 +246,7 @@ function blurTransform(position) {
 ### `reject`
 
 - **Props:** `{ item: T, delta: number }`
-- **Description:** Content shown when swiping left (rejection indicator). The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the rejection threshold.
+- **Description:** Content shown when swiping left (rejection indicator). The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the rejection swipeThreshold.
 
 ```vue
 <template #reject="{ item, delta }">
@@ -370,8 +370,8 @@ function animatedReset() {
 **ResetOptions:**
 ```typescript
 interface ResetOptions {
-  animated?: boolean  // If true, restores cards one by one with animations (default: false)
-  delay?: number      // Delay between animations in ms when animated=true (default: 200)
+  animated?: boolean // If true, restores cards one by one with animations (default: false)
+  delay?: number // Delay between animations in ms when animated=true (default: 200)
 }
 ```
 
@@ -410,8 +410,8 @@ interface Card {
 }
 
 interface ResetOptions {
-  animated?: boolean  // Show restore animations (default: false)
-  delay?: number      // Delay between animations in ms (default: 200)
+  animated?: boolean // Show restore animations (default: false)
+  delay?: number // Delay between animations in ms (default: 200)
 }
 
 const cards = ref<Card[]>([

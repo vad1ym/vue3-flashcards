@@ -12,7 +12,7 @@ describe('[props] maxDraggingY', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: flashCardsDefaults.threshold,
+          swipeThreshold: flashCardsDefaults.swipeThreshold,
           maxDraggingY: 50,
         },
         slots: {
@@ -73,7 +73,7 @@ describe('[props] maxDraggingY', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: flashCardsDefaults.threshold,
+          swipeThreshold: flashCardsDefaults.swipeThreshold,
           maxDraggingY: 0,
         },
         slots: {
@@ -99,7 +99,7 @@ describe('[props] maxDraggingY', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: flashCardsDefaults.threshold,
+          swipeThreshold: flashCardsDefaults.swipeThreshold,
           // maxDraggingY not set, should allow free vertical movement
         },
         slots: {
@@ -141,7 +141,7 @@ describe('[props] maxDraggingY', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          threshold: flashCardsDefaults.threshold,
+          swipeThreshold: flashCardsDefaults.swipeThreshold,
           maxDraggingY: 30,
         },
         slots: {

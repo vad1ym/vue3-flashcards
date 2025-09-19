@@ -17,7 +17,7 @@ describe('[events] approve', () => {
     wrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
       },
       slots: {
         default: '{{ item.title }}',
@@ -38,7 +38,7 @@ describe('[events] approve', () => {
     const infiniteWrapper = mount(FlashCards, {
       props: {
         items: testItems,
-        threshold: flashCardsDefaults.threshold,
+        swipeThreshold: flashCardsDefaults.swipeThreshold,
         infinite: true,
       },
       slots: {
