@@ -1,10 +1,9 @@
 import type { MaybeRefOrGetter } from 'vue'
 import type { DragPosition } from './useDragSetup'
-import { computed, reactive, shallowRef, toValue, watch } from 'vue'
+import { computed, reactive, shallowReactive, toValue, watch } from 'vue'
 
 export interface StackItem<T> {
   item: T
-  index: number
   itemId: string | number
   animation?: {
     type: string
@@ -32,9 +31,9 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
   // Swiping history
   const history = reactive<Map<string | number, string>>(new Map())
 
-  // Cards that are currently animating (using shallowRef for less re-renders)
-  const cardsInTransition = shallowRef<StackItem<T>[]>([])
-  const hasCardsInTransition = computed(() => cardsInTransition.value.length > 0)
+  // Cards that are currently animating (using Map for O(1) operations)
+  const cardsInTransition = shallowReactive(new Map<string | number, StackItem<T>>())
+  const hasCardsInTransition = computed(() => cardsInTransition.size > 0)
 
   // Generate ID for card
   function getId(item: T, index: number) {
@@ -53,12 +52,18 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     return result
   })
 
+  // ID of the current card
+  const currentItemId = computed(() => {
+    const { items } = options.value
+    return getId(items[currentIndex.value], currentIndex.value)
+  })
+
   // Expected index after restoring animation, to better handle isStart & isEnd
   const expectedIndex = computed(() => {
-    const restoreAnimations = cardsInTransition.value.filter(card =>
+    const restoreCount = Array.from(cardsInTransition.values()).filter(card =>
       card.animation?.isRestoring,
-    )
-    return currentIndex.value - restoreAnimations.length
+    ).length
+    return currentIndex.value - restoreCount
   })
 
   // For loop mode reset history on new cycle (when index points outside of source array)
@@ -69,52 +74,39 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     }
   })
 
-  // Stack generation for rendering (excluding animating cards)
-  const stackList = computed(() => {
-    const { renderLimit, items, loop } = options.value
-    const len = items.length
-    if (!len)
-      return []
-
+  // Generate stack items with unified logic for loop and non-loop modes
+  function generateStackItems(startIndex: number, limit: number, items: T[], loop: boolean, animatingIds: Set<string | number>): StackItem<T>[] {
     const result: StackItem<T>[] = []
-    const animatingIds = new Set(cardsInTransition.value.map(card => card.itemId))
+    const len = items.length
 
-    if (loop) {
-      for (let i = 0; i < renderLimit; i++) {
-        const index = (currentIndex.value + i + len) % len
-        const item = items[index]
-        const itemId = getId(item, index)
+    for (let i = 0; i < limit; i++) {
+      const index = loop ? (startIndex + i + len) % len : startIndex + i
 
-        // Skip cards that are currently animating
-        if (animatingIds.has(itemId))
-          continue
+      // Break early for non-loop mode if we exceed array bounds
+      if (!loop && index >= len)
+        break
 
-        result.push({
-          item,
-          index,
-          itemId,
-        })
-      }
-    }
-    else {
-      const endIndex = Math.min(currentIndex.value + renderLimit, len)
-      for (let i = currentIndex.value; i < endIndex; i++) {
-        const item = items[i]
-        const itemId = getId(item, i)
+      const item = items[index]
+      const itemId = getId(item, index)
 
-        // Skip cards that are currently animating
-        if (animatingIds.has(itemId))
-          continue
+      // Skip cards that are currently animating
+      if (animatingIds.has(itemId))
+        continue
 
-        result.push({
-          item,
-          index: i,
-          itemId,
-        })
-      }
+      result.push({ item, itemId })
     }
 
     return result
+  }
+
+  // Stack generation for rendering (excluding animating cards)
+  const stackList = computed(() => {
+    const { renderLimit, items, loop = false } = options.value
+    if (!items.length)
+      return []
+
+    const animatingIds = new Set(cardsInTransition.keys())
+    return generateStackItems(currentIndex.value, renderLimit, items, loop, animatingIds)
   })
 
   // Is start is true if current index is 0
@@ -141,28 +133,12 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
 
   // Helper function to add or replace card in transition
   function addOrReplaceCard(transitionCard: StackItem<T>) {
-    // Try find oposite animation (approve/reject or restore)
-    const existingCardIndex = cardsInTransition.value.findIndex(c =>
-      c.itemId === transitionCard.itemId
-      && c.animation?.isRestoring === !transitionCard.animation?.isRestoring,
-    )
-
-    // If has oposite animation, replace it
-    if (existingCardIndex !== -1) {
-      cardsInTransition.value.splice(existingCardIndex, 1, transitionCard)
-    }
-    // Otherwise add new
-    else {
-      cardsInTransition.value.push(transitionCard)
-    }
-
-    // Trigger reactivity for shallowRef
-    cardsInTransition.value = [...cardsInTransition.value]
+    cardsInTransition.set(transitionCard.itemId, transitionCard)
   }
 
   // Remove animating card and optionally clear from history
   function removeAnimatingCard(itemId: string | number) {
-    const card = cardsInTransition.value.find(c => c.itemId === itemId)
+    const card = cardsInTransition.get(itemId)
     if (!card)
       return
 
@@ -171,8 +147,8 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
       history.delete(itemId)
     }
 
-    // Remove card from transitions (faster filter for performance)
-    cardsInTransition.value = cardsInTransition.value.filter(c => c.itemId !== itemId)
+    // Remove card from transitions
+    cardsInTransition.delete(itemId)
   }
 
   // -------------------
@@ -187,18 +163,13 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     }
 
     // Check if current item still exist in source items array
-    const itemIndex = items.findIndex((item, index) => getId(item, index) === itemId)
-    if (itemIndex === -1) {
+    const item = items.find((item, index) => getId(item, index) === itemId)
+    if (!item) {
       return
     }
 
-    // action parameter is already StackAction, no conversion needed
-
-    const item = items[itemIndex]
-
     addOrReplaceCard({
       item,
-      index: itemIndex,
       itemId,
       animation: {
         type,
@@ -214,48 +185,53 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
   }
 
   // -------------------
+  // Restore helpers
+  // -------------------
+  function isCardRestoring(itemId: string | number): boolean {
+    return cardsInTransition.get(itemId)?.animation?.isRestoring ?? false
+  }
+
+  function findRestorableCard(): { item: T, itemId: string | number, action: string } | null {
+    const { items } = options.value
+
+    // Try reverse history iteration (last swiped first - good UX)
+    for (const [itemId, action] of Array.from(history.entries()).reverse()) {
+      if (isCardRestoring(itemId))
+        continue
+
+      // Find index of this item in current items array
+      const item = items.find((item, idx) => getId(item, idx) === itemId)
+      if (item) {
+        return { item, itemId, action }
+      }
+    }
+    return null
+  }
+
+  // -------------------
   // Restore
   // -------------------
   function restoreCard(): T | undefined {
-    if (!canRestore.value) {
+    if (!canRestore.value)
       return
-    }
 
-    const { items } = options.value
+    const restorableCard = findRestorableCard()
+    if (!restorableCard)
+      return
 
-    // Simple index-based restore (LIFO order by index)
-    for (let i = currentIndex.value - 1; i >= 0; i--) {
-      const item = items[i]
-      const itemId = getId(item, i)
-      const action = history.get(itemId)
+    const { item, itemId, action } = restorableCard
 
-      if (action) {
-        // Skip cards that are already restoring (to allow parallel restores of different cards)
-        const isAlreadyRestoring = cardsInTransition.value.some(c =>
-          c.itemId === itemId && c.animation?.isRestoring,
-        )
+    addOrReplaceCard({
+      item,
+      itemId,
+      animation: {
+        // If we have running swipe transition, restore should revert it
+        type: cardsInTransition.get(itemId)?.animation?.type || action,
+        isRestoring: true,
+      },
+    })
 
-        if (!isAlreadyRestoring) {
-          // Find card that's animating approve/reject to determine restore type
-          const animatingCard = cardsInTransition.value.find(c =>
-            c.itemId === itemId && c.animation && !c.animation.isRestoring,
-          )
-          const restoreFromType = animatingCard?.animation?.type || action
-
-          // Replace existing approve/reject animation or add new restore
-          addOrReplaceCard({
-            item,
-            index: i,
-            itemId,
-            animation: {
-              type: restoreFromType,
-              isRestoring: true,
-            },
-          })
-          return item
-        }
-      }
-    }
+    return item
   }
 
   // -------------------
@@ -276,7 +252,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     else {
       // No animation - clear everything immediately
       history.clear()
-      cardsInTransition.value = []
+      cardsInTransition.clear()
     }
   }
 
@@ -287,11 +263,12 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
     isEnd,
     canRestore,
     stackList,
-    cardsInTransition,
     swipeCard,
     restoreCard,
     removeAnimatingCard,
     reset,
     hasCardsInTransition,
+    currentItemId,
+    cardsInTransition: computed(() => Array.from(cardsInTransition.values())),
   }
 }
