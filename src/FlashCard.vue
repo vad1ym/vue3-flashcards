@@ -111,7 +111,7 @@ defineExpose({
       class="flash-card__animation-wrapper"
       :class="{
         [`flash-card-animation--${animation?.type}`]: animation?.type,
-        [`flash-card-animation--restore-${animation?.type}`]: animation?.isRestoring,
+        [`flash-card-animation--${animation?.type}-restore`]: animation?.isRestoring,
       }"
       @animationend="emit('animationend')"
     >
@@ -167,8 +167,8 @@ defineExpose({
 /* Default animations */
 .flash-card-animation--approve { animation: approve 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--reject { animation: reject 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--restore-approve { animation: restore-approve 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--restore-reject { animation: restore-reject 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--approve-restore { animation: restore-approve 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--reject-restore { animation: restore-reject 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 
 @keyframes approve { 0%{opacity:1;} 100%{transform:translateX(320px) rotate(15deg);opacity:0;} }
 @keyframes reject { 0%{opacity:1;} 100%{transform:translateX(-320px) rotate(-15deg);opacity:0;} }
