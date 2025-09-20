@@ -61,6 +61,13 @@ function getTransformStyle(position: DragPosition): string | null {
   if (transformStyle) {
     return transformStyle(position)
   }
+
+  // For vertical swipe, don't rotate by default
+  if (params.swipeDirection === 'vertical') {
+    return `transform: scale(${1 - Math.abs(position.delta) / 5})`
+  }
+
+  // For horizontal swipe, use rotation
   return `transform: rotate(${position.delta * maxRotation}deg)`
 }
 
@@ -112,6 +119,7 @@ defineExpose({
       :class="{
         [`flash-card-animation--${animation?.type}`]: animation?.type,
         [`flash-card-animation--${animation?.type}-restore`]: animation?.isRestoring,
+        [`flash-card-animation--${params.swipeDirection}`]: animation?.type,
       }"
       @animationend="emit('animationend')"
     >
@@ -167,14 +175,33 @@ defineExpose({
   pointer-events: none;
 }
 
-/* Default animations */
-.flash-card-animation--approve { animation: approve 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--reject { animation: reject 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--approve-restore { animation: restore-approve 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--reject-restore { animation: restore-reject 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+/* Base animations (horizontal by default) */
+.flash-card-animation--approve { animation: approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--reject { animation: reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--approve-restore { animation: restore-approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--reject-restore { animation: restore-reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 
-@keyframes approve { 0%{opacity:1;} 100%{transform:translateX(320px) rotate(15deg);opacity:0;} }
-@keyframes reject { 0%{opacity:1;} 100%{transform:translateX(-320px) rotate(-15deg);opacity:0;} }
-@keyframes restore-approve { 0%{transform:translateX(320px) rotate(15deg);opacity:0;} 100%{transform:translateX(0) rotate(0deg);opacity:1;} }
-@keyframes restore-reject { 0%{transform:translateX(-320px) rotate(-15deg);opacity:0;} 100%{transform:translateX(0) rotate(0deg);opacity:1;} }
+/* Horizontal direction override */
+.flash-card-animation--horizontal.flash-card-animation--approve { animation: approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--horizontal.flash-card-animation--reject { animation: reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--horizontal.flash-card-animation--approve-restore { animation: restore-approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--horizontal.flash-card-animation--reject-restore { animation: restore-reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+/* Vertical direction override */
+.flash-card-animation--vertical.flash-card-animation--approve { animation: approve-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--vertical.flash-card-animation--reject { animation: reject-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--vertical.flash-card-animation--approve-restore { animation: restore-approve-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--vertical.flash-card-animation--reject-restore { animation: restore-reject-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+/* Horizontal keyframes */
+@keyframes approve-horizontal { 0%{opacity:1;} 100%{transform:translateX(320px) rotate(15deg);opacity:0;} }
+@keyframes reject-horizontal { 0%{opacity:1;} 100%{transform:translateX(-320px) rotate(-15deg);opacity:0;} }
+@keyframes restore-approve-horizontal { 0%{transform:translateX(320px) rotate(15deg);opacity:0;} 100%{transform:translateX(0) rotate(0deg);opacity:1;} }
+@keyframes restore-reject-horizontal { 0%{transform:translateX(-320px) rotate(-15deg);opacity:0;} 100%{transform:translateX(0) rotate(0deg);opacity:1;} }
+
+/* Vertical keyframes */
+@keyframes approve-vertical { 0%{opacity:1;} 100%{transform:translateY(-320px);opacity:0;} }
+@keyframes reject-vertical { 0%{opacity:1;} 100%{transform:translateY(320px);opacity:0;} }
+@keyframes restore-approve-vertical { 0%{transform:translateY(-320px);opacity:0;} 100%{transform:translateY(0);opacity:1;} }
+@keyframes restore-reject-vertical { 0%{transform:translateY(320px);opacity:0;} 100%{transform:translateY(0);opacity:1;} }
 </style>

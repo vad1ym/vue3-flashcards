@@ -6,6 +6,7 @@ export interface ConfigPanelProps {
   stackOffset: number
   stackScale: number
   stackDirection: 'top' | 'bottom' | 'left' | 'right'
+  swipeDirection: 'horizontal' | 'vertical'
   swipeThreshold: number
   dragThreshold: number
   maxRotation: number
@@ -185,6 +186,40 @@ defineEmits<Emits>()
               Right
             </option>
           </select>
+        </div>
+
+        <!-- Swipe Direction -->
+        <div class="form-control">
+          <div class="mb-1">
+            <span class="label-text font-medium">Swipe Direction</span>
+          </div>
+          <div class="text-xs text-gray-500 mb-2">
+            Direction of swipe interactions (affects animations)
+          </div>
+          <div class="flex items-center space-x-4">
+            <label class="cursor-pointer flex items-center space-x-2">
+              <input
+                :checked="config.swipeDirection === 'horizontal'"
+                type="radio"
+                name="swipeDirection"
+                value="horizontal"
+                class="radio radio-primary radio-sm"
+                @change="$emit('update:config', { ...config, swipeDirection: 'horizontal' })"
+              >
+              <span class="text-sm">Horizontal</span>
+            </label>
+            <label class="cursor-pointer flex items-center space-x-2">
+              <input
+                :checked="config.swipeDirection === 'vertical'"
+                type="radio"
+                name="swipeDirection"
+                value="vertical"
+                class="radio radio-primary radio-sm"
+                @change="$emit('update:config', { ...config, swipeDirection: 'vertical' })"
+              >
+              <span class="text-sm">Vertical</span>
+            </label>
+          </div>
         </div>
 
         <!-- Swipe Threshold -->

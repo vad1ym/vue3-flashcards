@@ -33,6 +33,24 @@ The main component for creating swipeable card interfaces.
 - **Default:** `5`
 - **Description:** Minimum distance in pixels the card must be dragged to start swiping. Helps prevent false positives from small movements like clicks.
 
+### `swipeDirection`
+
+- **Type:** `'horizontal' | 'vertical'`
+- **Default:** `'horizontal'`
+- **Description:** Direction of swiping interactions. When set to `'horizontal'`, cards are swiped left/right with rotation transform and horizontal exit animations. When set to `'vertical'`, cards are swiped up/down with no default rotation and vertical exit animations. This affects:
+  - Primary axis for swipe detection and completion
+  - Default transform style during drag (rotating for horizontal, scaling for vertical)
+  - Exit animations (horizontal: slide left/right with rotation, vertical: slide up/down)
+
+**Example:**
+```vue
+<!-- Horizontal swiping (default) - with rotation and horizontal animations -->
+<FlashCards :items="cards" swipe-direction="horizontal" />
+
+<!-- Vertical swiping - no rotation, vertical animations -->
+<FlashCards :items="cards" swipe-direction="vertical" />
+```
+
 ### `maxDragY`
 
 - **Type:** `number | null`

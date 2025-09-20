@@ -22,6 +22,7 @@ const defaultConfig = {
   waitAnimationEnd: false,
   loop: false,
   stackDirection: 'bottom' as 'top' | 'bottom' | 'left' | 'right',
+  swipeDirection: 'horizontal' as 'horizontal' | 'vertical',
   maxDragX: null,
   maxDragY: null,
   disableDrag: false,
@@ -195,6 +196,7 @@ function resetConfig() {
                       :stack-offset="config.stackOffset"
                       :stack-scale="config.stackScale"
                       :stack-direction="config.stackDirection"
+                      :swipe-direction="config.swipeDirection"
                       :swipe-threshold="config.swipeThreshold"
                       :drag-threshold="config.dragThreshold"
                       :max-rotation="config.maxRotation"

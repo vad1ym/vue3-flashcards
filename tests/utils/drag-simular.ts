@@ -224,4 +224,64 @@ export class DragSimulator {
   swipeReject() {
     return this.swipeLeftBeyondThreshold()
   }
+
+  // --- VERTICAL SWIPE METHODS ---
+
+  /**
+   * Drag up to a specific percentage of swipeThreshold (without ending)
+   * @param percentage - Percentage of swipeThreshold
+   */
+  dragUpToThreshold(percentage: number) {
+    return this.dragStart().dragMove([{ y: -percentage * this.options.swipeThreshold! }])
+  }
+
+  /**
+   * Drag down to a specific percentage of swipeThreshold (without ending)
+   * @param percentage - Percentage of swipeThreshold
+   */
+  dragDownToThreshold(percentage: number) {
+    return this.dragStart().dragMove([{ y: percentage * this.options.swipeThreshold! }])
+  }
+
+  /**
+   * Swipe up beyond swipeThreshold (complete cycle) - full approval swipe (vertical)
+   */
+  swipeUpBeyondThreshold() {
+    return this.dragUpToThreshold(1.1).dragEnd()
+  }
+
+  /**
+   * Swipe down beyond swipeThreshold (complete cycle) - full rejection swipe (vertical)
+   */
+  swipeDownBeyondThreshold() {
+    return this.dragDownToThreshold(1.1).dragEnd()
+  }
+
+  /**
+   * Swipe up below swipeThreshold (complete cycle) - drag and release below swipeThreshold (vertical)
+   */
+  swipeUpBelowThreshold() {
+    return this.dragUpToThreshold(0.9).dragEnd()
+  }
+
+  /**
+   * Swipe down below swipeThreshold (complete cycle) - drag and release below swipeThreshold (vertical)
+   */
+  swipeDownBelowThreshold() {
+    return this.dragDownToThreshold(0.9).dragEnd()
+  }
+
+  /**
+   * Alias for swipeUpBeyondThreshold - complete approval swipe (vertical)
+   */
+  swipeApproveVertical() {
+    return this.swipeUpBeyondThreshold()
+  }
+
+  /**
+   * Alias for swipeDownBeyondThreshold - complete rejection swipe (vertical)
+   */
+  swipeRejectVertical() {
+    return this.swipeDownBeyondThreshold()
+  }
 }
