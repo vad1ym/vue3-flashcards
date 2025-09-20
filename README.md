@@ -186,6 +186,7 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `maxRotation` | `number` | `20` | Maximum rotation angle in degrees |
 | `swipeThreshold` | `number` | `150` | Swipe swipeThreshold in pixels |
 | `dragThreshold` | `number` | `5` | Minimum drag distance to start swiping |
+| `swipeDirection` | `'horizontal' \| 'vertical'` | `'horizontal'` | Direction of swiping: horizontal (left/right) or vertical (up/down). Affects swipe detection, default transform, and exit animations |
 | `maxDragY` | `number \| null` | `null` | Maximum Y dragging distance in pixels (null = unlimited) |
 | `maxDragX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |
 | `disableDrag` | `boolean` | `false` | Completely disable dragging functionality. Manual methods and slot actions still work |

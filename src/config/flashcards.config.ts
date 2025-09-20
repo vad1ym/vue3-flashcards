@@ -9,6 +9,7 @@ export const flashCardsDefaults = (
     renderLimit: 3,
     swipeThreshold: 150,
     dragThreshold: 5,
+    swipeDirection: 'horizontal',
     maxRotation: 20,
     stack: 0,
     stackOffset: 20,

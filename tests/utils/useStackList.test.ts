@@ -261,7 +261,7 @@ describe('useStackList', () => {
       })
 
       const stackList = useStackList(options)
-      const initialPosition = { x: 100, y: 50 }
+      const initialPosition = { x: 100, y: 50, delta: 0 }
 
       await stackList.swipeCard(1, 'approve', initialPosition)
 
@@ -448,7 +448,7 @@ describe('useStackList', () => {
       expect(stackList.cardsInTransition.value).toHaveLength(1)
       expect(stackList.history.has(1)).toBe(true)
 
-      stackList.removeAnimatingCard(1, { withHistory: true })
+      stackList.removeAnimatingCard(1)
       expect(stackList.cardsInTransition.value).toHaveLength(0)
       expect(stackList.history.has(1)).toBe(false) // After restore, item is removed from history
     })
@@ -702,7 +702,7 @@ describe('useStackList', () => {
       stackList.removeAnimatingCard(2)
 
       stackList.restoreCard() // Restore item 2
-      stackList.removeAnimatingCard(2, { withHistory: true })
+      stackList.removeAnimatingCard(2)
 
       await stackList.swipeCard(2, SwipeAction.APPROVE) // Re-approve item 2
       stackList.removeAnimatingCard(2)

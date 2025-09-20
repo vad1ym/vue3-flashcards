@@ -23,6 +23,9 @@ export interface DragSetupParams {
   maxDragY?: number | null
   maxDragX?: number | null
 
+  // Direction of swiping: horizontal (left/right) or vertical (up/down)
+  swipeDirection?: 'horizontal' | 'vertical'
+
   // Completely disable dragging feature
   disableDrag?: boolean
 
@@ -64,6 +67,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   const dragThreshold = computed(() => options.value.dragThreshold ?? flashCardsDefaults.dragThreshold)
   const maxDragY = computed(() => options.value.maxDragY ?? null)
   const maxDragX = computed(() => options.value.maxDragX ?? null)
+  const swipeDirection = computed(() => options.value.swipeDirection ?? flashCardsDefaults.swipeDirection)
 
   // Is drag started
   const isDragStarted = ref(false)
@@ -136,7 +140,9 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
       limitedY = Math.max(-maxDragY.value, Math.min(maxDragY.value, y))
     }
 
-    const delta = Math.max(-1, Math.min(1, limitedX / swipeThreshold.value))
+    const isHorizontal = swipeDirection.value === 'horizontal'
+    const primaryAxis = isHorizontal ? limitedX : -limitedY // Invert Y axis for vertical swipe (up = positive, down = negative)
+    const delta = Math.max(-1, Math.min(1, primaryAxis / swipeThreshold.value))
 
     position.x = limitedX
     position.y = limitedY
@@ -157,12 +163,15 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     isDragStarted.value = false
     isDragging.value = false
 
-    if (position.x >= swipeThreshold.value) {
+    const isHorizontal = swipeDirection.value === 'horizontal'
+    const primaryAxis = isHorizontal ? position.x : -position.y // Invert Y axis for vertical swipe (up = positive, down = negative)
+
+    if (primaryAxis >= swipeThreshold.value) {
       onDragComplete('approve')
       position.delta = 1
       position.type = SwipeAction.APPROVE
     }
-    else if (position.x <= -swipeThreshold.value) {
+    else if (primaryAxis <= -swipeThreshold.value) {
       onDragComplete('reject')
       position.delta = -1
       position.type = SwipeAction.REJECT
