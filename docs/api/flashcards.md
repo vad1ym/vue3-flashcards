@@ -11,7 +11,7 @@ The main component for creating swipeable card interfaces.
 
 ### `itemKey`
 
-- **Type:** `string | number`
+- **Type:** `keyof Item | 'id'`
 - **Default:** `id`
 - **Description:** Property to track items by. When provided, items will be tracked by this property instead of their index. Should be unique for each item. This is recommended to use when you modify items array in runtime.
 
@@ -203,7 +203,7 @@ function blurTransform(position) {
 
 ### `actions`
 
-- **Props:** `{ restore: () => void, reject: () => void, approve: () => void, reset: (options?) => void, isEnd: boolean, canRestore: boolean }`
+- **Props:** `{ restore: () => void, reject: () => void, approve: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean }`
 - **Description:** Custom actions UI for controlling card behavior programmatically.
 
 **Available actions:**
@@ -212,17 +212,18 @@ function blurTransform(position) {
 - `approve()` - Triggers approval animation on current card
 - `reset(options?)` - Resets all cards with optional animation settings
 - `isEnd` - Boolean indicating if all cards have been swiped
+- `isStart` - Boolean indicating if at the first card (no cards to restore)
 - `canRestore` - Boolean indicating if there's a previous card to restore
 
 ```vue
 <template>
   <FlashCards :items="cards">
-    <template #actions="{ approve, reject, restore, reset, isEnd, canRestore }">
+    <template #actions="{ approve, reject, restore, reset, isEnd, isStart, canRestore }">
       <div class="action-buttons">
         <button :disabled="isEnd" @click="reject">
           ❌ Reject
         </button>
-        <button :disabled="!canRestore" @click="restore">
+        <button :disabled="!canRestore || isStart" @click="restore">
           ↩️ Restore
         </button>
         <button :disabled="isEnd" @click="approve">

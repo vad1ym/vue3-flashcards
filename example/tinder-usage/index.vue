@@ -53,12 +53,13 @@ const items = ref<Card[]>([
           </div>
         </template>
 
-        <template #actions="{ approve, reject, restore, isEnd, canRestore }">
+        <template #actions="{ approve, reject, restore, isEnd, isStart, canRestore }">
           <TinderActions
             :approve="approve"
             :reject="reject"
             :restore="restore"
             :is-end="isEnd"
+            :is-start="isStart"
             :can-restore="canRestore"
           />
         </template>

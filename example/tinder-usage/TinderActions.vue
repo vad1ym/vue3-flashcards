@@ -4,6 +4,7 @@ defineProps<{
   reject: () => void
   restore: () => void
   isEnd: boolean
+  isStart: boolean
   canRestore: boolean
 }>()
 </script>
@@ -12,7 +13,7 @@ defineProps<{
   <div class="flex justify-center gap-5 mt-5">
     <button
       class="w-15 h-15 rounded-full text-2xl text-white bg-blue-500 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110"
-      :disabled="!canRestore"
+      :disabled="!canRestore || isStart"
       @click="restore"
     >
       ↺

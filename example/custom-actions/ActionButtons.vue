@@ -4,6 +4,7 @@ defineProps<{
   reject: () => void
   restore: () => void
   reset: (options?: { animate?: boolean }) => void
+  isStart: boolean
 }>()
 </script>
 
@@ -23,6 +24,7 @@ defineProps<{
     </button>
     <button
       class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
+      :disabled="isStart"
       @click="restore"
     >
       ↩️ Restore Last

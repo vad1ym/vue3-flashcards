@@ -34,12 +34,13 @@ const disableDrag = ref(false)
           <LearningCard :item="item" />
         </template>
 
-        <template #actions="{ approve, reject, restore, reset }">
+        <template #actions="{ approve, reject, restore, reset, isStart }">
           <ActionButtons
             :approve="approve"
             :reject="reject"
             :restore="restore"
             :reset="reset"
+            :is-start="isStart"
           />
         </template>
       </FlashCards>
