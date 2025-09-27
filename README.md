@@ -4,8 +4,6 @@
 
 **A Tinder-like flashcards component for Vue 3 with smooth animations and intuitive gestures**
 
-> ⚠️ **Development Notice**: This package is currently in development. The API may change between minor versions until v1.0.0 is released.
-
 [![NPM Version](https://img.shields.io/npm/v/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://www.npmjs.com/package/vue3-flashcards)
 [![NPM Downloads](https://img.shields.io/npm/dm/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://www.npmjs.com/package/vue3-flashcards)
 [![Bundle Size](https://img.shields.io/bundlephobia/minzip/vue3-flashcards?style=flat&colorA=18181B&colorB=28CF8D)](https://bundlephobia.com/package/vue3-flashcards)

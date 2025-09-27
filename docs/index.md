@@ -30,7 +30,3 @@ features:
     title: Zero Dependencies
     details: Lightweight and performant with no external dependencies, built purely with Vue 3 and CSS
 ---
-
-::: warning Development Notice
-This package is currently in development. The API may change between minor versions until v1.0.0 is released.
-:::

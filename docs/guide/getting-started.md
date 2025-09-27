@@ -1,5 +1,9 @@
 # Getting Started
 
+::: tip Upgrading from v0.x?
+See the [Migration Guide](/guide/migration-from-v0) for upgrading from previous versions.
+:::
+
 Vue3 Flashcards is a powerful and flexible library for creating Tinder-like card interfaces in Vue 3 applications. Built with TypeScript and the Vue 3 Composition API, it provides smooth animations, touch support, and extensive customization options.
 
 ## Installation
@@ -155,12 +159,6 @@ Components are auto-imported and globally available:
 - ✅ **Auto-import** - Components available without manual imports
 - ✅ **Global Config** - Set defaults for all components via `nuxt.config.ts`
 - ✅ **TypeScript** - Full IntelliSense support
-
-## Development Notice
-
-::: warning Development Status
-This package is currently in development. The API may change between minor versions until v1.0.0 is released.
-:::
 
 ## What's Next?
 

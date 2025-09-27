@@ -58,6 +58,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Getting Started', link: '/guide/getting-started' },
+            { text: 'Migration from v0.x', link: '/guide/migration-from-v0' },
           ],
         },
         {
@@ -84,6 +85,7 @@ export default defineConfig({
           text: 'Guide',
           items: [
             { text: 'Getting Started', link: '/guide/getting-started' },
+            { text: 'Migration from v0.x', link: '/guide/migration-from-v0' },
             { text: 'Examples', link: '/examples' },
             { text: 'Interactive Demo', link: '/interactive-demo' },
           ],
