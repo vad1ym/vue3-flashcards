@@ -1,7 +1,7 @@
 {
   "name": "vue3-flashcards",
   "type": "module",
-  "version": "0.10.3",
+  "version": "1.0.0",
   "description": "Tinder-like flashcards component with dragging and flipping",
   "author": "vad1ym",
   "license": "MIT",
@@ -92,8 +92,8 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "changelog": "changelogen",
-    "changelog:dry": "changelogen --no-output",
-    "release": "changelogen --release"
+    "changelog:dry": "changelogen --no-output -r 1.0.0",
+    "release": "changelogen --release -r 1.0.0"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
