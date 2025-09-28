@@ -60,6 +60,10 @@ const emit = defineEmits<{
   approve: [item: T]
   reject: [item: T]
   restore: [item: T]
+  loop: []
+  dragstart: [item: T]
+  dragmove: [item: T, type: SwipeAction | null, delta: number]
+  dragend: [item: T]
 }>()
 
 defineSlots<{
@@ -109,7 +113,11 @@ const {
   removeAnimatingCard,
   reset,
   currentItemId,
-} = useStackList<T>(() => ({ ...config.value, renderLimit: renderLimit.value }))
+} = useStackList<T>(() => ({
+  ...config.value,
+  renderLimit: renderLimit.value,
+  onLoop: () => emit('loop'),
+}))
 
 /**
  * STACK TRANSFORM
@@ -209,6 +217,9 @@ defineExpose({
           :class="{ 'flashcards__card--active': itemId === currentItemId }"
           @complete="(action, pos) => handleCardSwipe(itemId, action, pos)"
           @mounted="containerHeight = Math.max($event, 0)"
+          @dragstart="emit('dragstart', item)"
+          @dragmove="(type, delta) => emit('dragmove', item, type, delta)"
+          @dragend="emit('dragend', item)"
         >
           <template #default>
             <slot :item="item" />
@@ -235,6 +246,9 @@ defineExpose({
           class="flashcards__card flashcards__card--animating"
           :animation="animation"
           @animationend="() => removeAnimatingCard(itemId)"
+          @dragstart="emit('dragstart', item)"
+          @dragmove="(type, delta) => emit('dragmove', item, type, delta)"
+          @dragend="emit('dragend', item)"
         >
           <template #default>
             <slot :item="item" />

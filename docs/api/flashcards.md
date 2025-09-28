@@ -362,6 +362,28 @@ function blurTransform(position) {
 - **Payload:** `item: T`
 - **Description:** Emitted when a card is restored (returned to the stack via restore action).
 
+### `loop`
+
+- **Payload:** None
+- **Description:** Emitted when a new loop cycle starts in loop mode. This event fires when all cards have been swiped and the component starts over from the beginning. Only triggered when `loop` prop is enabled.
+
+### `dragstart`
+
+- **Payload:** `item: T`
+- **Description:** Emitted when user starts dragging a card. Fires immediately when dragging begins, before any movement threshold is reached.
+
+### `dragmove`
+
+- **Payload:** `item: T, type: SwipeAction | null, delta: number`
+- **Description:** Emitted during card dragging with real-time movement details. The `type` indicates the swipe direction (`'approve'` for right/up, `'reject'` for left/down, or `null` if within threshold). The `delta` is a normalized value (-1 to 1) representing drag progress relative to swipe threshold.
+
+### `dragend`
+
+- **Payload:** `item: T`
+- **Description:** Emitted when user stops dragging a card, regardless of whether the swipe completed or was cancelled.
+
+**Usage example with all events:**
+
 ```vue
 <script setup>
 function handleApprove(item) {
@@ -378,14 +400,39 @@ function handleRestore(item) {
   console.log('Restored:', item)
   // Remove from approved/rejected lists, etc.
 }
+
+function handleLoop() {
+  console.log('New loop cycle started!')
+  // Analytics, reset counters, etc.
+}
+
+function handleDragStart(item) {
+  console.log('Started dragging:', item)
+  // Show drag hints, haptic feedback, etc.
+}
+
+function handleDragMove(item, type, delta) {
+  console.log('Dragging:', item, 'Direction:', type, 'Progress:', delta)
+  // Update UI indicators, play sounds, etc.
+}
+
+function handleDragEnd(item) {
+  console.log('Stopped dragging:', item)
+  // Hide drag hints, etc.
+}
 </script>
 
 <template>
   <FlashCards
     :items="cards"
+    :loop="true"
     @approve="handleApprove"
     @reject="handleReject"
     @restore="handleRestore"
+    @loop="handleLoop"
+    @dragstart="handleDragStart"
+    @dragmove="handleDragMove"
+    @dragend="handleDragEnd"
   >
     <!-- slots -->
   </FlashCards>

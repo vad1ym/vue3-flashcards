@@ -48,6 +48,21 @@ const emit = defineEmits<{
    * Event fired when animation ends
    */
   animationend: []
+
+  /**
+   * Event fired when drag starts
+   */
+  dragstart: []
+
+  /**
+   * Event fired during dragging movement
+   */
+  dragmove: [type: SwipeAction | null, delta: number]
+
+  /**
+   * Event fired when drag ends
+   */
+  dragend: []
 }>()
 
 defineSlots<{
@@ -82,6 +97,15 @@ const {
 } = useDragSetup(el, () => ({
   ...params,
   ...animation,
+  onDragStart() {
+    emit('dragstart')
+  },
+  onDragMove(type, delta) {
+    emit('dragmove', type, delta)
+  },
+  onDragEnd() {
+    emit('dragend')
+  },
   onDragComplete(action) {
     emit('complete', action, position)
   },

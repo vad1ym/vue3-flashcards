@@ -18,6 +18,7 @@ export interface StackListOptions<T> {
   renderLimit: number
   itemKey?: keyof T | 'id'
   waitAnimationEnd?: boolean
+  onLoop?: () => void
 }
 
 export interface ResetOptions {
@@ -68,9 +69,10 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
 
   // For loop mode reset history on new cycle (when index points outside of source array)
   watch(currentIndex, (ci) => {
-    const { loop, items } = options.value
+    const { loop, items, onLoop } = options.value
     if (loop && ci === items.length) {
       history.clear()
+      onLoop?.() // New loop cycle started
     }
   })
 

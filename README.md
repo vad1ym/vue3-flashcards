@@ -278,6 +278,10 @@ function blurTransform(position) {
 | approve | `item: T` | Emitted when a card is approved (swiped right or approved via actions) |
 | reject | `item: T` | Emitted when a card is rejected (swiped left or rejected via actions) |
 | restore | `item: T` | Emitted when a card is restored (returned to the stack via restore action) |
+| loop | - | Emitted when a new loop cycle starts in loop mode (all cards have been swiped) |
+| dragstart | `item: T` | Emitted when user starts dragging a card |
+| dragmove | `item: T, type: SwipeAction \| null, delta: number` | Emitted during card dragging with movement details |
+| dragend | `item: T` | Emitted when user stops dragging a card |
 
 ## Exposed
 | Method/Property | Type | Description |
