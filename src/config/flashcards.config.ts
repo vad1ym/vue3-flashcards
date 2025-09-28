@@ -18,5 +18,8 @@ export const flashCardsDefaults = (
     itemKey: 'id',
     loop: undefined,
     waitAnimationEnd: undefined,
+    resistanceEffect: false,
+    resistanceThreshold: 150,
+    resistanceStrength: 0.3,
   } as const
 ) satisfies FlashCardsProps<any>

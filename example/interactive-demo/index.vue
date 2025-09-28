@@ -26,6 +26,9 @@ const defaultConfig = {
   maxDragX: null,
   maxDragY: null,
   disableDrag: false,
+  resistanceEffect: false,
+  resistanceThreshold: 150,
+  resistanceStrength: 0.3,
 }
 
 // Configuration reactive object
@@ -204,6 +207,9 @@ function resetConfig() {
                       :max-drag-y="enableYLimit ? config.maxDragY : null"
                       :disable-drag="config.disableDrag"
                       :wait-animation-end="config.waitAnimationEnd"
+                      :resistance-effect="config.resistanceEffect"
+                      :resistance-threshold="config.resistanceThreshold"
+                      :resistance-strength="config.resistanceStrength"
                       @approve="onApprove"
                       @reject="onReject"
                       @restore="onRestore"

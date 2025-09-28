@@ -14,6 +14,9 @@ export interface ConfigPanelProps {
   maxDragY: number | null
   disableDrag: boolean
   waitAnimationEnd: boolean
+  resistanceEffect: boolean
+  resistanceThreshold: number
+  resistanceStrength: number
 }
 
 interface Props {
@@ -396,6 +399,75 @@ defineEmits<Emits>()
               @change="$emit('update:config', { ...config, disableDrag: ($event.target as HTMLInputElement).checked })"
             >
           </label>
+        </div>
+
+        <!-- Resistance Effect -->
+        <div class="form-control">
+          <div class="mb-1">
+            <span class="label-text font-medium">Resistance Effect</span>
+          </div>
+          <div class="text-xs text-gray-500 mb-2">
+            Enable resistance when dragging beyond threshold
+          </div>
+          <label class="cursor-pointer">
+            <input
+              :checked="config.resistanceEffect"
+              type="checkbox"
+              class="checkbox checkbox-primary"
+              @change="$emit('update:config', { ...config, resistanceEffect: ($event.target as HTMLInputElement).checked })"
+            >
+          </label>
+        </div>
+
+        <!-- Resistance Threshold -->
+        <div v-if="config.resistanceEffect" class="form-control">
+          <div class="mb-1">
+            <span class="label-text font-medium">Resistance Threshold</span>
+          </div>
+          <div class="text-xs text-gray-500 mb-2">
+            Distance threshold for resistance effect to activate
+          </div>
+          <input
+            :value="config.resistanceThreshold"
+            type="range"
+            min="50"
+            max="300"
+            class="range range-primary range-sm w-full"
+            @input="$emit('update:config', { ...config, resistanceThreshold: Number(($event.target as HTMLInputElement).value) })"
+          >
+          <div class="w-full flex justify-between text-xs px-2">
+            <span>50</span>
+            <span class="opacity-50">
+              {{ config.resistanceThreshold }}px
+            </span>
+            <span>300</span>
+          </div>
+        </div>
+
+        <!-- Resistance Strength -->
+        <div v-if="config.resistanceEffect" class="form-control">
+          <div class="mb-1">
+            <span class="label-text font-medium">Resistance Strength</span>
+          </div>
+          <div class="text-xs text-gray-500 mb-2">
+            Strength of resistance (0-1, where 1 is maximum resistance)
+          </div>
+          <input
+            :value="config.resistanceStrength"
+            type="range"
+            min="0.1"
+            max="1"
+            step="0.1"
+            class="range range-primary range-sm w-full"
+            @input="$emit('update:config', { ...config, resistanceStrength: Number(($event.target as HTMLInputElement).value) })"
+          >
+          <div class="w-full flex justify-between text-xs px-2">
+            <span>0.1</span>
+            <span class="opacity-50">
+              {{ config.resistanceStrength.toFixed(1) }}
+            </span>
+            <span>1.0</span>
+          </div>
         </div>
 
         <div>

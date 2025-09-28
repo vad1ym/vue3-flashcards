@@ -70,6 +70,43 @@ const cards = ref([
 </template>
 ```
 
+### Advanced Usage with Resistance Effect
+
+```vue
+<template>
+  <FlashCards
+    :items="cards"
+    :resistance-effect="true"
+    :resistance-threshold="100"
+    :resistance-strength="0.5"
+    :swipe-threshold="150"
+    :stack="3"
+    :loop="true"
+    @approve="onApprove"
+    @reject="onReject"
+  >
+    <template #default="{ item }">
+      <div class="card">
+        <h2>{{ item.title }}</h2>
+        <p>{{ item.description }}</p>
+      </div>
+    </template>
+
+    <template #approve="{ delta }">
+      <div class="approve-indicator" :style="{ opacity: delta }">
+        ✅ Like
+      </div>
+    </template>
+
+    <template #reject="{ delta }">
+      <div class="reject-indicator" :style="{ opacity: delta }">
+        ❌ Pass
+      </div>
+    </template>
+  </FlashCards>
+</template>
+```
+
 ### Vue Plugin (Global Configuration)
 
 Install the plugin to register components globally and set default configuration:
@@ -188,6 +225,9 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `maxDragY` | `number \| null` | `null` | Maximum Y dragging distance in pixels (null = unlimited) |
 | `maxDragX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |
 | `disableDrag` | `boolean` | `false` | Completely disable dragging functionality. Manual methods and slot actions still work |
+| `resistanceEffect` | `boolean` | `false` | Enable resistance when dragging beyond threshold |
+| `resistanceThreshold` | `number` | `150` | Distance threshold for resistance effect to activate |
+| `resistanceStrength` | `number` | `0.3` | Strength of resistance (0-1, where 1 is maximum resistance) |
 | `loop` | `boolean` | `false` | Enable loop swiping mode (cards loop endlessly) |
 | `renderLimit` | `number` | `3` | Cards to render. Can't be lower than 1. |
 | `stack` | `number` | `0` | Number of cards to show stacked behind the active card. When stack is greater than renderLimit, renderLimit is automatically increased to stack + 2. |

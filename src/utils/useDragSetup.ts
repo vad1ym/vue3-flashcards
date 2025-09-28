@@ -31,6 +31,15 @@ export interface DragSetupParams {
 
   // Initial position for the card (used for animations)
   initialPosition?: DragPosition
+
+  // Enable resistance effect when dragging beyond threshold
+  resistanceEffect?: boolean
+
+  // Distance threshold for resistance effect to activate
+  resistanceThreshold?: number
+
+  // Strength of resistance (0-1, where 1 is maximum resistance)
+  resistanceStrength?: number
 }
 
 export interface DragSetupCallbacks {
@@ -68,6 +77,9 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   const maxDragY = computed(() => options.value.maxDragY ?? null)
   const maxDragX = computed(() => options.value.maxDragX ?? null)
   const swipeDirection = computed(() => options.value.swipeDirection ?? flashCardsDefaults.swipeDirection)
+  const resistanceEffect = computed(() => options.value.resistanceEffect ?? flashCardsDefaults.resistanceEffect)
+  const resistanceThreshold = computed(() => options.value.resistanceThreshold ?? flashCardsDefaults.resistanceThreshold)
+  const resistanceStrength = computed(() => options.value.resistanceStrength ?? flashCardsDefaults.resistanceStrength)
 
   // Is drag started
   const isDragStarted = ref(false)
@@ -141,7 +153,31 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     }
 
     const isHorizontal = swipeDirection.value === 'horizontal'
-    const primaryAxis = isHorizontal ? limitedX : -limitedY // Invert Y axis for vertical swipe (up = positive, down = negative)
+    let primaryAxis = isHorizontal ? limitedX : -limitedY // Invert Y axis for vertical swipe (up = positive, down = negative)
+
+    // Apply resistance effect if enabled and beyond threshold
+    if (resistanceEffect.value && Math.abs(primaryAxis) > resistanceThreshold.value) {
+      const excessDistance = Math.abs(primaryAxis) - resistanceThreshold.value
+
+      // Apply resistance to excess movement only
+      const resistanceMultiplier = 1 / (1 + excessDistance * resistanceStrength.value / 35)
+      const resistedExcess = excessDistance * resistanceMultiplier
+
+      // Final position = threshold + resisted excess movement
+      const direction = primaryAxis >= 0 ? 1 : -1
+      const resistancePosition = resistanceThreshold.value + resistedExcess
+
+      // Apply resistance effect to the appropriate axis
+      if (isHorizontal) {
+        limitedX = resistancePosition * direction
+      }
+      else {
+        limitedY = -resistancePosition * direction // Invert for vertical
+      }
+
+      primaryAxis = isHorizontal ? limitedX : -limitedY
+    }
+
     const delta = Math.max(-1, Math.min(1, primaryAxis / swipeThreshold.value))
 
     position.x = limitedX

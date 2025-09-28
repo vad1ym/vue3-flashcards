@@ -69,6 +69,60 @@ The main component for creating swipeable card interfaces.
 - **Default:** `false`
 - **Description:** Completely disable dragging functionality. When disabled, cards cannot be swiped with touch or mouse gestures. Manual methods (`approve()`, `reject()`, `restore()`) and slot actions still work normally.
 
+### `resistanceEffect`
+
+- **Type:** `boolean`
+- **Default:** `false`
+- **Description:** Enable resistance effect when dragging beyond the resistance threshold. When enabled, cards become increasingly difficult to drag once they pass the `resistanceThreshold` distance, creating a "sticky" or "elastic" feel that provides visual and tactile feedback to users about the swipe progress.
+
+**Example:**
+```vue
+<FlashCards :items="cards" :resistance-effect="true" />
+```
+
+### `resistanceThreshold`
+
+- **Type:** `number`
+- **Default:** `150`
+- **Description:** Distance threshold in pixels for resistance effect to activate. Once the card is dragged beyond this distance, resistance begins to apply. This works independently of `swipeThreshold` - you can have resistance start before or after the swipe completion threshold.
+
+**Example:**
+```vue
+<!-- Resistance starts at 100px, swipe completes at 150px -->
+<FlashCards
+  :items="cards"
+  :resistance-effect="true"
+  :resistance-threshold="100"
+  :swipe-threshold="150"
+/>
+```
+
+### `resistanceStrength`
+
+- **Type:** `number`
+- **Default:** `0.3`
+- **Description:** Strength of resistance effect (0-1, where 1 is maximum resistance). Higher values create stronger resistance, making cards harder to drag beyond the threshold. A value of 0 effectively disables resistance, while 1 creates very strong resistance.
+
+**Examples:**
+```vue
+<!-- Light resistance -->
+<FlashCards
+  :items="cards"
+  :resistance-effect="true"
+  :resistance-strength="0.2"
+/>
+
+<!-- Strong resistance -->
+<FlashCards
+  :items="cards"
+  :resistance-effect="true"
+  :resistance-strength="0.8"
+/>
+```
+
+**Resistance Effect Behavior:**
+The resistance effect creates a smooth, elastic feel when dragging cards beyond the threshold. The formula provides exponential resistance - the further you drag past the threshold, the harder it becomes to continue dragging. This gives users clear feedback about swipe progress while still allowing completion of the action.
+
 ### `loop`
 
 - **Type:** `boolean`
