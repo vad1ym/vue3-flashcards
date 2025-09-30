@@ -128,6 +128,17 @@ const {
 } = useStackTransform(() => ({ ...config.value }))
 
 /**
+ * Determines if drag should be disabled on cards
+ *
+ * Drag is disabled when:
+ * - `disableDrag` prop is explicitly set to true
+ * - `waitAnimationEnd` is enabled AND there are cards currently in transition
+ *   This prevents race conditions where a user can drag a new card while
+ *   the previous card is still animating, which causes cards to hang/freeze
+ */
+const isDragDisabled = computed(() => props.disableDrag || (config.value.waitAnimationEnd && hasCardsInTransition.value))
+
+/**
  * Handles card swipe completion
  */
 function handleCardSwipe(itemId: string | number, action: string, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
@@ -215,6 +226,7 @@ defineExpose({
           v-bind="props"
           class="flashcards__card"
           :class="{ 'flashcards__card--active': itemId === currentItemId }"
+          :disable-drag="isDragDisabled"
           @complete="(action, pos) => handleCardSwipe(itemId, action, pos)"
           @mounted="containerHeight = Math.max($event, 0)"
           @dragstart="emit('dragstart', item)"
