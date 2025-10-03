@@ -67,7 +67,7 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  default: (props: { item: T }) => any
+  default: (props: { item: T, activeItemKey: string | number }) => any
   reject?: (props: { item: T, delta: number }) => any
   approve?: (props: { item: T, delta: number }) => any
   actions?: (props: {
@@ -234,7 +234,7 @@ defineExpose({
           @dragend="emit('dragend', item)"
         >
           <template #default>
-            <slot :item="item" />
+            <slot :item="item" :active-item-key="currentItemId" />
           </template>
           <template #reject="{ delta }">
             <slot name="reject" :item="item" :delta="delta" />
@@ -263,7 +263,7 @@ defineExpose({
           @dragend="emit('dragend', item)"
         >
           <template #default>
-            <slot :item="item" />
+              <slot :item="item" :active-item-key="currentItemId" />
           </template>
           <template #reject="{ delta }">
             <slot name="reject" :item="item" :delta="delta" />
