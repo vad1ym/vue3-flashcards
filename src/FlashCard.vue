@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { DragPosition, DragSetupParams } from './utils/useDragSetup'
-import { onMounted, useTemplateRef, watch } from 'vue'
+import { onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
 import ApproveIcon from './components/icons/ApproveIcon.vue'
 import RejectIcon from './components/icons/RejectIcon.vue'
 import { SwipeAction, useDragSetup } from './utils/useDragSetup'
+import { useGhostAnimation } from './utils/useGhostAnimation'
 
 export interface FlashCardProps extends DragSetupParams {
   // Completely disable dragging feature
@@ -117,10 +118,56 @@ watch(() => params.disableDrag, () => {
   setupInteract()
 })
 
+// Ghost animation composable
+const { isAnimating: isGhostAnimating, createGhost, cleanup: cleanupGhost } = useGhostAnimation(el)
+
+// Helper to trigger ghost animation
+function triggerGhostAnimation() {
+  if (!animation || !el.value)
+    return
+
+  requestAnimationFrame(() => {
+    createGhost(
+      {
+        animationType: animation.type,
+        isRestoring: animation.isRestoring,
+        swipeDirection: params.swipeDirection,
+        initialPosition: animation.initialPosition,
+        getTransformStyle,
+      },
+      () => emit('animationend'),
+    )
+  })
+}
+
+// Watch for animation prop changes (serialize to detect deep changes)
+watch(() => JSON.stringify(animation), (newAnimationStr, oldAnimationStr) => {
+  // Skip if element is not mounted yet
+  if (!el.value) {
+    return
+  }
+
+  // If animation changed to a new one while old is still running, cleanup first
+  if (oldAnimationStr && newAnimationStr && oldAnimationStr !== newAnimationStr) {
+    cleanupGhost()
+  }
+
+  triggerGhostAnimation()
+})
+
 onMounted(() => {
   if (el.value?.offsetHeight) {
     emit('mounted', el.value?.offsetHeight)
   }
+
+  // If animation is set, trigger ghost creation after mount
+  if (animation) {
+    triggerGhostAnimation()
+  }
+})
+
+onBeforeUnmount(() => {
+  cleanupGhost()
 })
 
 defineExpose({
@@ -135,17 +182,12 @@ defineExpose({
     :class="{
       'flash-card--dragging': isDragging,
       'flash-card--drag-disabled': params.disableDrag,
+      'flash-card--hidden': isGhostAnimating,
     }"
     :style="{ transform: `translate3D(${position.x}px, ${position.y}px, 0)` }"
   >
     <div
       class="flash-card__animation-wrapper"
-      :class="{
-        [`flash-card-animation--${animation?.type}`]: animation?.type,
-        [`flash-card-animation--${animation?.type}-restore`]: animation?.isRestoring,
-        [`flash-card-animation--${params.swipeDirection}`]: animation?.type,
-      }"
-      @animationend="emit('animationend')"
     >
       <div class="flash-card__transform" :style="getTransformStyle(position)">
         <slot :is-dragging="isDragging" />
@@ -199,6 +241,10 @@ defineExpose({
   pointer-events: none;
 }
 
+.flash-card--hidden {
+  visibility: hidden;
+}
+
 /* Base animations (horizontal by default) */
 .flash-card-animation--approve { animation: approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--reject { animation: reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
@@ -218,14 +264,14 @@ defineExpose({
 .flash-card-animation--vertical.flash-card-animation--reject-restore { animation: restore-reject-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 
 /* Horizontal keyframes */
-@keyframes approve-horizontal { 0%{opacity:1;} 100%{transform:translateX(320px) rotate(15deg);opacity:0;} }
-@keyframes reject-horizontal { 0%{opacity:1;} 100%{transform:translateX(-320px) rotate(-15deg);opacity:0;} }
-@keyframes restore-approve-horizontal { 0%{transform:translateX(320px) rotate(15deg);opacity:0;} 100%{transform:translateX(0) rotate(0deg);opacity:1;} }
-@keyframes restore-reject-horizontal { 0%{transform:translateX(-320px) rotate(-15deg);opacity:0;} 100%{transform:translateX(0) rotate(0deg);opacity:1;} }
+@keyframes approve-horizontal { to {transform:translateX(320px) rotate(15deg);opacity:0;} }
+@keyframes reject-horizontal { to {transform:translateX(-320px) rotate(-15deg);opacity:0;} }
+@keyframes restore-approve-horizontal { from {transform:translateX(320px) rotate(15deg);opacity:0;} to {transform:translateX(0) rotate(0deg);opacity:1;} }
+@keyframes restore-reject-horizontal { from {transform:translateX(-320px) rotate(-15deg);opacity:0;} to {transform:translateX(0) rotate(0deg);opacity:1;} }
 
 /* Vertical keyframes */
-@keyframes approve-vertical { 0%{opacity:1;} 100%{transform:translateY(-320px);opacity:0;} }
-@keyframes reject-vertical { 0%{opacity:1;} 100%{transform:translateY(320px);opacity:0;} }
-@keyframes restore-approve-vertical { 0%{transform:translateY(-320px);opacity:0;} 100%{transform:translateY(0);opacity:1;} }
-@keyframes restore-reject-vertical { 0%{transform:translateY(320px);opacity:0;} 100%{transform:translateY(0);opacity:1;} }
+@keyframes approve-vertical { to {transform:translateY(-320px);opacity:0;} }
+@keyframes reject-vertical { to {transform:translateY(320px);opacity:0;} }
+@keyframes restore-approve-vertical { from {transform:translateY(-320px);opacity:0;} to {transform:translateY(0);opacity:1;} }
+@keyframes restore-reject-vertical { from {transform:translateY(320px);opacity:0;} to {transform:translateY(0);opacity:1;} }
 </style>

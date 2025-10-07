@@ -209,54 +209,33 @@ defineExpose({
           No more cards!
         </slot>
       </div>
-      <!-- Обычные карточки стека -->
+      <!-- Unified card list - single v-for -->
       <div
-        v-for="({ item, itemId }, domIndex) in stackList"
-        :key="`stack-${itemId}`"
+        v-for="({ item, itemId, stackIndex, isAnimating, animation }, domIndex) in stackList"
+        :key="`card-${itemId}`"
         :data-item-id="itemId"
         class="flashcards__card-wrapper"
+        :class="{ 'flashcards__card-wrapper--animating': isAnimating }"
         :style="[
-          { zIndex: stackList.length - domIndex },
-          getCardStyle(domIndex + cardsInTransition.filter(c =>
-            c.animation?.isRestoring,
-          ).length),
+          {
+            zIndex: isAnimating
+              ? stackList.length * 2 + domIndex
+              : stackList.length - domIndex,
+          },
+          getCardStyle(stackIndex),
         ]"
       >
         <FlashCard
           v-bind="props"
           class="flashcards__card"
-          :class="{ 'flashcards__card--active': itemId === currentItemId }"
-          :disable-drag="isDragDisabled"
+          :class="{
+            'flashcards__card--active': itemId === currentItemId && !isAnimating,
+            'flashcards__card--animating': isAnimating,
+          }"
+          :animation="isAnimating ? animation : undefined"
+          :disable-drag="isDragDisabled || isAnimating"
           @complete="(action, pos) => handleCardSwipe(itemId, action, pos)"
           @mounted="containerHeight = Math.max($event, 0)"
-          @dragstart="emit('dragstart', item)"
-          @dragmove="(type, delta) => emit('dragmove', item, type, delta)"
-          @dragend="emit('dragend', item)"
-        >
-          <template #default>
-            <slot :item="item" :active-item-key="currentItemId" />
-          </template>
-          <template #reject="{ delta }">
-            <slot name="reject" :item="item" :delta="delta" />
-          </template>
-          <template #approve="{ delta }">
-            <slot name="approve" :item="item" :delta="delta" />
-          </template>
-        </FlashCard>
-      </div>
-
-      <!-- Animating cards -->
-      <div
-        v-for="({ item, itemId, animation }, domIndex) in cardsInTransition"
-        :key="`anim-${itemId}`"
-        :data-item-id="itemId"
-        class="flashcards__card-wrapper flashcards__card-wrapper--animating"
-        :style="[{ zIndex: stackList.length * 2 + domIndex }, getCardStyle(cardsInTransition.length - domIndex - 1)]"
-      >
-        <FlashCard
-          v-bind="props"
-          class="flashcards__card flashcards__card--animating"
-          :animation="animation"
           @animationend="() => removeAnimatingCard(itemId)"
           @dragstart="emit('dragstart', item)"
           @dragmove="(type, delta) => emit('dragmove', item, type, delta)"

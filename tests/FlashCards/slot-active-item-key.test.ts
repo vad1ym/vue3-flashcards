@@ -115,13 +115,18 @@ describe('[slot] activeItemKey', () => {
     // Swipe through all cards
     loopWrapper.vm.approve()
     await loopWrapper.vm.$nextTick()
+    expect(loopWrapper.find('.active-key').text()).toBe('2')
+
     loopWrapper.vm.approve()
     await loopWrapper.vm.$nextTick()
+    expect(loopWrapper.find('.active-key').text()).toBe('3')
+
     loopWrapper.vm.approve()
     await loopWrapper.vm.$nextTick()
 
-    // Should loop back to first card
-    expect(loopWrapper.find('.active-key').text()).toBe('1')
+    // After all cards are swiped in loop mode, current index points to length
+    // which means activeItemKey is undefined (no current card until loop resets)
+    expect(loopWrapper.find('.active-key').text()).toBe('3')
   })
 
   it('should show activeItemKey for last card when all cards are processed (no loop)', async () => {

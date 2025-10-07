@@ -35,7 +35,7 @@ defineEmits<Emits>()
         Anim. reset
       </button>
     </div>
-    <div class="flex justify-center gap-4">
+    <div class="flex justify-center gap-1">
       <button
         class="btn btn-circle btn-error"
         :disabled="isEnd && !loop"
