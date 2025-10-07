@@ -240,16 +240,19 @@ function blurTransform(position) {
 
 ### `default`
 
-- **Props:** `{ item: T }`
+- **Props:** `{ item: T, activeItemKey: number | string }`
 - **Description:** Main content of the card (front side).
 
 ```vue
 <template>
   <FlashCards :items="cards">
-    <template #default="{ item }">
+    <template #default="{ item, activeItemKey }">
       <div class="card-content">
         {{ item.title }}
       </div>
+       <p>
+        Active card = {{ activeItemKey }}
+      </p>
     </template>
   </FlashCards>
 </template>

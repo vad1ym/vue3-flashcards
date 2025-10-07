@@ -26,7 +26,7 @@ export interface ResetOptions {
   delay?: number
 }
 
-export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>) {
+export function useStackList<T extends Record<string, unknown>>(_options: MaybeRefOrGetter<StackListOptions<T>>) {
   const options = computed(() => toValue(_options))
 
   // Swiping history
@@ -37,11 +37,12 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
   const hasCardsInTransition = computed(() => cardsInTransition.size > 0)
 
   // Generate ID for card
-  function getId(item: T, index: number) {
-    const trackKey = options.value.itemKey
-    return trackKey && trackKey !== 'id'
-      ? item[trackKey as keyof T]
-      : (item as any).id ?? index
+  function getId(item: T, index: number): string | number {
+    if (!item)
+      return index
+
+    const trackKey = options.value.itemKey || 'id'
+    return item[trackKey as keyof T] as string | number ?? index
   }
 
   // Current index - first uncompleted card
@@ -55,7 +56,7 @@ export function useStackList<T>(_options: MaybeRefOrGetter<StackListOptions<T>>)
 
   // ID of the current card
   const currentItemId = computed(() => {
-    const { items } = options.value
+    const { items = [] } = options.value
     return getId(items[currentIndex.value], currentIndex.value)
   })
 

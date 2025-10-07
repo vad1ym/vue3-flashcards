@@ -265,7 +265,7 @@ function blurTransform(position) {
 
 | Slot Name | Props | Description |
 |-----------|-------|-------------|
-| default | `{ item: T }` | Main content of the card (front side) |
+| default | `{ item: T, activeItemKey: number `|` string }` | Main content of the card (front side) |
 | actions | `{ restore: () => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }` | Custom actions UI. `restore` returns to previous card, `reject`/`approve` trigger swipe animations, `isEnd` whether all cards have been swiped, `canRestore` whether there is a previous card to restore to |
 | approve | `{ item: T }` | Content shown when swiping right (approval indicator) |
 | reject | `{ item: T }` | Content shown when swiping left (rejection indicator) |
