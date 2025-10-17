@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DragPosition, DragSetupParams } from './utils/useDragSetup'
-import { onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
 import ApproveIcon from './components/icons/ApproveIcon.vue'
 import RejectIcon from './components/icons/RejectIcon.vue'
 import { SwipeAction, useDragSetup } from './utils/useDragSetup'
@@ -127,6 +127,10 @@ function triggerGhostAnimation() {
     return
 
   requestAnimationFrame(() => {
+    if (!animation) {
+      return
+    }
+
     createGhost(
       {
         animationType: animation.type,
@@ -141,18 +145,21 @@ function triggerGhostAnimation() {
 }
 
 // Watch for animation prop changes (serialize to detect deep changes)
-watch(() => JSON.stringify(animation), (newAnimationStr, oldAnimationStr) => {
+watch(() => animation, (newAnimation, oldAnimation) => {
   // Skip if element is not mounted yet
   if (!el.value) {
     return
   }
 
   // If animation changed to a new one while old is still running, cleanup first
-  if (oldAnimationStr && newAnimationStr && oldAnimationStr !== newAnimationStr) {
+  if (oldAnimation && newAnimation && oldAnimation !== newAnimation) {
     cleanupGhost()
   }
 
-  triggerGhostAnimation()
+  // Add a small delay to ensure DOM is ready
+  nextTick(() => {
+    triggerGhostAnimation()
+  })
 })
 
 onMounted(() => {
@@ -242,7 +249,9 @@ defineExpose({
 }
 
 .flash-card--hidden {
-  visibility: hidden;
+  opacity: 0 !important;
+  transition: none !important;
+  pointer-events: none !important;
 }
 
 /* Base animations (horizontal by default) */

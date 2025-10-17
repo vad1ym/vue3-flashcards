@@ -200,11 +200,12 @@ describe('useStackList', () => {
       expect(stackList.currentIndex.value).toBe(0)
       expect(stackList.history.size).toBe(0)
 
-      // Completing animation will add item back to history
+      // Completing animation after cycle reset won't add to history
+      // because we're in a new cycle and currentIndex is 0
       stackList.removeAnimatingCard(2)
 
-      // Now history has the item again since removeAnimatingCard adds it
-      expect(stackList.history.size).toBe(1)
+      // History remains empty since we're in a new cycle
+      expect(stackList.history.size).toBe(0)
     })
 
     it('should handle cycling with different currentIndex positions', async () => {

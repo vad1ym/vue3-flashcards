@@ -50,8 +50,6 @@ export function createGhostElement(options: GhostAnimationOptions): HTMLElement 
     animationType,
     isRestoring,
     swipeDirection,
-    initialPosition,
-    getTransformStyle,
     onAnimationEnd,
   } = options
 
@@ -62,11 +60,17 @@ export function createGhostElement(options: GhostAnimationOptions): HTMLElement 
 
   // Get current position from the card
   const rect = element.getBoundingClientRect()
+  const container = element.closest('.flashcards')!
 
-  // Position ghost exactly over original
-  clone.style.position = 'fixed'
-  clone.style.top = `${rect.top}px`
-  clone.style.left = `${rect.left}px`
+  // Calculate position relative to the container
+  const containerRect = container.getBoundingClientRect()
+  const relativeTop = rect.top - containerRect.top
+  const relativeLeft = rect.left - containerRect.left
+
+  // Position clone absolutely over the original card
+  clone.style.position = 'absolute'
+  clone.style.top = `${relativeTop}px`
+  clone.style.left = `${relativeLeft}px`
   clone.style.width = `${rect.width}px`
   clone.style.height = `${rect.height}px`
   clone.style.zIndex = '9999'
@@ -74,42 +78,9 @@ export function createGhostElement(options: GhostAnimationOptions): HTMLElement 
 
   // Get animation wrapper
   const animationWrapper = clone.querySelector('.flash-card__animation-wrapper') as HTMLElement
-  const transformWrapper = animationWrapper?.querySelector('.flash-card__transform') as HTMLElement
 
-  // Apply initial position if provided (for drag animations)
-  if (initialPosition && !isRestoring && animationWrapper && transformWrapper) {
-    clone.style.top = `${rect.top - initialPosition.y}px`
-    clone.style.left = `${rect.left - initialPosition.x}px`
-    animationWrapper.style.transform = `translate3d(${initialPosition.x}px, ${initialPosition.y}px, 0)`
-  }
-
-  // Always apply current transform style to ghost if available
-  if (animationWrapper && transformWrapper) {
-    // First, copy the current computed transform from the original element
-    const originalTransformWrapper = element.querySelector('.flash-card__transform') as HTMLElement
-    if (originalTransformWrapper) {
-      const computedStyle = window.getComputedStyle(originalTransformWrapper)
-      const currentTransform = computedStyle.transform
-      if (currentTransform && currentTransform !== 'none') {
-        transformWrapper.style.transform = currentTransform
-      }
-    }
-
-    // Then apply additional transform style if provided
-    if (getTransformStyle) {
-      const rotationStyle = getTransformStyle({ x: 0, y: 0, delta: 0, type: null, ...initialPosition })
-      if (rotationStyle) {
-        // Extract transform value from rotationStyle and apply it
-        const transformMatch = rotationStyle.match(/transform:\s*([^;]+)/)
-        if (transformMatch) {
-          transformWrapper.style.transform = transformMatch[1]
-        }
-      }
-    }
-  }
-
-  // Insert into document
-  document.body.appendChild(clone)
+  // Insert clone directly into the container
+  container.appendChild(clone)
 
   // Force reflow
   void clone.offsetHeight

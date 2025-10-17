@@ -77,12 +77,13 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
   })
 
   // For loop mode reset history on new cycle (when index points outside of source array)
-  watch(currentIndex, (ci) => {
+  watch(expectedIndex, (ci) => {
     const { loop, items, onLoop } = options.value
     if (loop && ci === items.length) {
       history.clear()
       // Don't clear cardsInTransition here - let animations finish naturally
       // But we need to prevent restore from finding cards from previous cycle
+      // And also we need to prevent last animating cards to appear in next cycle history
       onLoop?.() // New loop cycle started
     }
   })
@@ -190,8 +191,20 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
       history.delete(itemId)
     }
     else if (card.animation) {
-      // Card finished swiping animation - NOW add to history
-      history.set(itemId, card.animation.type)
+      // Card finished swiping animation - add to history only if we're still in the same cycle
+      const { items, loop } = options.value
+      if (loop) {
+        // In loop mode, check if card belongs to current cycle
+        const cardIndex = items.findIndex((item, idx) => getId(item, idx) === itemId)
+        // Only add to history if card index is before current index (belongs to current cycle)
+        if (cardIndex < currentIndex.value) {
+          history.set(itemId, card.animation.type)
+        }
+      }
+      else {
+        // In non-loop mode, always add to history
+        history.set(itemId, card.animation.type)
+      }
     }
 
     // Remove card from transitions
