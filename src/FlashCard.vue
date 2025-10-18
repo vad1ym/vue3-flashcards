@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import type { DragPosition, DragSetupParams } from './utils/useDragSetup'
-import { nextTick, onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import ApproveIcon from './components/icons/ApproveIcon.vue'
 import RejectIcon from './components/icons/RejectIcon.vue'
 import { SwipeAction, useDragSetup } from './utils/useDragSetup'
-import { useGhostAnimation } from './utils/useGhostAnimation'
 
 export interface FlashCardProps extends DragSetupParams {
   // Completely disable dragging feature
@@ -118,59 +117,67 @@ watch(() => params.disableDrag, () => {
   setupInteract()
 })
 
-// Ghost animation composable
-const { isAnimating: isGhostAnimating, createGhost, cleanup: cleanupGhost } = useGhostAnimation(el)
+// Animation classes computed
+const animationClasses = computed(() => ({
+  [`flash-card-animation--${animation?.type}`]: !!animation?.type,
+  [`flash-card-animation--${animation?.type}-restore`]: animation?.isRestoring,
+  [`flash-card-animation--${params.swipeDirection}`]: !!params.swipeDirection,
+}))
 
-// Helper to trigger ghost animation
+// Simple ghost animation state
+const isGhostAnimating = ref(false)
+let currentGhost: HTMLElement | null = null
+
+// Ghost management
+function cleanupGhost() {
+  currentGhost?.remove()
+  currentGhost = null
+  isGhostAnimating.value = false
+}
+
 function triggerGhostAnimation() {
-  if (!animation || !el.value)
+  if (!animation?.type || !el.value)
     return
 
-  requestAnimationFrame(() => {
-    if (!animation) {
-      return
-    }
+  cleanupGhost()
 
-    createGhost(
-      {
-        animationType: animation.type,
-        isRestoring: animation.isRestoring,
-        swipeDirection: params.swipeDirection,
-        initialPosition: animation.initialPosition,
-        getTransformStyle,
-      },
-      () => emit('animationend'),
-    )
+  // Create ghost
+  const wrapper = el.value.closest('.flashcards__card-wrapper') as HTMLElement
+  currentGhost = wrapper.cloneNode(true) as HTMLElement
+  currentGhost.classList.add('flashcards__ghost')
+
+  el.value.closest('.flashcards')?.appendChild(currentGhost)
+  isGhostAnimating.value = true
+
+  // Handle animation end
+  currentGhost.addEventListener('animationend', (e: AnimationEvent) => {
+    if (e.target === currentGhost?.querySelector('.flash-card__animation-wrapper')) {
+      nextTick(() => {
+        cleanupGhost()
+        emit('animationend')
+      })
+    }
   })
 }
 
-// Watch for animation prop changes (serialize to detect deep changes)
+// Single watcher for animation changes
 watch(() => animation, (newAnimation, oldAnimation) => {
-  // Skip if element is not mounted yet
-  if (!el.value) {
+  if (!el.value)
     return
-  }
 
-  // If animation changed to a new one while old is still running, cleanup first
+  // Cleanup if animation changed to a new one while old is still running
   if (oldAnimation && newAnimation && oldAnimation !== newAnimation) {
     cleanupGhost()
   }
 
-  // Add a small delay to ensure DOM is ready
-  nextTick(() => {
-    triggerGhostAnimation()
-  })
-})
+  // Trigger animation if we have a valid animation type
+  if (newAnimation?.type) {
+    nextTick(() => triggerGhostAnimation())
+  }
+}, { immediate: true })
 
 onMounted(() => {
-  if (el.value?.offsetHeight) {
-    emit('mounted', el.value?.offsetHeight)
-  }
-
-  // If animation is set, trigger ghost creation after mount
-  if (animation) {
-    triggerGhostAnimation()
-  }
+  el.value?.offsetHeight && emit('mounted', el.value.offsetHeight)
 })
 
 onBeforeUnmount(() => {
@@ -195,6 +202,7 @@ defineExpose({
   >
     <div
       class="flash-card__animation-wrapper"
+      :class="animationClasses"
     >
       <div class="flash-card__transform" :style="getTransformStyle(position)">
         <slot :is-dragging="isDragging" />
@@ -254,6 +262,11 @@ defineExpose({
   pointer-events: none !important;
 }
 
+/* Disable all animations for hidden elements - they will be handled by ghost */
+.flash-card--hidden .flash-card__animation-wrapper {
+  animation: none !important;
+}
+
 /* Base animations (horizontal by default) */
 .flash-card-animation--approve { animation: approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--reject { animation: reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
@@ -283,4 +296,9 @@ defineExpose({
 @keyframes reject-vertical { to {transform:translateY(320px);opacity:0;} }
 @keyframes restore-approve-vertical { from {transform:translateY(-320px);opacity:0;} to {transform:translateY(0);opacity:1;} }
 @keyframes restore-reject-vertical { from {transform:translateY(320px);opacity:0;} to {transform:translateY(0);opacity:1;} }
+
+.flash-card--ghost {
+  pointer-events: none;
+  z-index: 9999;
+}
 </style>
