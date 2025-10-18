@@ -260,13 +260,14 @@ function blurTransform(position) {
 
 ### `actions`
 
-- **Props:** `{ restore: () => void, reject: () => void, approve: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean }`
+- **Props:** `{ restore: () => void, reject: () => void, approve: () => void, skip: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean }`
 - **Description:** Custom actions UI for controlling card behavior programmatically.
 
 **Available actions:**
 - `restore()` - Returns to the previous card if available
 - `reject()` - Triggers rejection animation on current card
 - `approve()` - Triggers approval animation on current card
+- `skip()` - Triggers skip animation on current card - moves to next card without approve/reject
 - `reset(options?)` - Resets all cards with optional animation settings
 - `isEnd` - Boolean indicating if all cards have been swiped
 - `isStart` - Boolean indicating if at the first card (no cards to restore)
@@ -275,10 +276,13 @@ function blurTransform(position) {
 ```vue
 <template>
   <FlashCards :items="cards">
-    <template #actions="{ approve, reject, restore, reset, isEnd, isStart, canRestore }">
+    <template #actions="{ approve, reject, skip, restore, reset, isEnd, isStart, canRestore }">
       <div class="action-buttons">
         <button :disabled="isEnd" @click="reject">
           ❌ Reject
+        </button>
+        <button :disabled="isEnd" @click="skip">
+          ⏭️ Skip
         </button>
         <button :disabled="!canRestore || isStart" @click="restore">
           ↩️ Restore
@@ -360,6 +364,11 @@ function blurTransform(position) {
 - **Payload:** `item: T`
 - **Description:** Emitted when a card is rejected (swiped left or rejected via actions).
 
+### `skip`
+
+- **Payload:** `item: T`
+- **Description:** Emitted when a card is skipped (skipped via actions) - moves to next card without approve/reject.
+
 ### `restore`
 
 - **Payload:** `item: T`
@@ -399,6 +408,11 @@ function handleReject(item) {
   // Add to rejected list, save to database, etc.
 }
 
+function handleSkip(item) {
+  console.log('Skipped:', item)
+  // Add to skipped list, analytics, etc.
+}
+
 function handleRestore(item) {
   console.log('Restored:', item)
   // Remove from approved/rejected lists, etc.
@@ -431,6 +445,7 @@ function handleDragEnd(item) {
     :loop="true"
     @approve="handleApprove"
     @reject="handleReject"
+    @skip="handleSkip"
     @restore="handleRestore"
     @loop="handleLoop"
     @dragstart="handleDragStart"
@@ -454,6 +469,10 @@ function programmaticApprove() {
   flashcardsRef.value.approve()
 }
 
+function programmaticSkip() {
+  flashcardsRef.value.skip()
+}
+
 function animatedReset() {
   flashcardsRef.value.reset({ animated: true, delay: 300 })
 }
@@ -463,6 +482,9 @@ function animatedReset() {
   <FlashCards ref="flashcardsRef" :items="cards" />
   <button @click="programmaticApprove">
     Approve
+  </button>
+  <button @click="programmaticSkip">
+    Skip
   </button>
   <button @click="animatedReset">
     Animated Reset
@@ -484,6 +506,11 @@ function animatedReset() {
 
 - **Type:** `() => void`
 - **Description:** Triggers rejection animation on the current card.
+
+### `skip()`
+
+- **Type:** `() => void`
+- **Description:** Triggers skip animation on the current card - moves to next card without approve/reject.
 
 ### `reset(options?)`
 

@@ -266,7 +266,7 @@ function blurTransform(position) {
 | Slot Name | Props | Description |
 |-----------|-------|-------------|
 | default | `{ item: T, activeItemKey: number `|` string }` | Main content of the card (front side) |
-| actions | `{ restore: () => void, reject: () => void, approve: () => void, isEnd: boolean, canRestore: boolean }` | Custom actions UI. `restore` returns to previous card, `reject`/`approve` trigger swipe animations, `isEnd` whether all cards have been swiped, `canRestore` whether there is a previous card to restore to |
+| actions | `{ restore: () => void, reject: () => void, approve: () => void, skip: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean }` | Custom actions UI. `restore` returns to previous card, `reject`/`approve`/`skip` trigger swipe animations, `reset` resets all cards, `isEnd` whether all cards have been swiped, `isStart` whether at the first card, `canRestore` whether there is a previous card to restore to |
 | approve | `{ item: T }` | Content shown when swiping right (approval indicator) |
 | reject | `{ item: T }` | Content shown when swiping left (rejection indicator) |
 | empty | - | Content shown when all cards have been swiped |
@@ -277,6 +277,7 @@ function blurTransform(position) {
 |------------|---------|-------------|
 | approve | `item: T` | Emitted when a card is approved (swiped right or approved via actions) |
 | reject | `item: T` | Emitted when a card is rejected (swiped left or rejected via actions) |
+| skip | `item: T` | Emitted when a card is skipped (skipped via actions) - moves to next card without approve/reject |
 | restore | `item: T` | Emitted when a card is restored (returned to the stack via restore action) |
 | loop | - | Emitted when a new loop cycle starts in loop mode (all cards have been swiped) |
 | dragstart | `item: T` | Emitted when user starts dragging a card |
@@ -289,6 +290,7 @@ function blurTransform(position) {
 | restore | `() => void` | Returns to the previous card if available |
 | approve | `() => void` | Triggers approval animation on current card |
 | reject | `() => void` | Triggers rejection animation on current card |
+| skip | `() => void` | Triggers skip animation on current card - moves to next card without approve/reject |
 | reset | `(options?) => void` | Resets all cards to initial state. Options: `{ animated?: boolean, delay?: number }` |
 | canRestore | `boolean` | Whether there is a previous card to restore to |
 | isEnd | `boolean` | Whether all cards have been swiped |
