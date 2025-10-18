@@ -60,6 +60,7 @@ const emit = defineEmits<{
   approve: [item: T]
   reject: [item: T]
   restore: [item: T]
+  skip: [item: T]
   loop: []
   dragstart: [item: T]
   dragmove: [item: T, type: SwipeAction | null, delta: number]
@@ -74,6 +75,7 @@ defineSlots<{
     restore: () => void
     reject: () => void
     approve: () => void
+    skip: () => void
     reset: (options?: ResetOptions) => void
     isEnd: boolean
     isStart: boolean
@@ -115,6 +117,7 @@ const {
   currentItemId,
 } = useStackList<T>(() => ({
   ...config.value,
+  items: props.items,
   renderLimit: renderLimit.value,
   onLoop: () => emit('loop'),
 }))
@@ -141,15 +144,13 @@ const isDragDisabled = computed(() => props.disableDrag || (config.value.waitAni
 /**
  * Handles card swipe completion
  */
-function handleCardSwipe(itemId: string | number, action: string, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
+function handleCardSwipe(itemId: string | number, action: SwipeAction, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
   const swipedCard = swipeCard(itemId, action, position)
 
   if (!swipedCard)
     return
 
-  action === SwipeAction.APPROVE
-    ? emit('approve', swipedCard)
-    : emit('reject', swipedCard)
+  emit(action as any, swipedCard)
 }
 
 /**
@@ -179,17 +180,23 @@ function restore() {
 /**
  * Approves card
  */
-const approve = () => performCardAction('approve')
+const approve = () => performCardAction(SwipeAction.APPROVE)
 
 /**
  * Rejects card
  */
-const reject = () => performCardAction('reject')
+const reject = () => performCardAction(SwipeAction.REJECT)
+
+/**
+ * Skips card - moves to end without approve/reject
+ */
+const skip = () => performCardAction(SwipeAction.SKIP)
 
 defineExpose({
   restore,
   approve,
   reject,
+  skip,
   reset,
   canRestore,
   isEnd,
@@ -259,6 +266,7 @@ defineExpose({
       :restore="restore"
       :reject="reject"
       :approve="approve"
+      :skip="skip"
       :reset="reset"
       :is-end="isEnd"
       :is-start="isStart"
@@ -282,4 +290,12 @@ defineExpose({
 }
 .flashcards__card--active { pointer-events: all; }
 .flashcards-empty-state { grid-area:1/1; display:flex;align-items:center;justify-content:center; }
+
+.flashcards__ghost,
+.flashcards__ghost * {
+  pointer-events: none !important;
+}
+.flashcards__ghost {
+  z-index: 9999;
+}
 </style>

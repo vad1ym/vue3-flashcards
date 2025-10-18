@@ -7,7 +7,10 @@ import { ref } from 'vue'
 export function createGhostElement(element: HTMLElement, animationType: string, isRestoring: boolean = false, swipeDirection?: string): HTMLElement {
   // Clone the element
   const clone = element.closest('.flashcards__card-wrapper')?.cloneNode(true) as HTMLElement
-  clone.classList.add('flash-card--ghost')
+  clone.classList.add('flashcards__ghost')
+
+  // Reset inline z-index to prevent overlay issues
+  clone.style.zIndex = ''
 
   // Get current position and size from the original element
   const container = element.closest('.flashcards') as HTMLElement

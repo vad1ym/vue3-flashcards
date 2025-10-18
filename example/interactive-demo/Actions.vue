@@ -10,6 +10,7 @@ interface Emits {
   (e: 'restore'): void
   (e: 'reject'): void
   (e: 'approve'): void
+  (e: 'skip'): void
   (e: 'reset', options?: { animate?: boolean }): void
 }
 
@@ -49,6 +50,13 @@ defineEmits<Emits>()
         @click="$emit('restore')"
       >
         ↶
+      </button>
+      <button
+        class="btn btn-circle btn-warning"
+        :disabled="isEnd && !loop"
+        @click="$emit('skip')"
+      >
+        ⏭
       </button>
       <button
         class="btn btn-circle btn-success"
