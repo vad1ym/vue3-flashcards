@@ -5,6 +5,7 @@ import { flashCardsDefaults } from '../config/flashcards.config'
 export const SwipeAction = {
   APPROVE: 'approve',
   REJECT: 'reject',
+  SKIP: 'skip',
 } as const
 
 export type SwipeAction = typeof SwipeAction[keyof typeof SwipeAction]

@@ -12,7 +12,7 @@ import InteractiveCard from './InteractiveCard.vue'
 import ItemsManager from './ItemsManager.vue'
 
 interface Event {
-  type: 'approve' | 'reject' | 'restore'
+  type: 'approve' | 'reject' | 'restore' | 'skip'
   item: CardItem
   timestamp: string
 }
@@ -95,6 +95,15 @@ function onReject(item: CardItem) {
 function onRestore(item: CardItem) {
   events.value.push({
     type: 'restore',
+    item,
+    timestamp: new Date().toLocaleTimeString(),
+  })
+  eventsLogRef.value?.scrollToBottom()
+}
+
+function onSkip(item: CardItem) {
+  events.value.push({
+    type: 'skip',
     item,
     timestamp: new Date().toLocaleTimeString(),
   })
@@ -213,6 +222,7 @@ function resetConfig() {
                       @approve="onApprove"
                       @reject="onReject"
                       @restore="onRestore"
+                      @skip="onSkip"
                     >
                       <template #default="{ item }">
                         <InteractiveCard :item="item" />
@@ -234,7 +244,7 @@ function resetConfig() {
                         </div>
                       </template>
 
-                      <template #actions="{ restore, reject, approve, reset, isEnd, isStart, canRestore }">
+                      <template #actions="{ restore, reject, approve, skip, reset, isEnd, isStart, canRestore }">
                         <Actions
                           :is-end="isEnd"
                           :is-start="isStart"
@@ -243,6 +253,7 @@ function resetConfig() {
                           @restore="restore"
                           @reject="reject"
                           @approve="approve"
+                          @skip="skip"
                           @reset="reset"
                         />
                       </template>

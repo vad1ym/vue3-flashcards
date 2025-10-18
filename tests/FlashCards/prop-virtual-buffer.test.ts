@@ -35,12 +35,12 @@ describe('[props] renderLimit', () => {
 
     it(`should use default renderLimit of ${flashCardsDefaults.renderLimit}`, () => {
       // With default renderLimit of 3, the component renders 4 cards (renderLimit + 1)
-      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
+      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating) .flash-card:not(.flash-card--hidden)')
       expect(cardWrappers.length).toBe(flashCardsDefaults.renderLimit)
     })
 
     it(`should render first ${flashCardsDefaults.renderLimit} items with default renderLimit`, () => {
-      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
+      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating) .flash-card:not(.flash-card--hidden)')
 
       for (let i = 0; i < flashCardsDefaults.renderLimit; i++) {
         expect(cardWrappers[i].text()).toContain(`Card ${i + 1}`)
@@ -63,7 +63,7 @@ describe('[props] renderLimit', () => {
     })
 
     it(`should render exactly ${LARGE_RENDER_LIMIT} cards in DOM with renderLimit of ${LARGE_RENDER_LIMIT}`, () => {
-      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
+      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating) .flash-card:not(.flash-card--hidden)')
       expect(cardWrappers.length).toBe(LARGE_RENDER_LIMIT)
 
       for (let i = 0; i < LARGE_RENDER_LIMIT; i++) {
@@ -77,8 +77,9 @@ describe('[props] renderLimit', () => {
       new DragSimulator(activeCard).swipeApprove()
       await wrapper.vm.$nextTick()
 
-      // Should now show cards after swipe (may be 7 due to visible window shift)
-      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
+      // Should now show cards after swipe (window shifts to show next cards)
+      // After swiping, there should be renderLimit cards visible (excluding the animating one)
+      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating) .flash-card:not(.flash-card--hidden)')
       expect(cardWrappers.length).toBe(LARGE_RENDER_LIMIT)
 
       // The active card should now be Card 2
@@ -102,12 +103,12 @@ describe('[props] renderLimit', () => {
     })
 
     it('should render exactly 2 cards with renderLimit of 1', () => {
-      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
+      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating) .flash-card:not(.flash-card--hidden)')
       expect(cardWrappers.length).toBe(MINIMAL_RENDER_LIMIT)
     })
 
     it('should render current and next card with renderLimit of 1', () => {
-      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
+      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating) .flash-card:not(.flash-card--hidden)')
       expect(cardWrappers[0].text()).toContain('Card 1')
     })
   })
@@ -129,7 +130,7 @@ describe('[props] renderLimit', () => {
 
     it('should automatically adjust renderLimit to stack + 1', () => {
       // With stack=3, renderLimit should be adjusted to 4, so we expect 5 cards rendered
-      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
+      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating) .flash-card:not(.flash-card--hidden)')
       expect(cardWrappers.length).toBe(5)
     })
   })
@@ -149,13 +150,13 @@ describe('[props] renderLimit', () => {
     })
 
     it('should not render more cards than available items', () => {
-      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
+      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating) .flash-card:not(.flash-card--hidden)')
       // Should render all 10 available items, not 15
       expect(cardWrappers.length).toBeLessThanOrEqual(testItems.length)
     })
 
     it('should render all available items when renderLimit exceeds items count', () => {
-      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating)')
+      const cardWrappers = wrapper.findAll('.flashcards__card-wrapper:not(.flashcards__card-wrapper--animating) .flash-card:not(.flash-card--hidden)')
 
       // Should render all items from 1 to 10
       for (let i = 0; i < Math.min(cardWrappers.length, testItems.length); i++) {

@@ -146,12 +146,14 @@ function triggerGhostAnimation() {
   currentGhost = wrapper.cloneNode(true) as HTMLElement
   currentGhost.classList.add('flashcards__ghost')
 
+  const ghostAnimationWrapper = currentGhost.querySelector('.flash-card__animation-wrapper') as HTMLElement
+
   el.value.closest('.flashcards')?.appendChild(currentGhost)
   isGhostAnimating.value = true
 
   // Handle animation end
   currentGhost.addEventListener('animationend', (e: AnimationEvent) => {
-    if (e.target === currentGhost?.querySelector('.flash-card__animation-wrapper')) {
+    if (e.target === ghostAnimationWrapper) {
       nextTick(() => {
         cleanupGhost()
         emit('animationend')
@@ -177,7 +179,14 @@ watch(() => animation, (newAnimation, oldAnimation) => {
 }, { immediate: true })
 
 onMounted(() => {
-  el.value?.offsetHeight && emit('mounted', el.value.offsetHeight)
+  if (el.value?.offsetHeight) {
+    emit('mounted', el.value.offsetHeight)
+
+    // Check if we need to trigger animation after mount
+    if (animation?.type && !isGhostAnimating.value) {
+      triggerGhostAnimation()
+    }
+  }
 })
 
 onBeforeUnmount(() => {
@@ -241,6 +250,8 @@ defineExpose({
 
 .flash-card__transform {
   touch-action: inherit;
+  position: relative;
+  border-radius: 8px;
 }
 
 .flash-card:not(.flash-card--dragging),
@@ -270,35 +281,94 @@ defineExpose({
 /* Base animations (horizontal by default) */
 .flash-card-animation--approve { animation: approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--reject { animation: reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--skip { animation: skip-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--approve-restore { animation: restore-approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--reject-restore { animation: restore-reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--skip-restore { animation: restore-skip-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 
 /* Horizontal direction override */
 .flash-card-animation--horizontal.flash-card-animation--approve { animation: approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--horizontal.flash-card-animation--reject { animation: reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--horizontal.flash-card-animation--skip { animation: skip-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--horizontal.flash-card-animation--approve-restore { animation: restore-approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--horizontal.flash-card-animation--reject-restore { animation: restore-reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--horizontal.flash-card-animation--skip-restore { animation: restore-skip-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 
 /* Vertical direction override */
 .flash-card-animation--vertical.flash-card-animation--approve { animation: approve-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--vertical.flash-card-animation--reject { animation: reject-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--vertical.flash-card-animation--skip { animation: skip-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--vertical.flash-card-animation--approve-restore { animation: restore-approve-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--vertical.flash-card-animation--reject-restore { animation: restore-reject-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--vertical.flash-card-animation--skip-restore { animation: restore-skip-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 
 /* Horizontal keyframes */
 @keyframes approve-horizontal { to {transform:translateX(320px) rotate(15deg);opacity:0;} }
 @keyframes reject-horizontal { to {transform:translateX(-320px) rotate(-15deg);opacity:0;} }
+@keyframes skip-horizontal {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+}
+
+.flash-card-animation--skip .flash-card__transform {
+  overflow: hidden;
+}
+
+/* Skip wave effect - unified for both directions */
+.flash-card-animation--skip .flash-card__transform::before,
+.flash-card-animation--skip-restore .flash-card__transform::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
+  z-index: 1;
+  border-radius: 8px;
+  top: 0;
+  left: -100%;
+}
+
+/* Wave animation - same for both horizontal and vertical */
+.flash-card-animation--skip .flash-card__transform::before {
+  animation: skip-wave 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+.flash-card-animation--skip-restore .flash-card__transform::before {
+  animation: skip-wave 0.4s cubic-bezier(0.4,0,0.2,1) reverse forwards;
+}
+@keyframes skip-wave { to { left: 100%; } }
+@keyframes skip-wave-vertical { to { top: 100%; } }
 @keyframes restore-approve-horizontal { from {transform:translateX(320px) rotate(15deg);opacity:0;} to {transform:translateX(0) rotate(0deg);opacity:1;} }
 @keyframes restore-reject-horizontal { from {transform:translateX(-320px) rotate(-15deg);opacity:0;} to {transform:translateX(0) rotate(0deg);opacity:1;} }
+@keyframes restore-skip-horizontal {
+  0% { transform: translateX(0); opacity: 0; }
+  50% { transform: translateX(0); opacity: 0.3; }
+  100% { transform: translateX(0); opacity: 1; }
+}
 
 /* Vertical keyframes */
 @keyframes approve-vertical { to {transform:translateY(-320px);opacity:0;} }
 @keyframes reject-vertical { to {transform:translateY(320px);opacity:0;} }
+@keyframes skip-vertical {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
 @keyframes restore-approve-vertical { from {transform:translateY(-320px);opacity:0;} to {transform:translateY(0);opacity:1;} }
 @keyframes restore-reject-vertical { from {transform:translateY(320px);opacity:0;} to {transform:translateY(0);opacity:1;} }
-
-.flash-card--ghost {
-  pointer-events: none;
-  z-index: 9999;
+@keyframes restore-skip-vertical {
+  0% { transform: translateY(0); opacity: 0; }
+  50% { transform: translateY(0); opacity: 0.3; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 </style>
