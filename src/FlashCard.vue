@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DragPosition, DragSetupParams } from './utils/useDragSetup'
-import { nextTick, onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
+import { onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
 import ApproveIcon from './components/icons/ApproveIcon.vue'
 import RejectIcon from './components/icons/RejectIcon.vue'
 import { SwipeAction, useDragSetup } from './utils/useDragSetup'
@@ -126,22 +126,14 @@ function triggerGhostAnimation() {
   if (!animation || !el.value)
     return
 
-  requestAnimationFrame(() => {
-    if (!animation) {
-      return
-    }
-
-    createGhost(
-      {
-        animationType: animation.type,
-        isRestoring: animation.isRestoring,
-        swipeDirection: params.swipeDirection,
-        initialPosition: animation.initialPosition,
-        getTransformStyle,
-      },
-      () => emit('animationend'),
-    )
-  })
+  createGhost(
+    {
+      animationType: animation.type,
+      isRestoring: animation.isRestoring,
+      swipeDirection: params.swipeDirection,
+    },
+    () => emit('animationend'),
+  )
 }
 
 // Watch for animation prop changes (serialize to detect deep changes)
@@ -157,9 +149,7 @@ watch(() => animation, (newAnimation, oldAnimation) => {
   }
 
   // Add a small delay to ensure DOM is ready
-  nextTick(() => {
-    triggerGhostAnimation()
-  })
+  triggerGhostAnimation()
 })
 
 onMounted(() => {
@@ -283,4 +273,9 @@ defineExpose({
 @keyframes reject-vertical { to {transform:translateY(320px);opacity:0;} }
 @keyframes restore-approve-vertical { from {transform:translateY(-320px);opacity:0;} to {transform:translateY(0);opacity:1;} }
 @keyframes restore-reject-vertical { from {transform:translateY(320px);opacity:0;} to {transform:translateY(0);opacity:1;} }
+
+.flash-card--ghost {
+  pointer-events: none;
+  z-index: 9999;
+}
 </style>
