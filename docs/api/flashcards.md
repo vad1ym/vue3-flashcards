@@ -35,21 +35,31 @@ The main component for creating swipeable card interfaces.
 
 ### `swipeDirection`
 
-- **Type:** `'horizontal' | 'vertical'`
+- **Type:** `'horizontal' | 'vertical' | ('left' | 'right' | 'top' | 'bottom')[]`
 - **Default:** `'horizontal'`
-- **Description:** Direction of swiping interactions. When set to `'horizontal'`, cards are swiped left/right with rotation transform and horizontal exit animations. When set to `'vertical'`, cards are swiped up/down with no default rotation and vertical exit animations. This affects:
+- **Description:** Direction of swiping interactions. Supports preset modes (`'horizontal'` for left/right, `'vertical'` for up/down) or custom array of specific directions for multi-directional swipe (e.g., `['left', 'right', 'top']` for Tinder-like UX). This affects:
   - Primary axis for swipe detection and completion
   - Default transform style during drag (rotating for horizontal, scaling for vertical)
   - Exit animations (horizontal: slide left/right with rotation, vertical: slide up/down)
 
-**Example:**
+**Examples:**
 ```vue
 <!-- Horizontal swiping (default) - with rotation and horizontal animations -->
 <FlashCards :items="cards" swipe-direction="horizontal" />
 
 <!-- Vertical swiping - no rotation, vertical animations -->
 <FlashCards :items="cards" swipe-direction="vertical" />
+
+<!-- Custom multi-directional - e.g., Tinder-like with left, right, and up -->
+<FlashCards :items="cards" :swipe-direction="['left', 'right', 'top']" />
+
+<!-- All 4 directions -->
+<FlashCards :items="cards" :swipe-direction="['left', 'right', 'top', 'bottom']" />
 ```
+
+::: tip Backward Compatibility
+The old `approve`/`reject` events and slots remain fully functional. When using preset modes (`'horizontal'` or `'vertical'`), the old API continues to work. However, for new projects or when using array mode, the directional API is recommended.
+:::
 
 ### `maxDragY`
 
@@ -260,26 +270,33 @@ function blurTransform(position) {
 
 ### `actions`
 
-- **Props:** `{ restore: () => void, reject: () => void, approve: () => void, skip: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean }`
+- **Props:** `{ restore: () => void, swipeTop: () => void, swipeLeft: () => void, swipeRight: () => void, swipeBottom: () => void, skip: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean, approve: () => void, reject: () => void }`
 - **Description:** Custom actions UI for controlling card behavior programmatically.
 
 **Available actions:**
 - `restore()` - Returns to the previous card if available
-- `reject()` - Triggers rejection animation on current card
-- `approve()` - Triggers approval animation on current card
-- `skip()` - Triggers skip animation on current card - moves to next card without approve/reject
+- `swipeTop()` - Triggers upward swipe animation on current card
+- `swipeLeft()` - Triggers left swipe animation on current card
+- `swipeRight()` - Triggers right swipe animation on current card
+- `swipeBottom()` - Triggers downward swipe animation on current card
+- `skip()` - Triggers skip animation on current card - moves to next card without swipe
 - `reset(options?)` - Resets all cards with optional animation settings
 - `isEnd` - Boolean indicating if all cards have been swiped
 - `isStart` - Boolean indicating if at the first card (no cards to restore)
 - `canRestore` - Boolean indicating if there's a previous card to restore
+- `approve()` <Badge type="warning" text="deprecated" /> - Use `swipeRight()` or `swipeTop()` instead
+- `reject()` <Badge type="warning" text="deprecated" /> - Use `swipeLeft()` or `swipeBottom()` instead
 
 ```vue
 <template>
   <FlashCards :items="cards">
-    <template #actions="{ approve, reject, skip, restore, reset, isEnd, isStart, canRestore }">
+    <template #actions="{ swipeLeft, swipeRight, swipeTop, skip, restore, reset, isEnd, isStart, canRestore }">
       <div class="action-buttons">
-        <button :disabled="isEnd" @click="reject">
-          ❌ Reject
+        <button :disabled="isEnd" @click="swipeLeft">
+          ❌ Nope
+        </button>
+        <button :disabled="isEnd" @click="swipeTop">
+          ⭐ Super
         </button>
         <button :disabled="isEnd" @click="skip">
           ⏭️ Skip
@@ -287,8 +304,8 @@ function blurTransform(position) {
         <button :disabled="!canRestore || isStart" @click="restore">
           ↩️ Restore
         </button>
-        <button :disabled="isEnd" @click="approve">
-          ✅ Approve
+        <button :disabled="isEnd" @click="swipeRight">
+          ❤️ Like
         </button>
 
         <!-- Reset with different options -->
@@ -307,10 +324,10 @@ function blurTransform(position) {
 </template>
 ```
 
-### `approve`
+### `approve` <Badge type="warning" text="deprecated" />
 
 - **Props:** `{ item: T, delta: number }`
-- **Description:** Content shown when swiping right (approval indicator). The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the approval swipeThreshold.
+- **Description:** Content shown when swiping right (approval indicator). Use `right` or `top` slot instead. The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the approval swipeThreshold.
 
 ```vue
 <template #approve="{ item, delta }">
@@ -323,18 +340,71 @@ function blurTransform(position) {
 </template>
 ```
 
-### `reject`
+### `reject` <Badge type="warning" text="deprecated" />
 
 - **Props:** `{ item: T, delta: number }`
-- **Description:** Content shown when swiping left (rejection indicator). The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the rejection swipeThreshold.
+- **Description:** Content shown when swiping left (rejection indicator). Use `left` or `bottom` slot instead. The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the rejection swipeThreshold.
+
+### `top`
+
+- **Props:** `{ item: T, delta: number }`
+- **Description:** Content shown when swiping up. The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the swipe threshold.
 
 ```vue
-<template #reject="{ item, delta }">
+<template #top="{ item, delta }">
   <div
-    class="reject-indicator"
+    class="top-indicator"
     :style="{ opacity: delta }"
   >
-    ❌ Pass
+    ⭐ Super Like
+  </div>
+</template>
+```
+
+### `left`
+
+- **Props:** `{ item: T, delta: number }`
+- **Description:** Content shown when swiping left. The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the swipe threshold.
+
+```vue
+<template #left="{ item, delta }">
+  <div
+    class="left-indicator"
+    :style="{ opacity: delta }"
+  >
+    ❌ Nope
+  </div>
+</template>
+```
+
+### `right`
+
+- **Props:** `{ item: T, delta: number }`
+- **Description:** Content shown when swiping right. The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the swipe threshold.
+
+```vue
+<template #right="{ item, delta }">
+  <div
+    class="right-indicator"
+    :style="{ opacity: delta }"
+  >
+    ❤️ Like
+  </div>
+</template>
+```
+
+### `bottom`
+
+- **Props:** `{ item: T, delta: number }`
+- **Description:** Content shown when swiping down. The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the swipe threshold.
+
+```vue
+<template #bottom="{ item, delta }">
+  <div
+    class="bottom-indicator"
+    :style="{ opacity: delta }"
+  >
+    ⬇️ Pass
   </div>
 </template>
 ```
@@ -354,15 +424,35 @@ function blurTransform(position) {
 
 ## Events
 
-### `approve`
+### `swipeTop`
 
 - **Payload:** `item: T`
-- **Description:** Emitted when a card is approved (swiped right or approved via actions).
+- **Description:** Emitted when a card is swiped up.
 
-### `reject`
+### `swipeLeft`
 
 - **Payload:** `item: T`
-- **Description:** Emitted when a card is rejected (swiped left or rejected via actions).
+- **Description:** Emitted when a card is swiped left.
+
+### `swipeRight`
+
+- **Payload:** `item: T`
+- **Description:** Emitted when a card is swiped right.
+
+### `swipeBottom`
+
+- **Payload:** `item: T`
+- **Description:** Emitted when a card is swiped down.
+
+### `approve` <Badge type="warning" text="deprecated" />
+
+- **Payload:** `item: T`
+- **Description:** Emitted when a card is approved (swiped right or up via preset modes). Use `swipeRight` or `swipeTop` event instead.
+
+### `reject` <Badge type="warning" text="deprecated" />
+
+- **Payload:** `item: T`
+- **Description:** Emitted when a card is rejected (swiped left or down via preset modes). Use `swipeLeft` or `swipeBottom` event instead.
 
 ### `skip`
 
@@ -398,14 +488,24 @@ function blurTransform(position) {
 
 ```vue
 <script setup>
-function handleApprove(item) {
-  console.log('Approved:', item)
+function handleSwipeLeft(item) {
+  console.log('Swiped left:', item)
+  // Add to rejected list, save to database, etc.
+}
+
+function handleSwipeRight(item) {
+  console.log('Swiped right:', item)
   // Add to approved list, save to database, etc.
 }
 
-function handleReject(item) {
-  console.log('Rejected:', item)
-  // Add to rejected list, save to database, etc.
+function handleSwipeTop(item) {
+  console.log('Swiped up:', item)
+  // Special handling for upward swipes
+}
+
+function handleSwipeBottom(item) {
+  console.log('Swiped down:', item)
+  // Special handling for downward swipes
 }
 
 function handleSkip(item) {
@@ -442,9 +542,12 @@ function handleDragEnd(item) {
 <template>
   <FlashCards
     :items="cards"
+    :swipe-direction="['left', 'right', 'top']"
     :loop="true"
-    @approve="handleApprove"
-    @reject="handleReject"
+    @swipe-left="handleSwipeLeft"
+    @swipe-right="handleSwipeRight"
+    @swipe-top="handleSwipeTop"
+    @swipe-bottom="handleSwipeBottom"
     @skip="handleSkip"
     @restore="handleRestore"
     @loop="handleLoop"
@@ -465,8 +568,16 @@ Access these methods and properties using a template ref:
 <script setup>
 const flashcardsRef = ref()
 
-function programmaticApprove() {
-  flashcardsRef.value.approve()
+function programmaticSwipeLeft() {
+  flashcardsRef.value.swipeLeft()
+}
+
+function programmaticSwipeRight() {
+  flashcardsRef.value.swipeRight()
+}
+
+function programmaticSwipeTop() {
+  flashcardsRef.value.swipeTop()
 }
 
 function programmaticSkip() {
@@ -480,8 +591,14 @@ function animatedReset() {
 
 <template>
   <FlashCards ref="flashcardsRef" :items="cards" />
-  <button @click="programmaticApprove">
-    Approve
+  <button @click="programmaticSwipeLeft">
+    ❌ Nope
+  </button>
+  <button @click="programmaticSwipeRight">
+    ❤️ Like
+  </button>
+  <button @click="programmaticSwipeTop">
+    ⭐ Super
   </button>
   <button @click="programmaticSkip">
     Skip
@@ -497,15 +614,35 @@ function animatedReset() {
 - **Type:** `() => void`
 - **Description:** Returns to the previous card if available.
 
-### `approve()`
+### `swipeTop()`
 
 - **Type:** `() => void`
-- **Description:** Triggers approval animation on the current card.
+- **Description:** Triggers upward swipe animation on the current card.
 
-### `reject()`
+### `swipeLeft()`
 
 - **Type:** `() => void`
-- **Description:** Triggers rejection animation on the current card.
+- **Description:** Triggers left swipe animation on the current card.
+
+### `swipeRight()`
+
+- **Type:** `() => void`
+- **Description:** Triggers right swipe animation on the current card.
+
+### `swipeBottom()`
+
+- **Type:** `() => void`
+- **Description:** Triggers downward swipe animation on the current card.
+
+### `approve()` <Badge type="warning" text="deprecated" />
+
+- **Type:** `() => void`
+- **Description:** Triggers approval animation on the current card (works only with preset modes). Use `swipeRight()` or `swipeTop()` instead.
+
+### `reject()` <Badge type="warning" text="deprecated" />
+
+- **Type:** `() => void`
+- **Description:** Triggers rejection animation on the current card (works only with preset modes). Use `swipeLeft()` or `swipeBottom()` instead.
 
 ### `skip()`
 

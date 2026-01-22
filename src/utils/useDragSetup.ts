@@ -3,12 +3,19 @@ import { computed, nextTick, onMounted, onUnmounted, provide, reactive, readonly
 import { flashCardsDefaults } from '../config/flashcards.config'
 
 export const SwipeAction = {
-  APPROVE: 'approve',
-  REJECT: 'reject',
+  // Primary directional actions
+  TOP: 'top',
+  LEFT: 'left',
+  RIGHT: 'right',
+  BOTTOM: 'bottom',
+
+  // Special action
   SKIP: 'skip',
 } as const
 
 export type SwipeAction = typeof SwipeAction[keyof typeof SwipeAction]
+
+export type Direction = 'top' | 'left' | 'right' | 'bottom'
 
 export interface DragSetupParams {
   // Distance in pixels the card must be dragged to complete swiping
@@ -24,8 +31,8 @@ export interface DragSetupParams {
   maxDragY?: number | null
   maxDragX?: number | null
 
-  // Direction of swiping: horizontal (left/right) or vertical (up/down)
-  swipeDirection?: 'horizontal' | 'vertical'
+  // Direction of swiping, array of specific directions
+  direction?: Direction[]
 
   // Completely disable dragging feature
   disableDrag?: boolean
@@ -52,6 +59,45 @@ export interface DragSetupCallbacks {
 
 export type DragSetupOptions = DragSetupParams & DragSetupCallbacks
 
+function inferDirectionFromPosition(x: number, y: number): Direction | null {
+  // If both x and y are 0, no direction
+  if (x === 0 && y === 0)
+    return null
+
+  // Determine direction based on dominant axis
+  return Math.abs(x) >= Math.abs(y)
+    ? (x > 0 ? 'right' : 'left')
+    : (y > 0 ? 'bottom' : 'top')
+}
+
+function getDirectionFromPosition(
+  x: number,
+  y: number,
+  enabledDirections: Direction[],
+  threshold: number,
+): Direction | null {
+  // Find the dominant direction based on distance
+  const absX = Math.abs(x)
+  const absY = Math.abs(y)
+
+  if (absX > absY) {
+    // Horizontal is dominant
+    if (enabledDirections.includes('right') && x > threshold)
+      return 'right'
+    if (enabledDirections.includes('left') && x < -threshold)
+      return 'left'
+  }
+  else {
+    // Vertical is dominant
+    if (enabledDirections.includes('top') && y < -threshold)
+      return 'top'
+    if (enabledDirections.includes('bottom') && y > threshold)
+      return 'bottom'
+  }
+
+  return null
+}
+
 // For nested components to notify about dragging state
 export const IsDraggingStateInjectionKey = Symbol('is-dragging-key') as InjectionKey<Readonly<Ref<boolean>>>
 
@@ -77,7 +123,8 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   const dragThreshold = computed(() => options.value.dragThreshold ?? flashCardsDefaults.dragThreshold)
   const maxDragY = computed(() => options.value.maxDragY ?? null)
   const maxDragX = computed(() => options.value.maxDragX ?? null)
-  const swipeDirection = computed(() => options.value.swipeDirection ?? flashCardsDefaults.swipeDirection)
+  const swipeDirection = computed(() => options.value.direction)
+  const enabledDirections = computed(() => swipeDirection.value)
   const resistanceEffect = computed(() => options.value.resistanceEffect ?? flashCardsDefaults.resistanceEffect)
   const resistanceThreshold = computed(() => options.value.resistanceThreshold ?? flashCardsDefaults.resistanceThreshold)
   const resistanceStrength = computed(() => options.value.resistanceStrength ?? flashCardsDefaults.resistanceStrength)
@@ -99,7 +146,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     x: initialPos?.x || 0,
     y: initialPos?.y || 0,
     delta: initialPos?.delta || 0,
-    type: initialPos?.delta ? (initialPos.delta > 0 ? SwipeAction.APPROVE : SwipeAction.REJECT) : null,
+    type: initialPos?.type ?? inferDirectionFromPosition(initialPos?.x ?? 0, initialPos?.y ?? 0),
   })
 
   function restore() {
@@ -109,6 +156,19 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
       delta: 0,
       type: null,
     })
+  }
+
+  function getDominantAxis(absX: number, absY: number, enabled: Direction[]) {
+    const hasH = enabled.includes('left') || enabled.includes('right')
+    const hasV = enabled.includes('top') || enabled.includes('bottom')
+
+    if (hasH && !hasV)
+      return 'horizontal'
+    if (!hasH && hasV)
+      return 'vertical'
+
+    // true bidirectional
+    return absX >= absY ? 'horizontal' : 'vertical'
   }
 
   function handleDragStart(event: PointerEvent) {
@@ -121,9 +181,8 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   }
 
   function handleDragMove(event: PointerEvent) {
-    if (!isDragStarted.value) {
+    if (!isDragStarted.value)
       return
-    }
 
     const clientX = event.clientX
     const clientY = event.clientY
@@ -132,51 +191,56 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     const y = clientY - startY
 
     const distance = Math.sqrt(x * x + y * y)
-    if (distance < dragThreshold.value) {
+    if (distance < dragThreshold.value)
       return
-    }
 
     event.preventDefault()
     event.stopPropagation()
 
     isDragging.value = true
 
-    // Apply dragging limits if provided
     let limitedX = x
     let limitedY = y
 
-    if (maxDragX.value !== null) {
+    if (maxDragX.value !== null)
       limitedX = Math.max(-maxDragX.value, Math.min(maxDragX.value, x))
-    }
 
-    if (maxDragY.value !== null) {
+    if (maxDragY.value !== null)
       limitedY = Math.max(-maxDragY.value, Math.min(maxDragY.value, y))
+
+    const absX = Math.abs(limitedX)
+    const absY = Math.abs(limitedY)
+
+    const axis = getDominantAxis(absX, absY, enabledDirections.value || [])
+
+    const isHorizontal = axis === 'horizontal'
+    let primaryAxis = isHorizontal ? limitedX : -limitedY
+
+    let currentDirection: Direction | null = null
+
+    if (absX > dragThreshold.value || absY > dragThreshold.value) {
+      if (isHorizontal)
+        currentDirection = limitedX > 0 ? 'right' : 'left'
+      else
+        currentDirection = limitedY > 0 ? 'bottom' : 'top'
     }
 
-    const isHorizontal = swipeDirection.value === 'horizontal'
-    let primaryAxis = isHorizontal ? limitedX : -limitedY // Invert Y axis for vertical swipe (up = positive, down = negative)
-
-    // Apply resistance effect if enabled and beyond threshold
+    // Resistance
     if (resistanceEffect.value && Math.abs(primaryAxis) > resistanceThreshold.value) {
-      const excessDistance = Math.abs(primaryAxis) - resistanceThreshold.value
+      const excess = Math.abs(primaryAxis) - resistanceThreshold.value
+      const resistanceMultiplier = 1 / (1 + excess * resistanceStrength.value / 35)
+      const resistedExcess = excess * resistanceMultiplier
+      const dir = primaryAxis >= 0 ? 1 : -1
+      const resistancePos = resistanceThreshold.value + resistedExcess
 
-      // Apply resistance to excess movement only
-      const resistanceMultiplier = 1 / (1 + excessDistance * resistanceStrength.value / 35)
-      const resistedExcess = excessDistance * resistanceMultiplier
-
-      // Final position = threshold + resisted excess movement
-      const direction = primaryAxis >= 0 ? 1 : -1
-      const resistancePosition = resistanceThreshold.value + resistedExcess
-
-      // Apply resistance effect to the appropriate axis
       if (isHorizontal) {
-        limitedX = resistancePosition * direction
+        limitedX = resistancePos * dir
+        primaryAxis = limitedX
       }
       else {
-        limitedY = -resistancePosition * direction // Invert for vertical
+        limitedY = -resistancePos * dir
+        primaryAxis = -limitedY
       }
-
-      primaryAxis = isHorizontal ? limitedX : -limitedY
     }
 
     const delta = Math.max(-1, Math.min(1, primaryAxis / swipeThreshold.value))
@@ -184,10 +248,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     position.x = limitedX
     position.y = limitedY
     position.delta = delta
-
-    position.type = delta && delta > 0
-      ? SwipeAction.APPROVE
-      : SwipeAction.REJECT
+    position.type = currentDirection
 
     onDragMove(position.type, position.delta)
   }
@@ -200,18 +261,34 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     isDragStarted.value = false
     isDragging.value = false
 
-    const isHorizontal = swipeDirection.value === 'horizontal'
-    const primaryAxis = isHorizontal ? position.x : -position.y // Invert Y axis for vertical swipe (up = positive, down = negative)
+    // Determine if swipe completion threshold is reached
+    const completedDirection = getDirectionFromPosition(
+      position.x,
+      position.y,
+      enabledDirections.value || [],
+      swipeThreshold.value,
+    )
 
-    if (primaryAxis >= swipeThreshold.value) {
-      onDragComplete('approve')
-      position.delta = 1
-      position.type = SwipeAction.APPROVE
-    }
-    else if (primaryAxis <= -swipeThreshold.value) {
-      onDragComplete('reject')
-      position.delta = -1
-      position.type = SwipeAction.REJECT
+    if (completedDirection) {
+      onDragComplete(completedDirection)
+
+      // Update position to reflect completion
+      switch (completedDirection) {
+        case 'right':
+          position.delta = 1
+          break
+        case 'left':
+          position.delta = -1
+          break
+        case 'top':
+          position.delta = 1
+          break
+        case 'bottom':
+          position.delta = -1
+          break
+      }
+
+      position.type = completedDirection
     }
     else {
       restore()
@@ -221,13 +298,13 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   }
 
   function setupInteract() {
-    // Устанавливаем начальную позицию
+    // Set initial position
     const initialPos = options.value.initialPosition
     Object.assign(position, {
       x: initialPos?.x || 0,
       y: initialPos?.y || 0,
       delta: initialPos?.delta || 0,
-      type: initialPos?.delta ? (initialPos.delta > 0 ? SwipeAction.APPROVE : SwipeAction.REJECT) : null,
+      type: initialPos?.type ?? inferDirectionFromPosition(initialPos?.x ?? 0, initialPos?.y ?? 0),
     })
 
     // Don't add event listeners if dragging is disabled
@@ -262,5 +339,6 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     position,
     isDragging,
     restore,
+    getDominantAxis,
   }
 }

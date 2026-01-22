@@ -1,28 +1,23 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { flashCardsDefaults } from '../../src/config/flashcards.config'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
-describe('[props] swipeDirection', () => {
+describe('[props] direction', () => {
   let wrapper: VueWrapper<InstanceType<typeof FlashCard>>
 
-  describe('default swipeDirection (horizontal)', () => {
+  describe('default direction (horizontal)', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          swipeDirection: 'horizontal',
+          direction: ['left', 'right'],
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
         },
         global: { stubs: { Transition: false } },
       })
-    })
-
-    it('should use horizontal as default swipeDirection', () => {
-      expect(flashCardsDefaults.swipeDirection).toBe('horizontal')
     })
 
     it('should emit complete when swiped horizontally beyond threshold', async () => {
@@ -32,7 +27,7 @@ describe('[props] swipeDirection', () => {
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
-      expect(wrapper.emitted('complete')?.[0][0]).toBe('approve')
+      expect(wrapper.emitted('complete')?.[0][0]).toBe('right')
     })
 
     it('should not emit complete when swiped vertically beyond threshold', async () => {
@@ -55,11 +50,11 @@ describe('[props] swipeDirection', () => {
     })
   })
 
-  describe('vertical swipeDirection', () => {
+  describe('vertical direction', () => {
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          swipeDirection: 'vertical',
+          direction: ['top', 'bottom'],
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -68,28 +63,28 @@ describe('[props] swipeDirection', () => {
       })
     })
 
-    it('should accept vertical swipeDirection value', () => {
-      expect(wrapper.props('swipeDirection')).toBe('vertical')
+    it('should accept vertical direction value', () => {
+      expect(wrapper.props('direction')).toEqual(['top', 'bottom'])
     })
 
-    it('should emit complete when swiped vertically up beyond threshold (approve)', async () => {
+    it('should emit complete when swiped vertically up beyond threshold (top)', async () => {
       const cardElement = wrapper.element
 
       new DragSimulator(cardElement).swipeApproveVertical()
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
-      expect(wrapper.emitted('complete')?.[0][0]).toBe('approve')
+      expect(wrapper.emitted('complete')?.[0][0]).toBe('top')
     })
 
-    it('should emit complete when swiped vertically down beyond threshold (reject)', async () => {
+    it('should emit complete when swiped vertically down beyond threshold (bottom)', async () => {
       const cardElement = wrapper.element
 
       new DragSimulator(cardElement).swipeRejectVertical()
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
-      expect(wrapper.emitted('complete')?.[0][0]).toBe('reject')
+      expect(wrapper.emitted('complete')?.[0][0]).toBe('bottom')
     })
 
     it('should not emit complete when swiped horizontally beyond threshold', async () => {
@@ -114,35 +109,35 @@ describe('[props] swipeDirection', () => {
     it('should update position.delta based on vertical movement', async () => {
       const cardElement = wrapper.element
 
-      // Test upward movement (positive delta - approve)
+      // Test upward movement (positive delta - top)
       const dragSimulatorUp = new DragSimulator(cardElement)
       dragSimulatorUp.dragUpToThreshold(0.5)
       await wrapper.vm.$nextTick()
 
       const position = wrapper.vm.position
       expect(position.delta).toBeGreaterThan(0)
-      expect(position.type).toBe('approve')
+      expect(position.type).toBe('top')
 
       // End the drag to reset state
       dragSimulatorUp.dragEnd()
       await wrapper.vm.$nextTick()
 
-      // Test downward movement (negative delta - reject)
+      // Test downward movement (negative delta - bottom)
       const dragSimulatorDown = new DragSimulator(cardElement)
       dragSimulatorDown.dragDownToThreshold(0.5)
       await wrapper.vm.$nextTick()
 
       expect(position.delta).toBeLessThan(0)
-      expect(position.type).toBe('reject')
+      expect(position.type).toBe('bottom')
     })
   })
 
-  describe('swipeDirection with custom swipeThreshold', () => {
+  describe('direction with custom swipeThreshold', () => {
     it('should work with custom swipeThreshold for vertical direction', async () => {
       const customThreshold = 200
       const verticalWrapper = mount(FlashCard, {
         props: {
-          swipeDirection: 'vertical',
+          direction: ['top', 'bottom'],
           swipeThreshold: customThreshold,
         },
         slots: {
@@ -160,7 +155,7 @@ describe('[props] swipeDirection', () => {
       await verticalWrapper.vm.$nextTick()
 
       expect(verticalWrapper.emitted('complete')).toBeTruthy()
-      expect(verticalWrapper.emitted('complete')?.[0][0]).toBe('approve')
+      expect(verticalWrapper.emitted('complete')?.[0][0]).toBe('top')
     })
   })
 })

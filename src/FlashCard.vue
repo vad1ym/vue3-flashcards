@@ -30,7 +30,8 @@ const {
   maxRotation = 0,
   transformStyle,
   animation,
-  ...params
+  direction = ['left', 'right'], // Default to horizontal
+  ...otherProps
 } = defineProps<FlashCardProps>()
 
 const emit = defineEmits<{
@@ -66,25 +67,14 @@ const emit = defineEmits<{
 }>()
 
 defineSlots<{
-  default: (props: { isDragging: boolean }) => any
-  reject?: (props: { delta: number }) => any
-  approve?: (props: { delta: number }) => any
+  default: (props: { isDragging: boolean, delta: number }) => any
+
+  // Directional slots
+  top?: (props: { delta: number }) => any
+  left?: (props: { delta: number }) => any
+  right?: (props: { delta: number }) => any
+  bottom?: (props: { delta: number }) => any
 }>()
-
-// Apply custom transform style or default
-function getTransformStyle(position: DragPosition): string | null {
-  if (transformStyle) {
-    return transformStyle(position)
-  }
-
-  // For vertical swipe, don't rotate by default
-  if (params.swipeDirection === 'vertical') {
-    return `transform: scale(${1 - Math.abs(position.delta) / 5})`
-  }
-
-  // For horizontal swipe, use rotation
-  return `transform: rotate(${position.delta * maxRotation}deg)`
-}
 
 // Current card element ref
 const el = useTemplateRef('flash-card')
@@ -94,8 +84,10 @@ const {
   isDragging,
   setupInteract,
   cleanupInteract,
+  getDominantAxis,
 } = useDragSetup(el, () => ({
-  ...params,
+  ...otherProps,
+  direction,
   ...animation,
   onDragStart() {
     emit('dragstart')
@@ -111,8 +103,49 @@ const {
   },
 }))
 
+// Apply custom transform style or default
+function getTransformStyle(position: DragPosition): string | null {
+  if (transformStyle)
+    return transformStyle(position)
+
+  const { x, y, delta } = position
+  const absX = Math.abs(x)
+  const absY = Math.abs(y)
+
+  if (absX === 0 && absY === 0)
+    return `transform: rotate(0deg)`
+
+  const enabled = direction || []
+  const axis = getDominantAxis(absX, absY, enabled)
+
+  const hasH = enabled.includes('left') || enabled.includes('right')
+  const hasV = enabled.includes('top') || enabled.includes('bottom')
+
+  const dirH = x > 0 ? 'right' : 'left'
+  const dirV = y > 0 ? 'bottom' : 'top'
+
+  const rotate = () => `transform: rotate(${delta * maxRotation}deg)`
+  const scale = () => `transform: scale(${1 - Math.abs(delta) / 5})`
+
+  // Bidirectional
+  if (hasH && hasV) {
+    if (axis === 'horizontal' && enabled.includes(dirH))
+      return rotate()
+    if (axis === 'vertical' && enabled.includes(dirV))
+      return scale()
+    return `transform: rotate(0deg)`
+  }
+
+  // Horizontal only
+  if (hasH)
+    return rotate()
+
+  // Vertical only
+  return scale()
+}
+
 // Watch for disableDrag prop changes to resubscribe/unsubscribe
-watch(() => params.disableDrag, () => {
+watch(() => otherProps.disableDrag, () => {
   cleanupInteract()
   setupInteract()
 })
@@ -121,7 +154,6 @@ watch(() => params.disableDrag, () => {
 const animationClasses = computed(() => ({
   [`flash-card-animation--${animation?.type}`]: !!animation?.type,
   [`flash-card-animation--${animation?.type}-restore`]: animation?.isRestoring,
-  [`flash-card-animation--${params.swipeDirection}`]: !!params.swipeDirection,
 }))
 
 // Simple ghost animation state
@@ -204,7 +236,7 @@ defineExpose({
     class="flash-card"
     :class="{
       'flash-card--dragging': isDragging,
-      'flash-card--drag-disabled': params.disableDrag,
+      'flash-card--drag-disabled': otherProps.disableDrag,
       'flash-card--hidden': isGhostAnimating,
     }"
     :style="{ transform: `translate3D(${position.x}px, ${position.y}px, 0)` }"
@@ -214,17 +246,30 @@ defineExpose({
       :class="animationClasses"
     >
       <div class="flash-card__transform" :style="getTransformStyle(position)">
-        <slot :is-dragging="isDragging" />
+        <slot :is-dragging="isDragging" :delta="position.delta" />
 
-        <div v-show="position.type === SwipeAction.REJECT">
-          <slot name="reject" :delta="position.delta">
+        <!-- Directional slots -->
+        <div v-show="position.type === SwipeAction.TOP && direction?.includes('top')">
+          <slot name="top" :delta="position.delta">
+            <ApproveIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
+          </slot>
+        </div>
+
+        <div v-show="position.type === SwipeAction.LEFT && direction?.includes('left')">
+          <slot name="left" :delta="position.delta">
             <RejectIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
           </slot>
         </div>
 
-        <div v-show="position.type === SwipeAction.APPROVE">
-          <slot name="approve" :delta="position.delta">
+        <div v-show="position.type === SwipeAction.RIGHT && direction?.includes('right')">
+          <slot name="right" :delta="position.delta">
             <ApproveIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
+          </slot>
+        </div>
+
+        <div v-show="position.type === SwipeAction.BOTTOM && direction?.includes('bottom')">
+          <slot name="bottom" :delta="position.delta">
+            <RejectIcon class="flash-card__indicator" :style="{ opacity: Math.abs(position.delta) }" />
           </slot>
         </div>
       </div>
@@ -265,6 +310,7 @@ defineExpose({
   top: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
+  z-index: 10;
 }
 
 .flash-card--hidden {
@@ -278,33 +324,23 @@ defineExpose({
   animation: none !important;
 }
 
-/* Base animations (horizontal by default) */
-.flash-card-animation--approve { animation: approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--reject { animation: reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+/* Base animations */
 .flash-card-animation--skip { animation: skip-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--approve-restore { animation: restore-approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--reject-restore { animation: restore-reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 .flash-card-animation--skip-restore { animation: restore-skip-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 
-/* Horizontal direction override */
-.flash-card-animation--horizontal.flash-card-animation--approve { animation: approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--horizontal.flash-card-animation--reject { animation: reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--horizontal.flash-card-animation--skip { animation: skip-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--horizontal.flash-card-animation--approve-restore { animation: restore-approve-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--horizontal.flash-card-animation--reject-restore { animation: restore-reject-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--horizontal.flash-card-animation--skip-restore { animation: restore-skip-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+/* Directional animations */
+.flash-card-animation--top { animation: swipe-top 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--left { animation: swipe-left 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--right { animation: swipe-right 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--bottom { animation: swipe-bottom 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 
-/* Vertical direction override */
-.flash-card-animation--vertical.flash-card-animation--approve { animation: approve-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--vertical.flash-card-animation--reject { animation: reject-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--vertical.flash-card-animation--skip { animation: skip-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--vertical.flash-card-animation--approve-restore { animation: restore-approve-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--vertical.flash-card-animation--reject-restore { animation: restore-reject-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--vertical.flash-card-animation--skip-restore { animation: restore-skip-vertical 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+/* Directional restore animations */
+.flash-card-animation--top-restore { animation: restore-top 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--left-restore { animation: restore-left 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--right-restore { animation: restore-right 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+.flash-card-animation--bottom-restore { animation: restore-bottom 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
 
-/* Horizontal keyframes */
-@keyframes approve-horizontal { to {transform:translateX(320px) rotate(15deg);opacity:0;} }
-@keyframes reject-horizontal { to {transform:translateX(-320px) rotate(-15deg);opacity:0;} }
+/* Keyframes */
 @keyframes skip-horizontal {
   0% {
     transform: translateX(0);
@@ -343,8 +379,6 @@ defineExpose({
 }
 @keyframes skip-wave { to { left: 100%; } }
 @keyframes skip-wave-vertical { to { top: 100%; } }
-@keyframes restore-approve-horizontal { from {transform:translateX(320px) rotate(15deg);opacity:0;} to {transform:translateX(0) rotate(0deg);opacity:1;} }
-@keyframes restore-reject-horizontal { from {transform:translateX(-320px) rotate(-15deg);opacity:0;} to {transform:translateX(0) rotate(0deg);opacity:1;} }
 @keyframes restore-skip-horizontal {
   0% { transform: translateX(0); opacity: 0; }
   50% { transform: translateX(0); opacity: 0.3; }
@@ -352,8 +386,6 @@ defineExpose({
 }
 
 /* Vertical keyframes */
-@keyframes approve-vertical { to {transform:translateY(-320px);opacity:0;} }
-@keyframes reject-vertical { to {transform:translateY(320px);opacity:0;} }
 @keyframes skip-vertical {
   0% {
     transform: translateY(0);
@@ -364,11 +396,20 @@ defineExpose({
     opacity: 0;
   }
 }
-@keyframes restore-approve-vertical { from {transform:translateY(-320px);opacity:0;} to {transform:translateY(0);opacity:1;} }
-@keyframes restore-reject-vertical { from {transform:translateY(320px);opacity:0;} to {transform:translateY(0);opacity:1;} }
 @keyframes restore-skip-vertical {
   0% { transform: translateY(0); opacity: 0; }
   50% { transform: translateY(0); opacity: 0.3; }
   100% { transform: translateY(0); opacity: 1; }
 }
+
+/* Directional keyframes */
+@keyframes swipe-right { to {transform:translateX(320px) rotate(15deg);opacity:0;} }
+@keyframes swipe-left { to {transform:translateX(-320px) rotate(-15deg);opacity:0;} }
+@keyframes swipe-top { to {transform:translateY(-320px) scale(0.8);opacity:0;} }
+@keyframes swipe-bottom { to {transform:translateY(320px) scale(0.8);opacity:0;} }
+
+@keyframes restore-right { from {transform:translateX(320px) rotate(15deg);opacity:0;} to {transform:translateX(0) rotate(0deg);opacity:1;} }
+@keyframes restore-left { from {transform:translateX(-320px) rotate(-15deg);opacity:0;} to {transform:translateX(0) rotate(0deg);opacity:1;} }
+@keyframes restore-top { from {transform:translateY(-320px) scale(0.8);opacity:0;} to {transform:translateY(0) scale(1);opacity:1;} }
+@keyframes restore-bottom { from {transform:translateY(320px) scale(0.8);opacity:0;} to {transform:translateY(0) scale(1);opacity:1;} }
 </style>

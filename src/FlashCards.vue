@@ -1,6 +1,6 @@
 <script lang="ts" setup generic="T extends Record<string, unknown>">
 import type { FlashCardProps } from './FlashCard.vue'
-import type { DragPosition } from './utils/useDragSetup'
+import type { Direction, DragPosition } from './utils/useDragSetup'
 import type { ResetOptions } from './utils/useStackList'
 import type { StackDirection } from './utils/useStackTransform'
 import { computed, ref } from 'vue'
@@ -11,11 +11,17 @@ import { SwipeAction } from './utils/useDragSetup'
 import { useStackList } from './utils/useStackList'
 import { useStackTransform } from './utils/useStackTransform'
 
-export interface FlashCardsProps<Item> extends FlashCardProps {
+export interface FlashCardsProps<Item> extends Omit<FlashCardProps, 'direction'> {
   /**
    * Array of items to display as cards
    */
   items?: Item[]
+
+  /**
+   * Direction of swiping: horizontal (left/right), vertical (up/down),
+   * or array of specific directions for custom combinations
+   */
+  swipeDirection?: Direction[] | 'horizontal' | 'vertical'
   /**
    * Enable loop swiping mode
    */
@@ -57,37 +63,107 @@ const props = withDefaults(defineProps<FlashCardsProps<T>>(), {
 })
 
 const emit = defineEmits<{
-  approve: [item: T]
-  reject: [item: T]
+  // New directional events
+  swipeTop: [item: T]
+  swipeLeft: [item: T]
+  swipeRight: [item: T]
+  swipeBottom: [item: T]
+
+  // Other events
   restore: [item: T]
   skip: [item: T]
   loop: []
   dragstart: [item: T]
   dragmove: [item: T, type: SwipeAction | null, delta: number]
   dragend: [item: T]
+
+  /**
+   * @deprecated use swipeTop, swipeLeft, swipeRight, swipeBottom instead
+   */
+  approve: [item: T]
+
+  /**
+   * @deprecated use swipeTop, swipeLeft, swipeRight, swipeBottom instead
+   */
+  reject: [item: T]
 }>()
 
 defineSlots<{
   default: (props: { item: T, activeItemKey: string | number }) => any
+
+  // New directional slots
+  top?: (props: { item: T, delta: number }) => any
+  left?: (props: { item: T, delta: number }) => any
+  right?: (props: { item: T, delta: number }) => any
+  bottom?: (props: { item: T, delta: number }) => any
+
+  empty?: (props: { reset: (options?: ResetOptions) => void }) => any
+
+  /**
+   * @deprecated
+   */
   reject?: (props: { item: T, delta: number }) => any
+
+  /**
+   * @deprecated
+   */
   approve?: (props: { item: T, delta: number }) => any
+
   actions?: (props: {
     restore: () => void
-    reject: () => void
-    approve: () => void
     skip: () => void
     reset: (options?: ResetOptions) => void
+
+    // New directional methods
+    swipeTop: () => void
+    swipeLeft: () => void
+    swipeRight: () => void
+    swipeBottom: () => void
+
     isEnd: boolean
     isStart: boolean
     canRestore: boolean
+
+    /**
+     * @deprecated
+     */
+    reject: () => void
+    /**
+     * @deprecated
+     */
+    approve: () => void
   }) => any
-  empty?: (props: { reset: (options?: ResetOptions) => void }) => any
 }>()
+
+// Extract props that should be passed to FlashCard (excluding ones we handle specially)
+const otherProps = computed(() => {
+  const { items, swipeDirection, loop, renderLimit, stack, stackOffset, stackScale, stackDirection, itemKey, waitAnimationEnd, ...rest } = props
+  return rest
+})
 
 const containerHeight = ref(0)
 
 // Merge props with global config
 const config = useFlashCardsConfig(() => props)
+
+/**
+ * Convert swipeDirection presets to directional arrays
+ * This maintains backward compatibility while the core system uses only arrays
+ */
+const effectiveSwipeDirection = computed(() => {
+  if (props.swipeDirection === 'horizontal') {
+    return ['left', 'right'] as Direction[]
+  }
+  if (props.swipeDirection === 'vertical') {
+    return ['top', 'bottom'] as Direction[]
+  }
+  if (Array.isArray(props.swipeDirection)) {
+    return props.swipeDirection as Direction[]
+  }
+
+  // Default to horizontal for backward compatibility
+  return ['left', 'right'] as Direction[]
+})
 
 /**
  * RENDER LIMIT
@@ -119,6 +195,7 @@ const {
   ...config.value,
   items: props.items,
   renderLimit: renderLimit.value,
+  swipeDirection: effectiveSwipeDirection.value,
   onLoop: () => emit('loop'),
 }))
 
@@ -128,7 +205,10 @@ const {
  */
 const {
   getCardStyle,
-} = useStackTransform(() => ({ ...config.value }))
+} = useStackTransform(() => ({
+  ...config.value,
+  swipeDirection: effectiveSwipeDirection.value,
+}))
 
 /**
  * Determines if drag should be disabled on cards
@@ -143,6 +223,7 @@ const isDragDisabled = computed(() => props.disableDrag || (config.value.waitAni
 
 /**
  * Handles card swipe completion
+ * Emits both new directional events AND old approve/reject events for backward compatibility
  */
 function handleCardSwipe(itemId: string | number, action: SwipeAction, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
   const swipedCard = swipeCard(itemId, action, position)
@@ -150,7 +231,45 @@ function handleCardSwipe(itemId: string | number, action: SwipeAction, position:
   if (!swipedCard)
     return
 
-  emit(action as any, swipedCard)
+  // Always emit new directional events
+  if (action === SwipeAction.TOP) {
+    emit('swipeTop', swipedCard)
+    emit('approve', swipedCard) // Backward compatibility
+  }
+  else if (action === SwipeAction.LEFT) {
+    emit('swipeLeft', swipedCard)
+    emit('reject', swipedCard) // Backward compatibility
+  }
+  else if (action === SwipeAction.RIGHT) {
+    emit('swipeRight', swipedCard)
+    emit('approve', swipedCard) // Backward compatibility
+  }
+  else if (action === SwipeAction.BOTTOM) {
+    emit('swipeBottom', swipedCard)
+    emit('reject', swipedCard) // Backward compatibility
+  }
+  else if (action === SwipeAction.SKIP) {
+    emit('skip', swipedCard)
+  }
+}
+
+/**
+ * Handles drag move events
+ * Emits both new directional types AND old approve/reject types for backward compatibility
+ */
+function handleDragMove(item: T, type: SwipeAction | null, delta: number) {
+  // Always emit with raw type
+  emit('dragmove', item, type, delta)
+
+  // TODO: remove in 2.0.0
+  if (type) {
+    if (type === 'right' || type === 'top') {
+      emit('dragmove', item, 'approve' as any, delta)
+    }
+    else if (type === 'left' || type === 'bottom') {
+      emit('dragmove', item, 'reject' as any, delta)
+    }
+  }
 }
 
 /**
@@ -178,14 +297,52 @@ function restore() {
 }
 
 /**
- * Approves card
+ * Directional card actions
  */
-const approve = () => performCardAction(SwipeAction.APPROVE)
+const swipeTop = () => performCardAction(SwipeAction.TOP)
+const swipeLeft = () => performCardAction(SwipeAction.LEFT)
+const swipeRight = () => performCardAction(SwipeAction.RIGHT)
+const swipeBottom = () => performCardAction(SwipeAction.BOTTOM)
 
 /**
- * Rejects card
+ * Approve/Reject aliases - work only with preset modes for backward compatibility
+ * @deprecated
+ * Use swipeRight() or swipeTop() instead
  */
-const reject = () => performCardAction(SwipeAction.REJECT)
+function approve() {
+  if (props.swipeDirection === 'horizontal') {
+    return swipeRight()
+  }
+  else if (props.swipeDirection === 'vertical') {
+    return swipeTop()
+  }
+  // For array mode, approve is not supported - throw warning
+  console.warn(
+    'FlashCards: approve() method is only supported with horizontal or vertical preset modes. '
+    + 'Use directional methods (top, left, right, bottom) for array mode.',
+  )
+  return null
+}
+
+/**
+ * Approve/Reject aliases - work only with preset modes for backward compatibility
+ * @deprecated
+ * Use swipeLeft() or swipeBottom() instead
+ */
+function reject() {
+  if (props.swipeDirection === 'horizontal') {
+    return swipeLeft()
+  }
+  else if (props.swipeDirection === 'vertical') {
+    return swipeBottom()
+  }
+  // For array mode, reject is not supported - throw warning
+  console.warn(
+    'FlashCards: reject() method is only supported with horizontal or vertical preset modes. '
+    + 'Use directional methods (top, left, right, bottom) for array mode.',
+  )
+  return null
+}
 
 /**
  * Skips card - moves to end without approve/reject
@@ -193,10 +350,19 @@ const reject = () => performCardAction(SwipeAction.REJECT)
 const skip = () => performCardAction(SwipeAction.SKIP)
 
 defineExpose({
-  restore,
+  // New directional methods
+  swipeTop,
+  swipeLeft,
+  swipeRight,
+  swipeBottom,
+
+  // Backward compatibility aliases
   approve,
   reject,
   skip,
+
+  // Other methods
+  restore,
   reset,
   canRestore,
   isEnd,
@@ -233,7 +399,8 @@ defineExpose({
         ]"
       >
         <FlashCard
-          v-bind="props"
+          v-bind="otherProps"
+          :direction="effectiveSwipeDirection"
           class="flashcards__card"
           :class="{
             'flashcards__card--active': itemId === currentItemId && !isAnimating,
@@ -245,17 +412,33 @@ defineExpose({
           @mounted="containerHeight = Math.max($event, 0)"
           @animationend="() => removeAnimatingCard(itemId)"
           @dragstart="emit('dragstart', item)"
-          @dragmove="(type, delta) => emit('dragmove', item, type, delta)"
+          @dragmove="(type, delta) => handleDragMove(item, type, delta)"
           @dragend="emit('dragend', item)"
         >
           <template #default>
             <slot :item="item" :active-item-key="currentItemId" />
           </template>
-          <template #reject="{ delta }">
-            <slot name="reject" :item="item" :delta="delta" />
+
+          <!-- Directional slots - prioritize old approve/reject slots for backward compatibility -->
+          <!-- Only pass slots if parent provided them, otherwise FlashCard uses its default content -->
+          <template #top="slotProps">
+            <slot v-if="$slots.approve" name="approve" :item="item" :delta="slotProps.delta" />
+            <slot v-else-if="$slots.top" name="top" :item="item" :delta="slotProps.delta" />
           </template>
-          <template #approve="{ delta }">
-            <slot name="approve" :item="item" :delta="delta" />
+
+          <template #bottom="slotProps">
+            <slot v-if="$slots.reject" name="reject" :item="item" :delta="slotProps.delta" />
+            <slot v-else-if="$slots.bottom" name="bottom" :item="item" :delta="slotProps.delta" />
+          </template>
+
+          <template #left="slotProps">
+            <slot v-if="$slots.reject" name="reject" :item="item" :delta="slotProps.delta" />
+            <slot v-else-if="$slots.left" name="left" :item="item" :delta="slotProps.delta" />
+          </template>
+
+          <template #right="slotProps">
+            <slot v-if="$slots.approve" name="approve" :item="item" :delta="slotProps.delta" />
+            <slot v-else-if="$slots.right" name="right" :item="item" :delta="slotProps.delta" />
           </template>
         </FlashCard>
       </div>
@@ -268,6 +451,10 @@ defineExpose({
       :approve="approve"
       :skip="skip"
       :reset="reset"
+      :swipe-top="swipeTop"
+      :swipe-left="swipeLeft"
+      :swipe-right="swipeRight"
+      :swipe-bottom="swipeBottom"
       :is-end="isEnd"
       :is-start="isStart"
       :can-restore="canRestore"

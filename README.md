@@ -70,20 +70,22 @@ const cards = ref([
 </template>
 ```
 
-### Advanced Usage with Resistance Effect
+### Advanced Usage with Multi-Directional Swipe
 
 ```vue
 <template>
   <FlashCards
     :items="cards"
+    :swipe-direction="['left', 'right', 'top']"
     :resistance-effect="true"
     :resistance-threshold="100"
     :resistance-strength="0.5"
     :swipe-threshold="150"
     :stack="3"
     :loop="true"
-    @approve="onApprove"
-    @reject="onReject"
+    @swipe-left="onLeft"
+    @swipe-right="onRight"
+    @swipe-top="onTop"
   >
     <template #default="{ item }">
       <div class="card">
@@ -92,15 +94,21 @@ const cards = ref([
       </div>
     </template>
 
-    <template #approve="{ delta }">
-      <div class="approve-indicator" :style="{ opacity: delta }">
-        ✅ Like
+    <template #left="{ delta }">
+      <div class="indicator" :style="{ opacity: delta }">
+        ❌ Nope
       </div>
     </template>
 
-    <template #reject="{ delta }">
-      <div class="reject-indicator" :style="{ opacity: delta }">
-        ❌ Pass
+    <template #right="{ delta }">
+      <div class="indicator" :style="{ opacity: delta }">
+        ❤️ Like
+      </div>
+    </template>
+
+    <template #top="{ delta }">
+      <div class="indicator" :style="{ opacity: delta }">
+        ⭐ Super Like
       </div>
     </template>
   </FlashCards>
@@ -221,7 +229,7 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `maxRotation` | `number` | `20` | Maximum rotation angle in degrees |
 | `swipeThreshold` | `number` | `150` | Swipe swipeThreshold in pixels |
 | `dragThreshold` | `number` | `5` | Minimum drag distance to start swiping |
-| `swipeDirection` | `'horizontal' \| 'vertical'` | `'horizontal'` | Direction of swiping: horizontal (left/right) or vertical (up/down). Affects swipe detection, default transform, and exit animations |
+| `swipeDirection` | `'horizontal' \| 'vertical' \| ('left' \| 'right' \| 'top' \| 'bottom')[]` | `'horizontal'` | Direction of swiping: preset modes (`'horizontal'` for left/right, `'vertical'` for up/down) or custom array of directions (e.g., `['left', 'right', 'top']` for Tinder-like UX). Affects swipe detection, default transform, and exit animations |
 | `maxDragY` | `number \| null` | `null` | Maximum Y dragging distance in pixels (null = unlimited) |
 | `maxDragX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |
 | `disableDrag` | `boolean` | `false` | Completely disable dragging functionality. Manual methods and slot actions still work |
@@ -265,35 +273,47 @@ function blurTransform(position) {
 
 | Slot Name | Props | Description |
 |-----------|-------|-------------|
-| default | `{ item: T, activeItemKey: number `|` string }` | Main content of the card (front side) |
-| actions | `{ restore: () => void, reject: () => void, approve: () => void, skip: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean }` | Custom actions UI. `restore` returns to previous card, `reject`/`approve`/`skip` trigger swipe animations, `reset` resets all cards, `isEnd` whether all cards have been swiped, `isStart` whether at the first card, `canRestore` whether there is a previous card to restore to |
-| approve | `{ item: T }` | Content shown when swiping right (approval indicator) |
-| reject | `{ item: T }` | Content shown when swiping left (rejection indicator) |
+| default | `{ item: T, activeItemKey: number `\|` string }` | Main content of the card (front side) |
+| actions | `{ restore: () => void, swipeTop: () => void, swipeLeft: () => void, swipeRight: () => void, swipeBottom: () => void, skip: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean }` | Custom actions UI. `restore` returns to previous card, directional methods trigger swipe animations, `skip` moves to next without approve/reject, `reset` resets all cards |
+| top | `{ item: T, delta: number }` | Content shown when swiping up (indicator) |
+| left | `{ item: T, delta: number }` | Content shown when swiping left (indicator) |
+| right | `{ item: T, delta: number }` | Content shown when swiping right (indicator) |
+| bottom | `{ item: T, delta: number }` | Content shown when swiping down (indicator) |
+| approve | `{ item: T, delta: number }` | ~~Content shown when swiping right~~ **Deprecated**: Use `right` or `top` slot instead |
+| reject | `{ item: T, delta: number }` | **Deprecated**: Use `left` or `bottom` slot instead |
 | empty | - | Content shown when all cards have been swiped |
 
 ## Events
 
 | Event Name | Payload | Description |
 |------------|---------|-------------|
-| approve | `item: T` | Emitted when a card is approved (swiped right or approved via actions) |
-| reject | `item: T` | Emitted when a card is rejected (swiped left or rejected via actions) |
-| skip | `item: T` | Emitted when a card is skipped (skipped via actions) - moves to next card without approve/reject |
+| swipeTop | `item: T` | Emitted when a card is swiped up |
+| swipeLeft | `item: T` | Emitted when a card is swiped left |
+| swipeRight | `item: T` | Emitted when a card is swiped right |
+| swipeBottom | `item: T` | Emitted when a card is swiped down |
+| skip | `item: T` | Emitted when a card is skipped (skipped via actions) - moves to next card without swipe |
 | restore | `item: T` | Emitted when a card is restored (returned to the stack via restore action) |
 | loop | - | Emitted when a new loop cycle starts in loop mode (all cards have been swiped) |
 | dragstart | `item: T` | Emitted when user starts dragging a card |
 | dragmove | `item: T, type: SwipeAction \| null, delta: number` | Emitted during card dragging with movement details |
 | dragend | `item: T` | Emitted when user stops dragging a card |
+| approve | `item: T` | **Deprecated**: Use `swipeRight` or `swipeTop` event instead |
+| reject | `item: T` | **Deprecated**: Use `swipeLeft` or `swipeBottom` event instead |
 
 ## Exposed
 | Method/Property | Type | Description |
 |----------------|------|-------------|
+| swipeTop | `() => void` | Triggers upward swipe on current card |
+| swipeLeft | `() => void` | Triggers left swipe on current card |
+| swipeRight | `() => void` | Triggers right swipe on current card |
+| swipeBottom | `() => void` | Triggers downward swipe on current card |
 | restore | `() => void` | Returns to the previous card if available |
-| approve | `() => void` | Triggers approval animation on current card |
-| reject | `() => void` | Triggers rejection animation on current card |
-| skip | `() => void` | Triggers skip animation on current card - moves to next card without approve/reject |
+| skip | `() => void` | Triggers skip animation on current card - moves to next card without swipe |
 | reset | `(options?) => void` | Resets all cards to initial state. Options: `{ animated?: boolean, delay?: number }` |
 | canRestore | `boolean` | Whether there is a previous card to restore to |
 | isEnd | `boolean` | Whether all cards have been swiped |
+| approve | `() => void` | **Deprecated**: Use `swipeRight()` or `swipeTop()` instead |
+| reject | `() => void` | **Deprecated**: Use `swipeLeft()` or `swipeBottom()` instead |
 
 ## FlipCard Component
 

@@ -43,12 +43,12 @@ const cards = ref([
   { id: 3, text: 'Third Card' },
 ])
 
-function handleApprove(item) {
-  console.log('Approved:', item)
+function handleSwipeLeft(item) {
+  console.log('Swiped left:', item)
 }
 
-function handleReject(item) {
-  console.log('Rejected:', item)
+function handleSwipeRight(item) {
+  console.log('Swiped right:', item)
 }
 </script>
 
@@ -56,8 +56,8 @@ function handleReject(item) {
   <div class="card-container">
     <FlashCards
       :items="cards"
-      @approve="handleApprove"
-      @reject="handleReject"
+      @swipe-left="handleSwipeLeft"
+      @swipe-right="handleSwipeRight"
     >
       <template #default="{ item }">
         <div class="card">
@@ -68,6 +68,10 @@ function handleReject(item) {
   </div>
 </template>
 ```
+
+::: tip Backward Compatibility
+The `@approve` and `@reject` events remain fully functional. If you have existing code using these events, they will continue to work. The new directional events (`@swipe-left`, `@swipe-right`, etc.) are recommended for new projects as they provide clearer intent and enable multi-directional swipe configurations.
+:::
 
 ### Vue Plugin (Global Configuration)
 

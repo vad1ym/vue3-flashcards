@@ -28,7 +28,7 @@ describe('[props] swipeThreshold', () => {
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
-      expect(wrapper.emitted('complete')?.[0][0]).toBe('approve') // approved = true
+      expect(wrapper.emitted('complete')?.[0][0]).toBe('right') // right swipe
     })
 
     it('should not complete when swiped below swipeThreshold', async () => {

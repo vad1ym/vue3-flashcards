@@ -30,7 +30,7 @@ describe('[props] maxDragY', () => {
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
-      expect(wrapper.emitted('complete')?.[0][0]).toBe('approve')
+      expect(wrapper.emitted('complete')?.[0][0]).toBe('right')
     })
 
     it('should work with combined horizontal and vertical dragging', async () => {
@@ -47,7 +47,7 @@ describe('[props] maxDragY', () => {
 
       // Should complete the horizontal swipe despite vertical component
       expect(wrapper.emitted('complete')).toBeTruthy()
-      expect(wrapper.emitted('complete')?.[0][0]).toBe('approve')
+      expect(wrapper.emitted('complete')?.[0][0]).toBe('right')
     })
 
     it('should not prevent card functionality with vertical dragging', async () => {
@@ -91,7 +91,7 @@ describe('[props] maxDragY', () => {
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
-      expect(wrapper.emitted('complete')?.[0][0]).toBe('approve')
+      expect(wrapper.emitted('complete')?.[0][0]).toBe('right')
     })
   })
 
@@ -116,7 +116,7 @@ describe('[props] maxDragY', () => {
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
-      expect(wrapper.emitted('complete')?.[0][0]).toBe('approve')
+      expect(wrapper.emitted('complete')?.[0][0]).toBe('right')
     })
 
     it('should work with large vertical movements', async () => {
@@ -133,7 +133,7 @@ describe('[props] maxDragY', () => {
 
       // Should still complete horizontal swipe
       expect(wrapper.emitted('complete')).toBeTruthy()
-      expect(wrapper.emitted('complete')?.[0][0]).toBe('approve')
+      expect(wrapper.emitted('complete')?.[0][0]).toBe('right')
     })
   })
 

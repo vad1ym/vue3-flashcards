@@ -1,10 +1,14 @@
-<script setup>
-defineProps({
-  card: {
-    type: Object,
-    required: true,
-  },
-})
+<script setup lang="ts">
+interface Card {
+  id: number
+  title: string
+  description: string
+  color: string
+}
+
+defineProps<{
+  card: Card
+}>()
 </script>
 
 <template>
