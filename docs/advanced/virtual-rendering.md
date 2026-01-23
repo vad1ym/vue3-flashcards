@@ -48,4 +48,4 @@ Only the current card and upcoming cards are rendered. As cards are swiped, new 
 </FlashCards>
 ```
 
-**See:** [Examples - Virtual Rendering](../examples/advanced/virtual-rendering.md)
+**See:** [Examples - Virtual Rendering](../examples/virtual-rendering.md)

@@ -56,4 +56,4 @@ Add visual feedback for each direction:
 
 The `delta` value (-1 to 1) indicates drag progress for animations.
 
-**See:** [Examples - Basic](../examples/basic/basic-usage.md)
+**See:** [Examples - Basic](../examples/basic-usage.md)

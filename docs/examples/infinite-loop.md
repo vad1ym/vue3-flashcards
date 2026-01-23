@@ -32,4 +32,4 @@ Endless card swiping with a small dataset that cycles.
 
 ## Related
 
-- [Loop Mode](../../advanced/loop-mode.md)
+- [Loop Mode](../advanced/loop-mode.md)

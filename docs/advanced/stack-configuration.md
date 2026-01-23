@@ -62,4 +62,4 @@ Range: `0-1` (1 = no scaling)
 └─────────────┘
 ```
 
-**See:** [Examples - Stack Usage](../examples/advanced/stack-usage.md)
+**See:** [Examples - Stack Usage](../examples/stack-usage.md)

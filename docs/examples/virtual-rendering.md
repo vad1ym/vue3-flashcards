@@ -41,5 +41,4 @@ Efficiently handle large datasets with virtual DOM rendering.
 
 ## Related
 
-- [Virtual Rendering](../../advanced/virtual-rendering.md)
-- [Performance](../../best-practices/performance.md)
+- [Virtual Rendering](../advanced/virtual-rendering.md)

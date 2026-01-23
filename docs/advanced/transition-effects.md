@@ -78,4 +78,4 @@ Apply custom animations via CSS:
 }
 ```
 
-**See:** [Examples - Transitions](../examples/advanced/transitions.md)
+**See:** [Examples - Transitions](../examples/transitions.md)

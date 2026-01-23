@@ -14,4 +14,4 @@ Deep dive into advanced configuration and optimization.
 ## Prerequisites
 
 - [Essentials](../essentials/)
-- [Intermediate Examples](../examples/intermediate/)
+- [Examples](../examples/)

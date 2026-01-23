@@ -137,5 +137,5 @@ Text selection is now automatically prevented during drag interactions when drag
 If you encounter any issues during migration:
 
 - Check the [API Reference](/api/flashcards) for complete prop documentation
-- Review the [examples](/examples) for updated usage patterns
+- Review the [examples](/examples/) for updated usage patterns
 - [Open an issue](https://github.com/vad1ym/vue3-flashcards/issues) if you find any migration problems

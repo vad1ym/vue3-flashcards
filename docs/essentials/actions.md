@@ -61,4 +61,4 @@ Move to the next card without triggering a swipe event:
 </template>
 ```
 
-**See:** [Examples - Custom Actions](../examples/intermediate/custom-actions.md)
+**See:** [Examples - Custom Actions](../examples/custom-actions.md)

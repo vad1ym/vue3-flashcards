@@ -65,4 +65,4 @@ Use flip cards inside swipeable cards:
 </FlashCards>
 ```
 
-**See:** [Examples - Flip Cards](../examples/basic/flip-cards.md)
+**See:** [Examples - Flip Cards](../examples/flip-cards.md)

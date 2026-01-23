@@ -67,4 +67,4 @@ Combine with `resistanceEffect` for physical feedback:
 </FlashCards>
 ```
 
-**See:** [Examples - Drag Limits](../examples/intermediate/drag-limits.md)
+**See:** [Examples - Drag Limits](../examples/drag-limits.md)

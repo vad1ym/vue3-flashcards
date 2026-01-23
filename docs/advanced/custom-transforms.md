@@ -62,4 +62,4 @@ const perspectiveTransform = ({ deltaX, deltaY }) => {
 const noTransform = () => 'none'
 ```
 
-**See:** [Examples - Scale Transform](../examples/advanced/scale-transform.md)
+**See:** [Examples - Scale Transform](../examples/scale-transform.md)

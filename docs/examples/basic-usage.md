@@ -30,5 +30,5 @@ Simple swipeable cards with minimal setup.
 
 ## Related
 
-- [Swipe Directions](../../essentials/swipe-directions.md)
-- [Card Content](../../essentials/card-content.md)
+- [Swipe Directions](../essentials/swipe-directions.md)
+- [Card Content](../essentials/card-content.md)

@@ -34,4 +34,4 @@ Manual control buttons with skip and restore functionality.
 
 ## Related
 
-- [Actions Guide](../../essentials/actions.md)
+- [Actions Guide](../essentials/actions.md)

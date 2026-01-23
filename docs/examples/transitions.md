@@ -46,5 +46,4 @@ Custom CSS animations with different transition styles.
 
 ## Related
 
-- [Transition Effects](../../advanced/transition-effects.md)
-- [Animations](../../styling/animations.md)
+- [Transition Effects](../advanced/transition-effects.md)

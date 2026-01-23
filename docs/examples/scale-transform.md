@@ -33,5 +33,4 @@ Custom transform that scales cards instead of rotating during swipe.
 
 ## Related
 
-- [Custom Transforms](../../advanced/custom-transforms.md)
-- [Animations](../../styling/animations.md)
+- [Custom Transforms](../advanced/custom-transforms.md)

@@ -33,4 +33,4 @@ Multiple stacked cards with adjustable size and directional positioning.
 
 ## Related
 
-- [Stack Configuration](../../advanced/stack-configuration.md)
+- [Stack Configuration](../advanced/stack-configuration.md)

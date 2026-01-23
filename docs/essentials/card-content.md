@@ -51,4 +51,7 @@ Show content when all cards are swiped:
 </FlashCards>
 ```
 
-**See:** [Styling - Card Styling](../styling/card-styling.md)
+## Related
+
+- [Examples - Basic Usage](../examples/basic-usage.md)
+- [API - Slots](../api/flashcards.md#slots)

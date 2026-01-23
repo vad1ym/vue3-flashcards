@@ -12,7 +12,7 @@ Installation, quick start guide, and first steps.
 ### 📚 **[API Reference →](/api/flashcards)**
 Complete API documentation for FlashCards and FlipCard components.
 
-### 💡 **[Examples →](/examples)**
+### 💡 **[Examples →](/examples/)**
 Interactive examples and use cases.
 
 ---

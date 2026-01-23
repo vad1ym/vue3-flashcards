@@ -33,4 +33,4 @@ Constrain dragging in specific directions with maxDragX and maxDragY.
 
 ## Related
 
-- [Drag Limits](../../advanced/drag-limits.md)
+- [Drag Limits](../advanced/drag-limits.md)

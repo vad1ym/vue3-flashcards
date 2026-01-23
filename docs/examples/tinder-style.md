@@ -34,4 +34,5 @@ Image-based cards with visual swipe indicators and multi-directional actions.
 
 ## Related
 
-- [Use Cases - Dating App](../../use-cases/dating-app.md)
+- [Swipe Directions](../essentials/swipe-directions.md)
+- [Actions](../essentials/actions.md)

@@ -48,4 +48,4 @@ function handleLoop() {
 </FlashCards>
 ```
 
-**See:** [Examples - Infinite Loop](../examples/advanced/infinite-loop.md)
+**See:** [Examples - Infinite Loop](../examples/infinite-loop.md)

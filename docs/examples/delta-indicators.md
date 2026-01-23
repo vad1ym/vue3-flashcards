@@ -34,5 +34,4 @@ Custom swipe indicators with dynamic opacity based on drag distance.
 
 ## Related
 
-- [Swipe Directions](../../essentials/swipe-directions.md)
-- [Indicators Styling](../../styling/indicators.md)
+- [Swipe Directions](../essentials/swipe-directions.md)

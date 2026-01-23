@@ -34,4 +34,4 @@ Two-sided cards with flip animations. Click to flip, swipe to approve/reject.
 
 ## Related
 
-- [Flip Cards Guide](../../essentials/flip-cards.md)
+- [Flip Cards Guide](../essentials/flip-cards.md)
