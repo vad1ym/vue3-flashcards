@@ -1,36 +1,22 @@
 # Getting Started
 
 ::: tip Upgrading from v0.x?
-See the [Migration Guide](/guide/migration-from-v0) for upgrading from previous versions.
+See the [Migration Guide](./migration-from-v0) for upgrading from previous versions.
 :::
 
-Vue3 Flashcards is a powerful and flexible library for creating Tinder-like card interfaces in Vue 3 applications. Built with TypeScript and the Vue 3 Composition API, it provides smooth animations, touch support, and extensive customization options.
+Quick start guide to building your first swipeable card interface.
 
 ## Installation
 
-Install the package using your preferred package manager:
-
-::: code-group
-
-```bash [npm]
+```bash
 npm install vue3-flashcards
 ```
 
-```bash [yarn]
-yarn add vue3-flashcards
-```
-
-```bash [pnpm]
-pnpm add vue3-flashcards
-```
-
-:::
+[See all installation options →](./installation.md)
 
 ## Quick Start
 
-### Basic Usage
-
-Here's a minimal example to get you started:
+Here's a minimal example:
 
 ```vue
 <script setup>
@@ -53,118 +39,23 @@ function handleSwipeRight(item) {
 </script>
 
 <template>
-  <div class="card-container">
-    <FlashCards
-      :items="cards"
-      @swipe-left="handleSwipeLeft"
-      @swipe-right="handleSwipeRight"
-    >
-      <template #default="{ item }">
-        <div class="card">
-          <h3>{{ item.text }}</h3>
-        </div>
-      </template>
-    </FlashCards>
-  </div>
-</template>
-```
-
-::: tip Backward Compatibility
-The `@approve` and `@reject` events remain fully functional. If you have existing code using these events, they will continue to work. The new directional events (`@swipe-left`, `@swipe-right`, etc.) are recommended for new projects as they provide clearer intent and enable multi-directional swipe configurations.
-:::
-
-### Vue Plugin (Global Configuration)
-
-For applications that use FlashCards components throughout, install the plugin to register components globally and set default configuration:
-
-```typescript
-// main.ts
-import { createApp } from 'vue'
-import { FlashCardsPlugin } from 'vue3-flashcards'
-import App from './App.vue'
-
-const app = createApp(App)
-
-app.use(FlashCardsPlugin, {
-  flashCards: {
-    // Global defaults for FlashCards components
-    stack: 3,
-    stackOffset: 25,
-    swipeThreshold: 150,
-    loop: true,
-  },
-  flipCard: {
-    // Global defaults for FlipCard components
-    flipAxis: 'x',
-    waitAnimationEnd: false,
-  }
-})
-
-app.mount('#app')
-```
-
-Now components are globally available without imports:
-
-```vue
-<template>
-  <!-- No imports needed! -->
-  <FlashCards :items="cards">
+  <FlashCards
+    :items="cards"
+    @swipe-left="handleSwipeLeft"
+    @swipe-right="handleSwipeRight"
+  >
     <template #default="{ item }">
-      <div>{{ item.title }}</div>
+      <div class="card">
+        <h3>{{ item.text }}</h3>
+      </div>
     </template>
   </FlashCards>
-
-  <FlipCard>
-    <template #front>Front</template>
-    <template #back>Back</template>
-  </FlipCard>
 </template>
 ```
 
-### Nuxt Module
+## Next Steps
 
-For Nuxt applications, use the dedicated module for automatic configuration and SSR support:
-
-```typescript
-// nuxt.config.ts
-export default defineNuxtConfig({
-  modules: ['vue3-flashcards/nuxt'],
-
-  // Global configuration (optional)
-  flashcards: {
-    stack: 3,
-    stackOffset: 25,
-    swipeThreshold: 150,
-    loop: true,
-  }
-})
-```
-
-Components are auto-imported and globally available:
-
-```vue
-<template>
-  <!-- Auto-imported, no imports needed! -->
-  <FlashCards :items="cards">
-    <template #default="{ item }">
-      <div>{{ item.title }}</div>
-    </template>
-  </FlashCards>
-
-  <FlipCard>
-    <template #front>Front</template>
-    <template #back>Back</template>
-  </FlipCard>
-</template>
-```
-
-**Nuxt Module Features:**
-- ✅ **SSR Compatible** - Works perfectly with server-side rendering
-- ✅ **Auto-import** - Components available without manual imports
-- ✅ **Global Config** - Set defaults for all components via `nuxt.config.ts`
-- ✅ **TypeScript** - Full IntelliSense support
-
-## What's Next?
-
-- **[API Reference →](../api/flashcards)** - Complete component documentation
-- **[Examples →](../examples)** - Interactive demos and use cases
+- **[Installation](./installation.md)** - npm, yarn, pnpm, Vue plugin, Nuxt module
+- **[Basic Concepts](./basic-concepts.md)** - Items array, card lifecycle, events
+- **[Essentials](../essentials/)** - Core features: swipe directions, events, actions
+- **[Examples](../examples/)** - Interactive demos
