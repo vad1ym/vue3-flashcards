@@ -135,6 +135,9 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   // Is dragging in progress
   const isDragging = ref(false)
 
+  // Track active pointer ID for multi-touch prevention
+  const activePointerId = ref<number | null>(null)
+
   let startX = 0
   let startY = 0
 
@@ -173,6 +176,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
 
   function handleDragStart(event: PointerEvent) {
     isDragStarted.value = true
+    activePointerId.value = event.pointerId
 
     startX = event.clientX - position.x
     startY = event.clientY - position.y
@@ -183,6 +187,11 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   function handleDragMove(event: PointerEvent) {
     if (!isDragStarted.value)
       return
+
+    // Multi-touch prevention: ignore events from different pointers
+    if (activePointerId.value !== null && event.pointerId !== activePointerId.value) {
+      return
+    }
 
     const clientX = event.clientX
     const clientY = event.clientY
@@ -260,6 +269,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
 
     isDragStarted.value = false
     isDragging.value = false
+    activePointerId.value = null
 
     // Determine if swipe completion threshold is reached
     const completedDirection = getDirectionFromPosition(
@@ -297,6 +307,22 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     onDragEnd()
   }
 
+  // Prevent scroll on any element while dragging
+  function handleTouchMove(event: TouchEvent) {
+    if (isDragging.value) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }
+
+  // Prevent wheel scroll while dragging
+  function handleWheel(event: WheelEvent) {
+    if (isDragging.value) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }
+
   function setupInteract() {
     // Set initial position
     const initialPos = options.value.initialPosition
@@ -316,6 +342,10 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     element.value?.addEventListener('pointerdown', handleDragStart, { passive: false })
     window.addEventListener('pointermove', handleDragMove, { passive: false })
     window.addEventListener('pointerup', handleDragEnd, { passive: true })
+
+    // Add global scroll prevention listeners (with passive: false to allow preventDefault)
+    document.addEventListener('touchmove', handleTouchMove, { passive: false })
+    document.addEventListener('wheel', handleWheel, { passive: false })
   }
 
   onMounted(async () => {
@@ -327,6 +357,10 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     element.value?.removeEventListener('pointerdown', handleDragStart)
     window.removeEventListener('pointermove', handleDragMove)
     window.removeEventListener('pointerup', handleDragEnd)
+
+    // Remove global scroll prevention listeners
+    document.removeEventListener('touchmove', handleTouchMove)
+    document.removeEventListener('wheel', handleWheel)
   }
 
   onUnmounted(() => {

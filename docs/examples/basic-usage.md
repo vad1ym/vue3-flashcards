@@ -22,6 +22,10 @@ Simple swipeable cards with minimal setup.
 <<< ../../example/basic-usage/index.vue
 :::
 
+::: tip Styling
+Card content in this example is styled with Tailwind CSS. The library provides no built-in styles for card visuals — use plain `<style>`, CSS Modules, or any UI framework you already use.
+:::
+
 ## Key Concepts
 
 - **items prop**: Array of card objects

@@ -2,6 +2,10 @@
 
 Interactive demos showcasing different features and use cases.
 
+::: tip Styling note
+Examples use [Tailwind CSS](https://tailwindcss.com/) for card content styling. The library itself ships no styles for card visuals, buttons, or indicators — use any CSS approach you prefer.
+:::
+
 ## Examples
 
 - [Basic Usage](./basic-usage.md) - Simple horizontal swiping

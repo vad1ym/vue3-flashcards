@@ -14,6 +14,12 @@ npm install vue3-flashcards
 
 [See all installation options →](./installation.md)
 
+## Styling
+
+**The library provides no styles for card content, buttons, or any visual elements inside the slots.** All structural animations (swipe, flip, stack) are handled internally — but the look of your cards is entirely up to you.
+
+Examples in this documentation use [Tailwind CSS](https://tailwindcss.com/) for convenience, but you can use any approach you're comfortable with: plain `<style>`, CSS Modules, Quasar, Vuetify, UnoCSS, etc.
+
 ## Quick Start
 
 Here's a minimal example:
