@@ -38,7 +38,7 @@ describe('useStackList invariants', () => {
     if (history.has(id))
       return true
     const card = transition.find(c => c.itemId === id)
-    return !!card && !card.animation?.isRestoring
+    return !!card && !card.flight?.isRestoring
   }
 
   /**

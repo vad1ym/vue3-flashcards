@@ -1,7 +1,7 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { flashCardsDefaults } from '../../src/config/flashcards.config'
+import { resistanceDefaults } from '../../src/config/flashcards.config'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
@@ -12,18 +12,16 @@ const DRAG_BEYOND_THRESHOLD = 200 // Distance that exceeds resistance threshold
 const DRAG_WITHIN_THRESHOLD = 80 // Distance within resistance threshold
 const EXPECTED_RESISTANCE_POSITION = 141 // Expected position with resistance applied (threshold + reduced excess)
 
-describe('[props] resistanceEffect', () => {
+describe('[props] resistance', () => {
   let wrapper: VueWrapper<InstanceType<typeof FlashCard>>
 
-  describe('with resistanceEffect enabled', () => {
+  describe('with resistance enabled', () => {
     let cardElement: HTMLElement
 
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          resistanceEffect: true,
-          resistanceThreshold: RESISTANCE_THRESHOLD,
-          resistanceStrength: RESISTANCE_STRENGTH,
+          resistance: { threshold: RESISTANCE_THRESHOLD, strength: RESISTANCE_STRENGTH },
           swipeThreshold: 300, // High threshold to prevent completion during resistance tests
         },
         slots: {
@@ -67,9 +65,7 @@ describe('[props] resistanceEffect', () => {
       // Mount with vertical swipe direction
       wrapper = mount(FlashCard, {
         props: {
-          resistanceEffect: true,
-          resistanceThreshold: RESISTANCE_THRESHOLD,
-          resistanceStrength: RESISTANCE_STRENGTH,
+          resistance: { threshold: RESISTANCE_THRESHOLD, strength: RESISTANCE_STRENGTH },
           swipeDirection: 'vertical',
           swipeThreshold: 300,
         },
@@ -85,13 +81,11 @@ describe('[props] resistanceEffect', () => {
       expect(cardElement.classList.contains('flash-card')).toBe(true)
     })
 
-    it('should apply stronger resistance with higher resistanceStrength', async () => {
-      // Just test that resistanceStrength prop is accepted
+    it('should apply stronger resistance with higher strength', async () => {
+      // Just test that a higher resistance strength is accepted
       const strongerWrapper = mount(FlashCard, {
         props: {
-          resistanceEffect: true,
-          resistanceThreshold: RESISTANCE_THRESHOLD,
-          resistanceStrength: 0.8, // Higher resistance
+          resistance: { threshold: RESISTANCE_THRESHOLD, strength: 0.8 }, // Higher resistance
           swipeThreshold: 300,
         },
         slots: {
@@ -125,9 +119,7 @@ describe('[props] resistanceEffect', () => {
       // Test that different resistance configurations don't break the component
       const configWrapper = mount(FlashCard, {
         props: {
-          resistanceEffect: true,
-          resistanceThreshold: 50,
-          resistanceStrength: 0.3,
+          resistance: { threshold: 50, strength: 0.3 },
           swipeThreshold: 100,
         },
         slots: {
@@ -140,17 +132,43 @@ describe('[props] resistanceEffect', () => {
       expect(configWrapper.vm).toBeDefined()
       expect(configWrapper.element.classList.contains('flash-card')).toBe(true)
     })
+
+    it('uses default threshold/strength for an empty resistance object', async () => {
+      // `resistance: {}` enables the effect with both fields defaulted.
+      const defaultWrapper = mount(FlashCard, {
+        props: {
+          resistance: {},
+          swipeThreshold: 500,
+        },
+        slots: {
+          default: '<div class="card-content">Test Card</div>',
+        },
+        global: { stubs: { Transition: false } },
+      })
+      // Let onMounted → setupInteract attach the pointer listeners.
+      await defaultWrapper.vm.$nextTick()
+
+      new DragSimulator(defaultWrapper.element)
+        .dragStart()
+        .dragMove([{ x: resistanceDefaults.threshold + 100, y: 0 }])
+
+      await defaultWrapper.vm.$nextTick()
+
+      const transformMatch = defaultWrapper.element.style.transform.match(/translate3D\((-?\d+(?:\.\d+)?)px/)
+      const actualX = transformMatch ? Number.parseFloat(transformMatch[1]) : 0
+      // Resistance applied → position is held below the raw drag distance.
+      expect(actualX).toBeLessThan(resistanceDefaults.threshold + 100)
+      expect(actualX).toBeGreaterThan(resistanceDefaults.threshold)
+    })
   })
 
-  describe('with resistanceEffect disabled', () => {
+  describe('with resistance disabled', () => {
     let cardElement: HTMLElement
 
     beforeEach(() => {
       wrapper = mount(FlashCard, {
         props: {
-          resistanceEffect: false,
-          resistanceThreshold: RESISTANCE_THRESHOLD,
-          resistanceStrength: RESISTANCE_STRENGTH,
+          resistance: null,
         },
         slots: {
           default: '<div class="card-content">Test Card</div>',
@@ -160,7 +178,7 @@ describe('[props] resistanceEffect', () => {
       cardElement = wrapper.element
     })
 
-    it('should not apply resistance when resistanceEffect is disabled', async () => {
+    it('should not apply resistance when resistance is disabled', async () => {
       // Drag beyond what would be resistance threshold
       new DragSimulator(cardElement)
         .dragStart()
@@ -173,12 +191,12 @@ describe('[props] resistanceEffect', () => {
     })
   })
 
-  describe('with default resistanceEffect', () => {
+  describe('with default resistance (omitted)', () => {
     let cardElement: HTMLElement
 
     beforeEach(() => {
       wrapper = mount(FlashCard, {
-        props: {}, // Use all defaults
+        props: {}, // Use all defaults — resistance is off by default
         slots: {
           default: '<div class="card-content">Test Card</div>',
         },
@@ -187,24 +205,16 @@ describe('[props] resistanceEffect', () => {
       cardElement = wrapper.element
     })
 
-    it('should use default resistanceEffect setting from config', async () => {
-      // Drag beyond default resistance threshold
+    it('does not apply resistance by default', async () => {
+      // Drag beyond the default resistance threshold
       new DragSimulator(cardElement)
         .dragStart()
-        .dragMove([{ x: flashCardsDefaults.resistanceThreshold + 50, y: 0 }])
+        .dragMove([{ x: resistanceDefaults.threshold + 50, y: 0 }])
 
       await wrapper.vm.$nextTick()
 
-      if (flashCardsDefaults.resistanceEffect) {
-        // If enabled by default, should apply resistance
-        const transformMatch = cardElement.style.transform.match(/translate3D\((-?\d+(?:\.\d+)?)px/)
-        const actualX = transformMatch ? Number.parseFloat(transformMatch[1]) : 0
-        expect(actualX).toBeLessThan(flashCardsDefaults.resistanceThreshold + 50)
-      }
-      else {
-        // If disabled by default, should allow full movement
-        expect(cardElement.style.transform).toContain(`translate3D(${flashCardsDefaults.resistanceThreshold + 50}px, 0px, 0)`)
-      }
+      // Resistance is off by default → full movement.
+      expect(cardElement.style.transform).toContain(`translate3D(${resistanceDefaults.threshold + 50}px, 0px, 0)`)
     })
   })
 })

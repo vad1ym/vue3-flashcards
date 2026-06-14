@@ -246,7 +246,7 @@ describe('useStackList', () => {
       // History is not updated until animation completes
       expect(stackList.history.get(1)).toBeUndefined()
       expect(stackList.cardsInTransition.value).toHaveLength(1)
-      expect(stackList.cardsInTransition.value[0].animation?.type).toBe(SwipeAction.RIGHT)
+      expect(stackList.cardsInTransition.value[0].flight?.type).toBe(SwipeAction.RIGHT)
 
       // Complete the animation
       stackList.removeAnimatingCard(1)
@@ -268,7 +268,7 @@ describe('useStackList', () => {
       // History is not updated until animation completes
       expect(stackList.history.get(2)).toBeUndefined()
       expect(stackList.cardsInTransition.value).toHaveLength(1)
-      expect(stackList.cardsInTransition.value[0].animation?.type).toBe(SwipeAction.LEFT)
+      expect(stackList.cardsInTransition.value[0].flight?.type).toBe(SwipeAction.LEFT)
 
       // Complete the animation
       stackList.removeAnimatingCard(2)
@@ -288,7 +288,7 @@ describe('useStackList', () => {
 
       await stackList.swipeCard(1, 'right', initialPosition)
 
-      expect(stackList.cardsInTransition.value[0].animation?.initialPosition).toEqual(initialPosition)
+      expect(stackList.cardsInTransition.value[0].flight?.initialPosition).toEqual(initialPosition)
     })
 
     it('should not re-approve already completed items', async () => {
@@ -327,12 +327,12 @@ describe('useStackList', () => {
 
       // First approval
       await stackList.swipeCard(1, SwipeAction.RIGHT)
-      expect(stackList.cardsInTransition.value[0].animation?.type).toBe(SwipeAction.RIGHT)
+      expect(stackList.cardsInTransition.value[0].flight?.type).toBe(SwipeAction.RIGHT)
 
       // Try to change to rejection while animating - this will replace the existing animation
       await stackList.swipeCard(1, SwipeAction.LEFT)
       expect(stackList.cardsInTransition.value).toHaveLength(1) // Still one animation, but replaced
-      expect(stackList.cardsInTransition.value[0].animation?.type).toBe(SwipeAction.LEFT) // Animation type updated
+      expect(stackList.cardsInTransition.value[0].flight?.type).toBe(SwipeAction.LEFT) // Animation type updated
       expect(stackList.history.get(1)).toBeUndefined() // History not updated until animation completes
 
       // Complete animation
@@ -415,18 +415,18 @@ describe('useStackList', () => {
 
       // Swipe card 1 (starts animating)
       stackList.swipeCard(1, SwipeAction.RIGHT)
-      const anim1Before = stackList.cardsInTransition.value.find(c => c.itemId === 1)?.animation
+      const anim1Before = stackList.cardsInTransition.value.find(c => c.itemId === 1)?.flight
       expect(anim1Before).toBeDefined()
 
       // A second card starts animating while the first is still in flight
       stackList.swipeCard(2, SwipeAction.LEFT)
-      const anim1After = stackList.cardsInTransition.value.find(c => c.itemId === 1)?.animation
+      const anim1After = stackList.cardsInTransition.value.find(c => c.itemId === 1)?.flight
       // Card 1's animation object must be the SAME reference (not rebuilt)
       expect(anim1After).toBe(anim1Before)
 
       // And a restore of yet another card must not disturb card 1 either
       stackList.restoreCard()
-      const anim1AfterRestore = stackList.cardsInTransition.value.find(c => c.itemId === 1)?.animation
+      const anim1AfterRestore = stackList.cardsInTransition.value.find(c => c.itemId === 1)?.flight
       expect(anim1AfterRestore).toBe(anim1Before)
     })
 
@@ -535,7 +535,7 @@ describe('useStackList', () => {
       // Should restore item 2 (most recent)
       expect(stackList.cardsInTransition.value).toHaveLength(1)
       expect(stackList.cardsInTransition.value[0].item.id).toBe(2)
-      expect(stackList.cardsInTransition.value[0].animation?.isRestoring).toBe(true)
+      expect(stackList.cardsInTransition.value[0].flight?.isRestoring).toBe(true)
     })
 
     it('should complete restore animation and remove from history', async () => {
@@ -597,7 +597,7 @@ describe('useStackList', () => {
       const restored = stackList.restoreCard()
       expect(restored).toBeTruthy()
       expect(restored).toEqual({ id: 2, title: 'Item 2' })
-      expect(stackList.cardsInTransition.value.find(c => c.animation?.isRestoring)?.item.id).toBe(2)
+      expect(stackList.cardsInTransition.value.find(c => c.flight?.isRestoring)?.item.id).toBe(2)
     })
   })
 

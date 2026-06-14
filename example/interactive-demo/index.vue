@@ -34,6 +34,14 @@ const defaultConfig = {
 // Configuration reactive object
 const config = ref<ConfigPanelProps>(defaultConfig)
 
+// Map the flat demo config (used by the slider UI) into the grouped `resistance`
+// prop the component expects.
+const resistance = computed(() =>
+  config.value.resistanceEffect
+    ? { threshold: config.value.resistanceThreshold, strength: config.value.resistanceStrength }
+    : null,
+)
+
 // Drag limits toggles
 const enableXLimit = ref(false)
 const enableYLimit = ref(false)
@@ -216,9 +224,7 @@ function resetConfig() {
                       :max-drag-y="enableYLimit ? config.maxDragY : null"
                       :disable-drag="config.disableDrag"
                       :wait-animation-end="config.waitAnimationEnd"
-                      :resistance-effect="config.resistanceEffect"
-                      :resistance-threshold="config.resistanceThreshold"
-                      :resistance-strength="config.resistanceStrength"
+                      :resistance="resistance"
                       @swipe-right="onSwipeRight"
                       @swipe-left="onSwipeLeft"
                       @restore="onRestore"

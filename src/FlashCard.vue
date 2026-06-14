@@ -20,37 +20,34 @@ export interface FlashCardProps extends DragSetupParams {
   // Default value: `transform: rotate(${position.delta * maxRotation}deg)`
   transformStyle?: (position: DragPosition) => string
 
-  // Animation for card transitions
-  animation?: {
+  // In-flight animation descriptor for THIS card (a "flight"). Internal wiring,
+  // set by FlashCards from the deck state — not a user-facing prop.
+  flight?: {
     type: SwipeAction
     isRestoring: boolean
     initialPosition?: DragPosition
   }
 
-  // Describes how the card flies OUT, from center: the off-screen end frame
-  // (or several for a multi-step exit). Receives (type, direction, maxRotation).
-  // The library builds the rest: it starts the swipe at the drag-release point,
-  // and plays this REVERSED for restore. Defaults to `defaultAnimationKeyframes`.
-  animationKeyframes?: AnimationKeyframes
-
-  // Duration (ms) of the fly-out / restore animation.
-  animationDuration?: number
-
-  // Easing of the fly-out / restore animation.
-  animationEasing?: string
+  // Fly-out / restore animation config. All fields optional.
+  // - `keyframes` describes how the card flies OUT, from center: the off-screen
+  //   end frame (or several for a multi-step exit). Receives (type, direction,
+  //   maxRotation). The library builds the rest: it starts the swipe at the
+  //   drag-release point and plays this REVERSED for restore. Defaults to
+  //   `defaultAnimationKeyframes`.
+  // - `duration` in ms (default 400). `easing` is any CSS easing string.
+  animation?: {
+    keyframes?: AnimationKeyframes
+    duration?: number
+    easing?: string
+  }
 }
 
 const {
   maxRotation = 0,
   transformStyle,
+  flight,
   animation,
-  animationKeyframes = defaultAnimationKeyframes,
-  animationDuration = 400,
-  animationEasing = 'cubic-bezier(0.4, 0, 0.2, 1)',
   direction = ['left', 'right'], // Default to horizontal
-  // Opt-out boolean: Vue coerces an absent boolean prop to `false`, so we must
-  // declare the default here for velocity-based ("flick") swiping to stay on.
-  swipeVelocityEnabled = true,
   ...otherProps
 } = defineProps<FlashCardProps>()
 
@@ -85,7 +82,6 @@ const emit = defineEmits<{
    */
   dragend: []
 }>()
-
 defineSlots<{
   default: (props: { isDragging: boolean, delta: number }) => any
 
@@ -95,6 +91,11 @@ defineSlots<{
   right?: (props: { delta: number }) => any
   bottom?: (props: { delta: number }) => any
 }>()
+// Resolved fly-out / restore animation settings. The grouped `animation` prop
+// is optional and each field falls back to a default.
+const animationKeyframes = animation?.keyframes ?? defaultAnimationKeyframes
+const animationDuration = animation?.duration ?? 400
+const animationEasing = animation?.easing ?? 'cubic-bezier(0.4, 0, 0.2, 1)'
 
 // Current card element ref
 const el = useTemplateRef('flash-card')
@@ -108,8 +109,9 @@ const {
 } = useDragSetup(el, () => ({
   ...otherProps,
   direction,
-  swipeVelocityEnabled,
-  ...animation,
+  // `flight.initialPosition` is the drag-release point; the rest of `flight`
+  // (type/isRestoring) is ignored by useDragSetup.
+  ...flight,
   onDragStart() {
     emit('dragstart')
   },
@@ -187,14 +189,14 @@ watch(() => otherProps.disableDrag, () => {
 let currentAnim: Animation | null = null
 // The flight object we've already started animating, tracked by identity so the
 // mount hook and the watcher don't double-run the same flight.
-let animatedFlight: FlashCardProps['animation'] | null = null
+let animatedFlight: FlashCardProps['flight'] | null = null
 
 function cancelAnim() {
   currentAnim?.cancel()
   currentAnim = null
 }
 
-function runAnimation(flight: NonNullable<FlashCardProps['animation']>) {
+function runAnimation(flight: NonNullable<FlashCardProps['flight']>) {
   if (!el.value)
     return
 
@@ -264,14 +266,13 @@ function runAnimation(flight: NonNullable<FlashCardProps['animation']>) {
 }
 
 /**
- * Start (or cancel) the animation to match the current `animation` prop. Safe to
+ * Start (or cancel) the animation to match the current `flight` prop. Safe to
  * call from both the watcher and `onMounted`: it no-ops if the current flight is
  * already running, so a card that mounts with a flight ALREADY set (a restored
  * card is a fresh DOM node) still animates — the immediate watcher fires before
  * `el` exists, so the mount hook is what actually kicks it off.
  */
 function syncAnimation() {
-  const flight = animation
   if (flight?.type) {
     if (flight !== animatedFlight)
       runAnimation(flight)
@@ -283,7 +284,7 @@ function syncAnimation() {
 }
 
 // Drive the animation imperatively whenever a flight starts or changes.
-watch(() => animation, syncAnimation, { flush: 'post' })
+watch(() => flight, syncAnimation, { flush: 'post' })
 
 onMounted(() => {
   if (el.value?.offsetHeight)
@@ -301,8 +302,8 @@ onBeforeUnmount(() => {
 // Skip's signature "wave" shimmer is a decorative pseudo-element sweep, NOT a
 // card transform — it stays in CSS (independent of the WAAPI fly-out) and is
 // gated by this flag while a skip flight is active.
-const isSkipping = computed(() => animation?.type === SwipeAction.SKIP)
-const isSkipRestoring = computed(() => isSkipping.value && !!animation?.isRestoring)
+const isSkipping = computed(() => flight?.type === SwipeAction.SKIP)
+const isSkipRestoring = computed(() => isSkipping.value && !!flight?.isRestoring)
 
 defineExpose({
   position,
@@ -399,7 +400,7 @@ defineExpose({
  * Card fly-out / restore animations are no longer CSS keyframes — they are
  * driven by the Web Animations API (`el.animate(...)`) on the real element. See
  * `animationKeyframes.ts` for the default keyframe set and the
- * `animationKeyframes` prop to override it.
+ * `animation.keyframes` prop to override it.
  *
  * The ONLY CSS animation left is skip's decorative "wave" shimmer below: a
  * pseudo-element light sweep that is NOT a card transform, so it stays in CSS

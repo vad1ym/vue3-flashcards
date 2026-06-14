@@ -46,7 +46,10 @@ export interface StackItem<T> {
   itemId: string | number
   stackIndex: number // Current position in stack (0 = top)
   isAnimating?: boolean
-  animation?: {
+  // The in-flight animation descriptor for this card (a "flight"). Internal
+  // wiring only: FlashCard consumes it to drive its WAAPI fly-out/restore. NOT
+  // the public `animation` config prop (keyframes/duration/easing).
+  flight?: {
     type: SwipeAction
     isRestoring: boolean
     initialPosition?: DragPosition
@@ -168,9 +171,9 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
   // looks like the old list of animating StackItems. (`history` is the Map
   // declared above — consumers read history.get/has/size directly.)
   //
-  // IMPORTANT: StackItem objects (and their nested `animation` object) must keep
+  // IMPORTANT: StackItem objects (and their nested `flight` object) must keep
   // a STABLE identity for as long as the underlying record is unchanged.
-  // FlashCard.vue watches `animation` by reference to drive its WAAPI animation
+  // FlashCard.vue watches `flight` by reference to drive its WAAPI animation
   // and treats a new reference as "animation replaced" (cancel + re-run) — so
   // rebuilding these objects on every recompute would falsely restart in-flight
   // animations when a sibling card starts animating (e.g. fast swipe → fast
@@ -196,7 +199,7 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
       itemId,
       stackIndex: 0,
       isAnimating: true,
-      animation: {
+      flight: {
         type: rec.action,
         isRestoring: rec.state === 'restoring',
         initialPosition: rec.initialPosition,

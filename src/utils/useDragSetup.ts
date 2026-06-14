@@ -1,6 +1,6 @@
 import type { InjectionKey, MaybeRefOrGetter, Ref } from 'vue'
 import { computed, nextTick, onMounted, onUnmounted, provide, reactive, readonly, ref, toRef, toValue } from 'vue'
-import { flashCardsDefaults } from '../config/flashcards.config'
+import { flashCardsDefaults, resistanceDefaults, velocityDefaults } from '../config/flashcards.config'
 
 export const SwipeAction = {
   // Primary directional actions
@@ -40,23 +40,31 @@ export interface DragSetupParams {
   // Initial position for the card (used for animations)
   initialPosition?: DragPosition
 
-  // Enable resistance effect when dragging beyond threshold
-  resistanceEffect?: boolean
+  // Resistance ("rubber-band") effect when dragging beyond a threshold.
+  // Disabled by default (`null`). Pass an object to enable, with optional
+  // `threshold` (px before resistance kicks in) and `strength` (0-1, where 1 is
+  // maximum resistance). An empty object `{}` uses the defaults for both.
+  resistance?: ResistanceOptions | null
 
-  // Distance threshold for resistance effect to activate
-  resistanceThreshold?: number
+  // Velocity-based ("flick") swipe completion: a fast flick completes the swipe
+  // even if the card was released before reaching `swipeThreshold`. Enabled by
+  // default. Pass `null` to disable, or an object to tune the threshold.
+  // (Disable sentinel is `null`, not `false`, so Vue doesn't infer a Boolean
+  // prop and coerce an absent value to disabled.)
+  velocity?: VelocityOptions | null
+}
 
-  // Strength of resistance (0-1, where 1 is maximum resistance)
-  resistanceStrength?: number
+export interface ResistanceOptions {
+  // Distance (px) the card can move freely before resistance starts. Default 150.
+  threshold?: number
+  // Resistance strength, 0-1 (1 = maximum resistance). Default 0.3.
+  strength?: number
+}
 
-  // Complete a swipe based on the speed of a quick flick, in addition to the
-  // distance threshold. A fast flick completes the swipe even if the card was
-  // released before reaching `swipeThreshold`. Enabled by default.
-  swipeVelocityEnabled?: boolean
-
-  // Minimum pointer speed (pixels per millisecond) along the dominant axis at
-  // release that triggers a velocity-based ("flick") swipe completion.
-  swipeVelocityThreshold?: number
+export interface VelocityOptions {
+  // Minimum pointer speed (px/ms) along the dominant axis at release that
+  // triggers a flick completion. Default 0.5.
+  threshold?: number
 }
 
 export interface DragSetupCallbacks {
@@ -172,11 +180,26 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   const maxDragX = computed(() => options.value.maxDragX ?? null)
   const swipeDirection = computed(() => options.value.direction)
   const enabledDirections = computed(() => swipeDirection.value)
-  const resistanceEffect = computed(() => options.value.resistanceEffect ?? flashCardsDefaults.resistanceEffect)
-  const resistanceThreshold = computed(() => options.value.resistanceThreshold ?? flashCardsDefaults.resistanceThreshold)
-  const resistanceStrength = computed(() => options.value.resistanceStrength ?? flashCardsDefaults.resistanceStrength)
-  const swipeVelocityEnabled = computed(() => options.value.swipeVelocityEnabled ?? flashCardsDefaults.swipeVelocityEnabled)
-  const swipeVelocityThreshold = computed(() => options.value.swipeVelocityThreshold ?? flashCardsDefaults.swipeVelocityThreshold)
+  // Resistance is off unless `resistance` is an object. Each field falls back to
+  // the library default.
+  const resistanceEffect = computed(() => !!options.value.resistance)
+  const resistanceThreshold = computed(() => {
+    const r = options.value.resistance
+    return (r && r.threshold) ?? resistanceDefaults.threshold
+  })
+  const resistanceStrength = computed(() => {
+    const r = options.value.resistance
+    return (r && r.strength) ?? resistanceDefaults.strength
+  })
+  // Velocity ("flick") completion is ON by default. `velocity: null` disables
+  // it; an object tunes the threshold. (We use `null`, not `false`, as the
+  // disable sentinel so Vue doesn't infer a Boolean prop and coerce an absent
+  // value to `false` — that would silently disable the default-on behaviour.)
+  const swipeVelocityEnabled = computed(() => options.value.velocity !== null)
+  const swipeVelocityThreshold = computed(() => {
+    const v = options.value.velocity
+    return (v && v.threshold) ?? velocityDefaults.threshold
+  })
 
   // Is drag started
   const isDragStarted = ref(false)

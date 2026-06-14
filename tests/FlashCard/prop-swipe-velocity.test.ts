@@ -1,7 +1,7 @@
 import type { VueWrapper } from '@vue/test-utils'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { flashCardsDefaults } from '../../src/config/flashcards.config'
+import { velocityDefaults } from '../../src/config/flashcards.config'
 import FlashCard from '../../src/FlashCard.vue'
 import { DragSimulator } from '../utils/drag-simular'
 
@@ -17,7 +17,7 @@ function mountCard(props: Record<string, unknown> = {}) {
   })
 }
 
-describe('[props] swipeVelocity', () => {
+describe('[props] velocity', () => {
   let wrapper: VueWrapper<InstanceType<typeof FlashCard>>
 
   describe('enabled by default', () => {
@@ -61,7 +61,7 @@ describe('[props] swipeVelocity', () => {
 
   describe('when disabled', () => {
     beforeEach(() => {
-      wrapper = mountCard({ swipeVelocityEnabled: false })
+      wrapper = mountCard({ velocity: null })
     })
 
     it('does not complete a fast flick below the distance threshold', async () => {
@@ -75,11 +75,11 @@ describe('[props] swipeVelocity', () => {
     })
   })
 
-  describe('custom swipeVelocityThreshold', () => {
+  describe('custom velocity threshold', () => {
     it('respects a higher threshold (same flick no longer completes)', async () => {
       // An unreachably high threshold means even a fast flick falls back to the
       // distance rule, which the below-threshold distance does not satisfy.
-      wrapper = mountCard({ swipeVelocityThreshold: 1000 })
+      wrapper = mountCard({ velocity: { threshold: 1000 } })
 
       await new DragSimulator(wrapper.element).flick(
         { x: BELOW_THRESHOLD_DISTANCE },
@@ -91,8 +91,8 @@ describe('[props] swipeVelocity', () => {
     })
 
     it('uses the configured default velocity threshold', () => {
-      expect(flashCardsDefaults.swipeVelocityThreshold).toBe(0.5)
-      expect(flashCardsDefaults.swipeVelocityEnabled).toBe(true)
+      expect(velocityDefaults.threshold).toBe(0.5)
+      expect(velocityDefaults.enabled).toBe(true)
     })
   })
 })

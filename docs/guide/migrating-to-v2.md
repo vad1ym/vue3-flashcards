@@ -131,9 +131,9 @@ gone, and so are the `.flash-card-animation--*` CSS classes.
 
 **If you overrode the animations with CSS** (targeting
 `.flash-card-animation--right`, `--left-restore`, etc.), those classes no longer
-exist. Move your custom animation to the new `animationKeyframes` prop — a
-function returning the off-screen fly-out frame (the library reverses it for
-restore):
+exist. Move your custom animation to the new `animation` prop — its `keyframes`
+field is a function returning the off-screen fly-out frame (the library reverses
+it for restore):
 
 ```vue
 <!-- ❌ v1: CSS keyframes targeting internal classes -->
@@ -150,31 +150,33 @@ restore):
 ```
 
 ```vue
-<!-- ✅ v2: animationKeyframes prop -->
+<!-- ✅ v2: animation prop -->
 <FlashCards
   :items="cards"
-  :animation-keyframes="animationKeyframes"
-  :animation-duration="400"
-  animation-easing="linear"
+  :animation="animation"
 />
 
 <script setup lang="ts">
 import type { AnimationContext } from 'vue3-flashcards'
 
-function animationKeyframes(ctx: AnimationContext): Keyframe {
-  // Describe ONLY the fly-out (the off-screen end frame), from center. The
-  // library starts it from the drag-release point and plays it reversed for
-  // restore — you don't write either.
-  const x = ctx.type === 'left' ? -300 : 300
-  return { transform: `translateX(${x}px) rotate(360deg)`, opacity: 0 }
+const animation = {
+  // `keyframes` describes ONLY the fly-out (the off-screen end frame), from
+  // center. The library starts it from the drag-release point and plays it
+  // reversed for restore — you don't write either.
+  keyframes: (ctx: AnimationContext): Keyframe => {
+    const x = ctx.type === 'left' ? -300 : 300
+    return { transform: `translateX(${x}px) rotate(360deg)`, opacity: 0 }
+  },
+  duration: 400,
+  easing: 'linear',
 }
 </script>
 ```
 
 > [!TIP]
-> Timing moved from the CSS `animation` shorthand to the `animationDuration`
-> (ms) and `animationEasing` props. The full API, plus how to start a swipe from
-> the drag-release point, is documented in
+> Keyframes, duration, and easing now live together in the single `animation`
+> object prop (`{ keyframes, duration, easing }`) — all fields optional. The full
+> API, plus how to start a swipe from the drag-release point, is documented in
 > [Transition Effects](../advanced/transition-effects.md).
 
 ## New in v2: velocity-aware swiping
@@ -185,29 +187,65 @@ mobile card UIs, where a quick toss is enough. Previously a swipe only completed
 once the card was dragged past the distance threshold.
 
 This is **enabled by default** and tuned with sensible defaults, so most apps get
-the better feel for free. Two props control it:
+the better feel for free. A single `velocity` prop controls it:
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `swipeVelocityEnabled` | `boolean` | `true` | Turn flick-to-swipe on/off |
-| `swipeVelocityThreshold` | `number` | `0.5` | Minimum release speed in px/ms (≈500 px/s) to trigger a flick |
+| `velocity` | `{ threshold?: number } \| null` | enabled | Flick-to-swipe config. `null` disables it; an object tunes `threshold` (release speed in px/ms, ≈500 px/s default) |
 
 If you relied on swipes completing **only** at the distance threshold (for
-example, a deliberate "drag all the way across" interaction), opt out:
+example, a deliberate "drag all the way across" interaction), opt out with
+`null`:
 
 ```vue
 <!-- ❌ Restore the old distance-only behavior -->
-<FlashCards :items="cards" :swipe-velocity-enabled="false" />
+<FlashCards :items="cards" :velocity="null" />
 ```
 
 Or tune how hard the flick must be:
 
 ```vue
 <!-- Require a faster flick before a short drag completes -->
-<FlashCards :items="cards" :swipe-velocity-threshold="0.8" />
+<FlashCards :items="cards" :velocity="{ threshold: 0.8 }" />
 ```
 
-See the [API Reference](/api/flashcards#swipevelocityenabled) for full details.
+See the [API Reference](/api/flashcards#velocity) for full details.
+
+## Grouped props
+
+v2 collapses several related flat props into single object props. The behavior is
+identical — only the shape changed. Each grouped prop's fields are optional and
+fall back to the same defaults as before.
+
+| v1 flat props | v2 grouped prop |
+|---|---|
+| `animationKeyframes`, `animationDuration`, `animationEasing` | `animation` `{ keyframes?, duration?, easing? }` |
+| `resistanceEffect`, `resistanceThreshold`, `resistanceStrength` | `resistance` `{ threshold?, strength? } \| null` |
+| `swipeVelocityEnabled`, `swipeVelocityThreshold` | `velocity` `{ threshold? } \| null` |
+
+```vue
+<!-- ❌ v1 -->
+<FlashCards
+  :items="cards"
+  :resistance-effect="true"
+  :resistance-threshold="150"
+  :resistance-strength="0.3"
+  :swipe-velocity-threshold="0.8"
+/>
+
+<!-- ✅ v2 -->
+<FlashCards
+  :items="cards"
+  :resistance="{ threshold: 150, strength: 0.3 }"
+  :velocity="{ threshold: 0.8 }"
+/>
+```
+
+> [!TIP]
+> `resistance` and `velocity` use `null` (not `false`) as the "disabled" value:
+> `:resistance="null"` keeps it off (its default), `:velocity="null"` turns
+> flick-to-swipe off. To enable resistance with defaults, pass an empty object:
+> `:resistance="{}"`.
 
 ## Deprecated API
 
@@ -225,7 +263,10 @@ this section will track them.
 | `actions` slot `approve` / `reject` | `actions` slot `swipeRight` / `swipeLeft` |
 | `approve()` exposed method | `swipeRight()` / `swipeTop()` |
 | `reject()` exposed method | `swipeLeft()` / `swipeBottom()` |
-| `.flash-card-animation--*` CSS keyframe classes | `animationKeyframes` prop (Web Animations API) |
+| `.flash-card-animation--*` CSS keyframe classes | `animation.keyframes` (Web Animations API) |
+| `animationKeyframes` / `animationDuration` / `animationEasing` props | `animation` `{ keyframes, duration, easing }` |
+| `resistanceEffect` / `resistanceThreshold` / `resistanceStrength` props | `resistance` `{ threshold, strength }` |
+| `swipeVelocityEnabled` / `swipeVelocityThreshold` props | `velocity` `{ threshold }` |
 
 ## Migrating from v0.x
 

@@ -295,7 +295,7 @@ defineExpose({
       </div>
       <!-- Unified card list - single v-for -->
       <div
-        v-for="({ item, itemId, stackIndex, isAnimating, animation }, domIndex) in stackList"
+        v-for="({ item, itemId, stackIndex, isAnimating, flight }, domIndex) in stackList"
         :key="`card-${itemId}`"
         :data-item-id="itemId"
         class="flashcards__card-wrapper"
@@ -317,7 +317,7 @@ defineExpose({
             'flashcards__card--active': itemId === currentItemId && !isAnimating,
             'flashcards__card--animating': isAnimating,
           }"
-          :animation="isAnimating ? animation : undefined"
+          :flight="isAnimating ? flight : undefined"
           :disable-drag="isDragDisabled || isAnimating"
           @complete="(action, pos) => handleCardSwipe(itemId, action, pos)"
           @mounted="containerHeight = Math.max($event, 0)"

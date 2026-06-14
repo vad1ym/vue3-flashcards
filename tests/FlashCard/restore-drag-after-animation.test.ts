@@ -59,7 +59,7 @@ describe('restore: card is draggable after the restore animation finishes', () =
   it('releases the forwards-fill (cancels) when a restore animation finishes', async () => {
     wrapper = mount(FlashCard, {
       props: {
-        animation: { type: 'left', isRestoring: true },
+        flight: { type: 'left', isRestoring: true },
       },
       slots: { default: '<div class="card-content">Test Card</div>' },
     })
@@ -83,7 +83,7 @@ describe('restore: card is draggable after the restore animation finishes', () =
   it('moves the card on drag (not just rotation) after restore finishes', async () => {
     wrapper = mount(FlashCard, {
       props: {
-        animation: { type: 'left', isRestoring: true },
+        flight: { type: 'left', isRestoring: true },
       },
       slots: { default: '<div class="card-content">Test Card</div>' },
     })
@@ -96,7 +96,7 @@ describe('restore: card is draggable after the restore animation finishes', () =
 
     // Clear the animation prop, mirroring the parent removing the record once the
     // restored card returns to `pending`.
-    await wrapper.setProps({ animation: undefined })
+    await wrapper.setProps({ flight: undefined })
 
     const cardElement = wrapper.find('.flash-card')
     new DragSimulator(cardElement).dragRightToThreshold(0.5)
@@ -111,7 +111,7 @@ describe('restore: card is draggable after the restore animation finishes', () =
   it('does NOT cancel a swipe-out fill when it finishes (card must stay off-screen)', async () => {
     wrapper = mount(FlashCard, {
       props: {
-        animation: { type: 'left', isRestoring: false },
+        flight: { type: 'left', isRestoring: false },
       },
       slots: { default: '<div class="card-content">Test Card</div>' },
     })

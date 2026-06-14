@@ -18,12 +18,22 @@ export const flashCardsDefaults = (
     itemKey: 'id',
     loop: undefined,
     waitAnimationEnd: undefined,
-    resistanceEffect: false,
-    resistanceThreshold: 150,
-    resistanceStrength: 0.3,
-    swipeVelocityEnabled: true,
-    swipeVelocityThreshold: 0.5,
-    animationDuration: 400,
-    animationEasing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    resistance: null,
+    velocity: undefined,
   } as const
 ) satisfies FlashCardsProps<any>
+
+/**
+ * Internal tuning defaults for grouped props. These are the fallbacks used when
+ * a grouped prop (`resistance`, `velocity`) is enabled but a field is omitted —
+ * they are NOT public props themselves.
+ */
+export const resistanceDefaults = {
+  threshold: 150,
+  strength: 0.3,
+} as const
+
+export const velocityDefaults = {
+  enabled: true,
+  threshold: 0.5,
+} as const

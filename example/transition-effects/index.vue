@@ -53,9 +53,11 @@ const timing: Record<TransitionName, { duration: number, easing: string }> = {
   'elastic-bounce': { duration: 600, easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)' },
 }
 
-const animationKeyframes = computed(() => transitions[selectedTransition.value])
-const animationDuration = computed(() => timing[selectedTransition.value].duration)
-const animationEasing = computed(() => timing[selectedTransition.value].easing)
+const animation = computed(() => ({
+  keyframes: transitions[selectedTransition.value],
+  duration: timing[selectedTransition.value].duration,
+  easing: timing[selectedTransition.value].easing,
+}))
 </script>
 
 <template>
@@ -113,9 +115,7 @@ const animationEasing = computed(() => timing[selectedTransition.value].easing)
     <div class="h-96 w-full relative">
       <FlashCards
         :items="cards"
-        :animation-keyframes="animationKeyframes"
-        :animation-duration="animationDuration"
-        :animation-easing="animationEasing"
+        :animation="animation"
         loop
       >
         <template #default="{ item }">
