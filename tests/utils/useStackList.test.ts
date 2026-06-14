@@ -357,6 +357,46 @@ describe('useStackList', () => {
     })
   })
 
+  describe('swipeActive target selection', () => {
+    // Regression: reject + reject, then two fast restores, then a fast reject.
+    // The two restores run back-to-front (card 2 then card 1), so card 1 is
+    // restored LAST and renders on TOP (highest z-index = last in records /
+    // cardsInTransition). A button reject must swipe the card the user SEES on
+    // top (card 1) — not the one with the highest array index (card 2), which is
+    // underneath. The old code picked by array index and swiped the wrong card.
+    it('swipes the topmost (last-restored) card with multiple cards restoring', () => {
+      const options = ref<StackListOptions<TestItem>>({
+        items: createTestItems(5),
+        loop: false,
+        renderLimit: 5,
+        itemKey: 'id',
+      })
+
+      const stackList = useStackList(options)
+
+      // reject + reject (settle each so they commit to history).
+      stackList.swipeCard(1, SwipeAction.LEFT)
+      stackList.removeAnimatingCard(1)
+      stackList.swipeCard(2, SwipeAction.LEFT)
+      stackList.removeAnimatingCard(2)
+      expect(stackList.currentItemId.value).toBe(3)
+
+      // Two fast restores: card 2 (nearest), then card 1.
+      expect(stackList.restoreCard()?.id).toBe(2)
+      expect(stackList.restoreCard()?.id).toBe(1)
+
+      // Both are restoring; card 1 was restored last → it's on top.
+      const transition = stackList.cardsInTransition.value
+      expect(transition.map(c => c.itemId)).toEqual([2, 1])
+      // Last in the list renders on top (highest z-index).
+      expect(transition.at(-1)?.itemId).toBe(1)
+
+      // A fast reject must target the topmost card (1), not array-index-max (2).
+      const swiped = stackList.swipeActive(SwipeAction.LEFT)
+      expect(swiped?.id).toBe(1)
+    })
+  })
+
   describe('animation lifecycle', () => {
     // Regression: FlashCard.vue watches `animation` by reference to drive its
     // ghost animation. If a sibling card entering transition rebuilds the

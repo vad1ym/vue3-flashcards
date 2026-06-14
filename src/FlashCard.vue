@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import type { AnimationKeyframes } from './utils/animationKeyframes'
 import type { DragPosition, DragSetupParams } from './utils/useDragSetup'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
 import ApproveIcon from './components/icons/ApproveIcon.vue'
 import RejectIcon from './components/icons/RejectIcon.vue'
+import { defaultAnimationKeyframes, restFrame } from './utils/animationKeyframes'
 import { SwipeAction, useDragSetup } from './utils/useDragSetup'
 
 export interface FlashCardProps extends DragSetupParams {
@@ -20,16 +22,31 @@ export interface FlashCardProps extends DragSetupParams {
 
   // Animation for card transitions
   animation?: {
-    type: string
+    type: SwipeAction
     isRestoring: boolean
     initialPosition?: DragPosition
   }
+
+  // Describes how the card flies OUT, from center: the off-screen end frame
+  // (or several for a multi-step exit). Receives (type, direction, maxRotation).
+  // The library builds the rest: it starts the swipe at the drag-release point,
+  // and plays this REVERSED for restore. Defaults to `defaultAnimationKeyframes`.
+  animationKeyframes?: AnimationKeyframes
+
+  // Duration (ms) of the fly-out / restore animation.
+  animationDuration?: number
+
+  // Easing of the fly-out / restore animation.
+  animationEasing?: string
 }
 
 const {
   maxRotation = 0,
   transformStyle,
   animation,
+  animationKeyframes = defaultAnimationKeyframes,
+  animationDuration = 400,
+  animationEasing = 'cubic-bezier(0.4, 0, 0.2, 1)',
   direction = ['left', 'right'], // Default to horizontal
   ...otherProps
 } = defineProps<FlashCardProps>()
@@ -99,7 +116,10 @@ const {
     emit('dragend')
   },
   onDragComplete(action) {
-    emit('complete', action, position)
+    // Snapshot the release position — `position` is reactive and keeps mutating
+    // (and resets to 0), so passing it by reference would lose the release point
+    // by the time the swipe animation reads it.
+    emit('complete', action, { ...position })
   },
 }))
 
@@ -150,80 +170,135 @@ watch(() => otherProps.disableDrag, () => {
   setupInteract()
 })
 
-// Animation classes computed
-const animationClasses = computed(() => ({
-  [`flash-card-animation--${animation?.type}`]: !!animation?.type,
-  [`flash-card-animation--${animation?.type}-restore`]: animation?.isRestoring,
-}))
+// -------------------------------------------------------------------------
+// Fly-out / restore animation via the Web Animations API.
+//
+// One system, on the REAL element: no DOM clone, no `.ghost`, no `animationend`
+// plumbing, no object-identity watch. When the `animation` prop appears we run
+// `el.animate(keyframesFor(flight))` and emit `animationend` from the returned
+// `.finished` promise. Multiple cards animate independently because each
+// FlashCard owns its own running animation — the "last animation vanishes"
+// regression is structurally impossible.
+// -------------------------------------------------------------------------
+let currentAnim: Animation | null = null
+// The flight object we've already started animating, tracked by identity so the
+// mount hook and the watcher don't double-run the same flight.
+let animatedFlight: FlashCardProps['animation'] | null = null
 
-// Simple ghost animation state
-const isGhostAnimating = ref(false)
-let currentGhost: HTMLElement | null = null
-
-// Ghost management
-function cleanupGhost() {
-  currentGhost?.remove()
-  currentGhost = null
-  isGhostAnimating.value = false
+function cancelAnim() {
+  currentAnim?.cancel()
+  currentAnim = null
 }
 
-function triggerGhostAnimation() {
-  if (!animation?.type || !el.value)
-    return
-
-  cleanupGhost()
-
-  // Create ghost
-  const wrapper = el.value.closest('.flashcards__card-wrapper') as HTMLElement
-  currentGhost = wrapper.cloneNode(true) as HTMLElement
-  currentGhost.classList.add('flashcards__ghost')
-
-  const ghostAnimationWrapper = currentGhost.querySelector('.flash-card__animation-wrapper') as HTMLElement
-
-  el.value.closest('.flashcards')?.appendChild(currentGhost)
-  isGhostAnimating.value = true
-
-  // Handle animation end
-  currentGhost.addEventListener('animationend', (e: AnimationEvent) => {
-    if (e.target === ghostAnimationWrapper) {
-      nextTick(() => {
-        cleanupGhost()
-        emit('animationend')
-      })
-    }
-  })
-}
-
-// Single watcher for animation changes
-watch(() => animation, (newAnimation, oldAnimation) => {
+function runAnimation(flight: NonNullable<FlashCardProps['animation']>) {
   if (!el.value)
     return
 
-  // Cleanup if animation changed to a new one while old is still running
-  if (oldAnimation && newAnimation && oldAnimation !== newAnimation) {
-    cleanupGhost()
+  // A fresh flight supersedes any in-flight one on THIS card.
+  cancelAnim()
+  animatedFlight = flight
+
+  // The callback describes ONLY the fly-out, from center: a single off-screen
+  // end frame (or several for a multi-step exit). We build the full keyframe set
+  // around it.
+  const out = animationKeyframes({
+    type: flight.type,
+    direction: direction || [],
+    maxRotation,
+  })
+  const outFrames = Array.isArray(out) ? out : [out]
+
+  let keyframes: Keyframe[]
+  if (flight.isRestoring) {
+    // Restore = the fly-out reversed, ending at center. The card starts where it
+    // visually is (off-screen, the fly-out's last frame) and animates back in.
+    keyframes = [...outFrames].reverse()
+    keyframes.push({ ...restFrame })
+  }
+  else {
+    // Swipe out: start where the card is, then run the fly-out frames. For a
+    // manual swipe that start is the drag-release point so the card continues
+    // from the finger instead of snapping to center; otherwise it's center.
+    // The card IS fully visible at the start (opacity 1) — we must NOT inherit
+    // the end frame's opacity (0), or the swipe-out looks like it just vanishes.
+    const release = flight.initialPosition
+    const start: Keyframe = release && (release.x !== 0 || release.y !== 0)
+      ? { transform: `translate(${release.x}px, ${release.y}px)`, opacity: 1 }
+      : { ...restFrame }
+    keyframes = [start, ...outFrames]
   }
 
-  // Trigger animation if we have a valid animation type
-  if (newAnimation?.type) {
-    nextTick(() => triggerGhostAnimation())
+  const anim = el.value.animate(keyframes, {
+    duration: animationDuration,
+    easing: animationEasing,
+    fill: 'forwards',
+  })
+  currentAnim = anim
+
+  anim.finished
+    .then(() => {
+      // Ignore if a newer flight replaced us while we were running.
+      if (currentAnim !== anim)
+        return
+      currentAnim = null
+
+      // A RESTORED card keeps the same vnode key, so it's the same element and
+      // becomes draggable again. Its `fill: 'forwards'` would keep overriding
+      // the inline `translate3D` (the drag position), freezing the card in place
+      // — only the inner rotation child (never touched by WAAPI) would still
+      // move. The restore's final frame IS center (== the inline rest state), so
+      // cancelling the fill here is visually seamless and hands control back to
+      // the drag. Swipe-outs are NOT cancelled: their fill must hold the card
+      // off-screen until the parent commits/removes it.
+      if (flight.isRestoring)
+        anim.cancel()
+
+      emit('animationend')
+    })
+    // `.cancel()` rejects `.finished` with an AbortError — expected, swallow it.
+    .catch(() => {})
+}
+
+/**
+ * Start (or cancel) the animation to match the current `animation` prop. Safe to
+ * call from both the watcher and `onMounted`: it no-ops if the current flight is
+ * already running, so a card that mounts with a flight ALREADY set (a restored
+ * card is a fresh DOM node) still animates — the immediate watcher fires before
+ * `el` exists, so the mount hook is what actually kicks it off.
+ */
+function syncAnimation() {
+  const flight = animation
+  if (flight?.type) {
+    if (flight !== animatedFlight)
+      runAnimation(flight)
   }
-}, { immediate: true })
+  else {
+    animatedFlight = null
+    cancelAnim()
+  }
+}
+
+// Drive the animation imperatively whenever a flight starts or changes.
+watch(() => animation, syncAnimation, { flush: 'post' })
 
 onMounted(() => {
-  if (el.value?.offsetHeight) {
+  if (el.value?.offsetHeight)
     emit('mounted', el.value.offsetHeight)
 
-    // Check if we need to trigger animation after mount
-    if (animation?.type && !isGhostAnimating.value) {
-      triggerGhostAnimation()
-    }
-  }
+  // A card may mount with a flight already set (e.g. a restored card is a fresh
+  // node). `el` now exists, so kick off whatever the watcher couldn't.
+  syncAnimation()
 })
 
 onBeforeUnmount(() => {
-  cleanupGhost()
+  cancelAnim()
 })
+
+// Skip's signature "wave" shimmer is a decorative pseudo-element sweep, NOT a
+// card transform — it stays in CSS (independent of the WAAPI fly-out) and is
+// gated by this flag while a skip flight is active.
+const isSkipping = computed(() => animation?.type === SwipeAction.SKIP)
+const isSkipRestoring = computed(() => isSkipping.value && !!animation?.isRestoring)
 
 defineExpose({
   position,
@@ -237,15 +312,18 @@ defineExpose({
     :class="{
       'flash-card--dragging': isDragging,
       'flash-card--drag-disabled': otherProps.disableDrag,
-      'flash-card--hidden': isGhostAnimating,
     }"
     :style="{ transform: `translate3D(${position.x}px, ${position.y}px, 0)` }"
   >
-    <div
-      class="flash-card__animation-wrapper"
-      :class="animationClasses"
-    >
-      <div class="flash-card__transform" :style="getTransformStyle(position)">
+    <div class="flash-card__animation-wrapper">
+      <div
+        class="flash-card__transform"
+        :class="{
+          'flash-card__transform--skip': isSkipping && !isSkipRestoring,
+          'flash-card__transform--skip-restore': isSkipRestoring,
+        }"
+        :style="getTransformStyle(position)"
+      >
         <slot :is-dragging="isDragging" :delta="position.delta" />
 
         <!-- Directional slots -->
@@ -313,103 +391,46 @@ defineExpose({
   z-index: 10;
 }
 
-.flash-card--hidden {
-  opacity: 0 !important;
-  transition: none !important;
-  pointer-events: none !important;
-}
-
-/* Disable all animations for hidden elements - they will be handled by ghost */
-.flash-card--hidden .flash-card__animation-wrapper {
-  animation: none !important;
-}
-
-/* Base animations */
-.flash-card-animation--skip { animation: skip-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--skip-restore { animation: restore-skip-horizontal 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-
-/* Directional animations */
-.flash-card-animation--top { animation: swipe-top 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--left { animation: swipe-left 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--right { animation: swipe-right 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--bottom { animation: swipe-bottom 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-
-/* Directional restore animations */
-.flash-card-animation--top-restore { animation: restore-top 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--left-restore { animation: restore-left 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--right-restore { animation: restore-right 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-.flash-card-animation--bottom-restore { animation: restore-bottom 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
-
-/* Keyframes */
-@keyframes skip-horizontal {
-  0% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 0;
-  }
-}
-
-.flash-card-animation--skip .flash-card__transform {
+/*
+ * Card fly-out / restore animations are no longer CSS keyframes — they are
+ * driven by the Web Animations API (`el.animate(...)`) on the real element. See
+ * `animationKeyframes.ts` for the default keyframe set and the
+ * `animationKeyframes` prop to override it.
+ *
+ * The ONLY CSS animation left is skip's decorative "wave" shimmer below: a
+ * pseudo-element light sweep that is NOT a card transform, so it stays in CSS
+ * and runs alongside the WAAPI opacity fade without reintroducing two transform
+ * systems.
+ */
+.flash-card__transform--skip,
+.flash-card__transform--skip-restore {
   overflow: hidden;
 }
 
-/* Skip wave effect - unified for both directions */
-.flash-card-animation--skip .flash-card__transform::before,
-.flash-card-animation--skip-restore .flash-card__transform::before {
+.flash-card__transform--skip::before,
+.flash-card__transform--skip-restore::before {
   content: '';
   position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
-  z-index: 1;
-  border-radius: 8px;
   top: 0;
   left: -100%;
+  z-index: 1;
+  border-radius: 8px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
 }
 
-/* Wave animation - same for both horizontal and vertical */
-.flash-card-animation--skip .flash-card__transform::before {
-  animation: skip-wave 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
-}
-.flash-card-animation--skip-restore .flash-card__transform::before {
-  animation: skip-wave 0.4s cubic-bezier(0.4,0,0.2,1) reverse forwards;
-}
-@keyframes skip-wave { to { left: 100%; } }
-@keyframes skip-wave-vertical { to { top: 100%; } }
-@keyframes restore-skip-horizontal {
-  0% { transform: translateX(0); opacity: 0; }
-  50% { transform: translateX(0); opacity: 0.3; }
-  100% { transform: translateX(0); opacity: 1; }
+.flash-card__transform--skip::before {
+  animation: flash-card-skip-wave 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* Vertical keyframes */
-@keyframes skip-vertical {
-  0% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 0;
+.flash-card__transform--skip-restore::before {
+  animation: flash-card-skip-wave 0.4s cubic-bezier(0.4, 0, 0.2, 1) reverse forwards;
+}
+
+@keyframes flash-card-skip-wave {
+  to {
+    left: 100%;
   }
 }
-@keyframes restore-skip-vertical {
-  0% { transform: translateY(0); opacity: 0; }
-  50% { transform: translateY(0); opacity: 0.3; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-/* Directional keyframes */
-@keyframes swipe-right { to {transform:translateX(320px) rotate(15deg);opacity:0;} }
-@keyframes swipe-left { to {transform:translateX(-320px) rotate(-15deg);opacity:0;} }
-@keyframes swipe-top { to {transform:translateY(-320px) scale(0.8);opacity:0;} }
-@keyframes swipe-bottom { to {transform:translateY(320px) scale(0.8);opacity:0;} }
-
-@keyframes restore-right { from {transform:translateX(320px) rotate(15deg);opacity:0;} to {transform:translateX(0) rotate(0deg);opacity:1;} }
-@keyframes restore-left { from {transform:translateX(-320px) rotate(-15deg);opacity:0;} to {transform:translateX(0) rotate(0deg);opacity:1;} }
-@keyframes restore-top { from {transform:translateY(-320px) scale(0.8);opacity:0;} to {transform:translateY(0) scale(1);opacity:1;} }
-@keyframes restore-bottom { from {transform:translateY(320px) scale(0.8);opacity:0;} to {transform:translateY(0) scale(1);opacity:1;} }
 </style>

@@ -382,12 +382,4 @@ defineExpose({
 }
 .flashcards__card--active { pointer-events: all; }
 .flashcards-empty-state { grid-area:1/1; display:flex;align-items:center;justify-content:center; }
-
-.flashcards__ghost,
-.flashcards__ghost * {
-  pointer-events: none !important;
-}
-.flashcards__ghost {
-  z-index: 9999;
-}
 </style>

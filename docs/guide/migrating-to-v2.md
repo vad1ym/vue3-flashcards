@@ -120,6 +120,63 @@ Unlike the old aliases, the directional methods work in every mode (preset and
 array `swipeDirection`), so the `console.warn` you may have seen in array mode is
 gone.
 
+## Animations: CSS keyframes → Web Animations API
+
+In v2 the swipe-out and restore animations are driven by the
+[Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API)
+(`element.animate()`) instead of CSS `@keyframes`. The internal `.ghost` clone is
+gone, and so are the `.flash-card-animation--*` CSS classes.
+
+**If you used the default animations, nothing changes** — they look the same.
+
+**If you overrode the animations with CSS** (targeting
+`.flash-card-animation--right`, `--left-restore`, etc.), those classes no longer
+exist. Move your custom animation to the new `animationKeyframes` prop — a
+function returning the off-screen fly-out frame (the library reverses it for
+restore):
+
+```vue
+<!-- ❌ v1: CSS keyframes targeting internal classes -->
+<FlashCards :items="cards" class="fast-rotate" />
+
+<style>
+.fast-rotate .flash-card-animation--right {
+  animation: fastSpin 0.4s linear forwards !important;
+}
+@keyframes fastSpin {
+  to { transform: translateX(300px) rotate(360deg); opacity: 0; }
+}
+</style>
+```
+
+```vue
+<!-- ✅ v2: animationKeyframes prop -->
+<FlashCards
+  :items="cards"
+  :animation-keyframes="animationKeyframes"
+  :animation-duration="400"
+  animation-easing="linear"
+/>
+
+<script setup lang="ts">
+import type { AnimationContext } from 'vue3-flashcards'
+
+function animationKeyframes(ctx: AnimationContext): Keyframe {
+  // Describe ONLY the fly-out (the off-screen end frame), from center. The
+  // library starts it from the drag-release point and plays it reversed for
+  // restore — you don't write either.
+  const x = ctx.type === 'left' ? -300 : 300
+  return { transform: `translateX(${x}px) rotate(360deg)`, opacity: 0 }
+}
+</script>
+```
+
+> [!TIP]
+> Timing moved from the CSS `animation` shorthand to the `animationDuration`
+> (ms) and `animationEasing` props. The full API, plus how to start a swipe from
+> the drag-release point, is documented in
+> [Transition Effects](../advanced/transition-effects.md).
+
 ## Deprecated API
 
 The following APIs are **removed in v2**. They are listed here for reference
@@ -136,6 +193,7 @@ this section will track them.
 | `actions` slot `approve` / `reject` | `actions` slot `swipeRight` / `swipeLeft` |
 | `approve()` exposed method | `swipeRight()` / `swipeTop()` |
 | `reject()` exposed method | `swipeLeft()` / `swipeBottom()` |
+| `.flash-card-animation--*` CSS keyframe classes | `animationKeyframes` prop (Web Animations API) |
 
 ## Migrating from v0.x
 

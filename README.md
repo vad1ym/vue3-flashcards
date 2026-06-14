@@ -244,6 +244,9 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `stackDirection` | `'top' \| 'bottom' \| 'left' \| 'right'` | `'bottom'` | Direction where stacked cards appear relative to the active card. |
 | `waitAnimationEnd` | `boolean` | `false` | Wait for animation to end before performing next action |
 | `transformStyle` | `(position: DragPosition) => string \| null` | `null` | Custom transform function for card movement during drag |
+| `animationKeyframes` | `(ctx: AnimationContext) => Keyframe \| Keyframe[]` | built-in fly-out | Custom fly-out animation (Web Animations API). Returns the off-screen end frame; the library starts it from the release point and reverses it for restore (see below) |
+| `animationDuration` | `number` | `400` | Duration (ms) of the swipe-out / restore animation |
+| `animationEasing` | `string` | `cubic-bezier(0.4, 0, 0.2, 1)` | Easing of the swipe-out / restore animation |
 
 #### Transform Style Function
 
@@ -268,6 +271,41 @@ function blurTransform(position) {
   return `transform: rotate(${position.delta * 20}deg); filter: blur(${Math.abs(position.delta) * 3}px)`
 }
 ```
+
+#### Custom Swipe Animations
+
+> Since **v2**, swipe-out and restore animations use the [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API) instead of CSS keyframes. Override them with the `animationKeyframes` prop. The old `.flash-card-animation--*` CSS classes are removed.
+
+The callback describes **only how the card flies out**, from center — the
+off-screen end frame (or an array of frames for a multi-step exit). The library
+builds the rest:
+
+- **swipe-out** — starts the card at the drag-release point (so a manual swipe
+  continues from the finger, not from center) → your fly-out frames.
+- **restore** — plays your fly-out frames **in reverse**, ending at center. You
+  never write the restore animation; it's the mirror of the swipe.
+
+```ts
+import type { AnimationContext } from 'vue3-flashcards'
+
+function animationKeyframes(ctx: AnimationContext): Keyframe {
+  // ctx: { type, direction, maxRotation } — just return the off-screen frame.
+  const x = ctx.type === 'left' ? -320 : 320
+  return { transform: `translateX(${x}px) rotate(15deg)`, opacity: 0 }
+}
+```
+
+```vue
+<FlashCards
+  :items="cards"
+  :animation-keyframes="animationKeyframes"
+  :animation-duration="400"
+  animation-easing="cubic-bezier(0.4, 0, 0.2, 1)"
+/>
+```
+
+The built-in `defaultAnimationKeyframes` is also exported for wrapping in partial
+overrides.
 
 ### Key Slots
 

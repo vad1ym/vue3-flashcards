@@ -10,7 +10,8 @@ import TransitionEffectsUsage from '../../example/transition-effects/index.vue'
 
 <Badge>Advanced</Badge>
 
-Custom CSS animations with different transition styles.
+Custom swipe-out and restore animations via the `animationKeyframes` prop
+(Web Animations API).
 
 ## Demo
 
@@ -26,22 +27,23 @@ Custom CSS animations with different transition styles.
 
 ## Key Concepts
 
-- **Transition classes**: Apply CSS animations to swiped cards
-- **Custom keyframes**: Define your own animations
-- **Per-direction styles**: Different animations for left/right/top/bottom
-- Override default swipe-out animations
+- **`animationKeyframes`**: a function returning the off-screen fly-out frame
+- **`AnimationContext`**: `type`, `direction`, `maxRotation`
+- **Per-direction styles**: branch on `ctx.type` for left/right/top/bottom
+- **One frame, both ways**: the library starts the swipe from the drag-release point and plays it reversed for restore
+- **Timing**: `animationDuration` / `animationEasing`
 
 ## Common Patterns
 
-```css
-/* Fast rotation */
-.fast-rotate { animation: fastSpin 0.3s ease-out; }
+```ts
+function animationKeyframes(ctx) {
+  const x = ctx.type === 'left' ? -300 : 300
 
-/* Elastic bounce */
-.elastic { animation: elasticBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-
-/* 3D flip */
-.flip-3d { animation: flip3D 0.6s ease-in-out; }
+  // Just the off-screen end frame:
+  return { transform: `translateX(${x}px) rotate(360deg)`, opacity: 0 }
+  // Scale to zero:  { transform: `translateX(${x}px) scale(0)`, opacity: 0 }
+  // 3D flip:        { transform: `translateX(${x}px) rotateY(180deg)`, opacity: 0 }
+}
 ```
 
 ## Related

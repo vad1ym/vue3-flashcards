@@ -1,5 +1,5 @@
 import type { MaybeRefOrGetter } from 'vue'
-import type { DragPosition } from './useDragSetup'
+import type { DragPosition, SwipeAction } from './useDragSetup'
 import { computed, reactive, ref, toValue, watch } from 'vue'
 
 /**
@@ -37,7 +37,7 @@ export type CardState = 'swiping' | 'restoring'
 
 export interface CardRecord {
   state: CardState
-  action: string // swipe direction / type
+  action: SwipeAction // swipe direction / type
   initialPosition?: DragPosition
 }
 
@@ -47,7 +47,7 @@ export interface StackItem<T> {
   stackIndex: number // Current position in stack (0 = top)
   isAnimating?: boolean
   animation?: {
-    type: string
+    type: SwipeAction
     isRestoring: boolean
     initialPosition?: DragPosition
   }
@@ -86,7 +86,7 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
   // two in lock-step so this union is always consistent.
   // -------------------------------------------------------------------------
   const records = reactive(new Map<string | number, CardRecord>())
-  const history = reactive(new Map<string | number, string>())
+  const history = reactive(new Map<string | number, SwipeAction>())
 
   // True while any card is animating (swiping out or restoring back in).
   const hasCardsInTransition = computed(() => records.size > 0)
@@ -170,11 +170,12 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
   //
   // IMPORTANT: StackItem objects (and their nested `animation` object) must keep
   // a STABLE identity for as long as the underlying record is unchanged.
-  // FlashCard.vue watches `animation` by reference to drive its ghost animation
-  // and treats a new reference as "animation replaced" — so rebuilding these
-  // objects on every recompute would falsely cancel in-flight animations when a
-  // sibling card starts animating (e.g. fast swipe → fast restore). We cache by
-  // itemId and only rebuild when the record's meaningful fields change.
+  // FlashCard.vue watches `animation` by reference to drive its WAAPI animation
+  // and treats a new reference as "animation replaced" (cancel + re-run) — so
+  // rebuilding these objects on every recompute would falsely restart in-flight
+  // animations when a sibling card starts animating (e.g. fast swipe → fast
+  // restore). We cache by itemId and only rebuild when the record's meaningful
+  // fields change.
   // -------------------------------------------------------------------------
   const stackItemCache = new Map<string | number, { rec: CardRecord, stackItem: StackItem<T> }>()
 
@@ -320,7 +321,7 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
    * Overwriting an existing record is intentional: restore → fast next lands
    * here and simply cancels the in-flight restore by switching it to swiping.
    */
-  function swipeCard(itemId: string | number, type: string, initialPosition?: DragPosition): T | undefined {
+  function swipeCard(itemId: string | number, type: SwipeAction, initialPosition?: DragPosition): T | undefined {
     const { items, waitAnimationEnd } = options.value
 
     // Block new actions while something animates, if requested.
@@ -351,21 +352,21 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
    * that target-selection so consumers don't need to know about the state
    * machine — they just call swipeActive(type).
    */
-  function swipeActive(type: string): T | undefined {
+  function swipeActive(type: SwipeAction): T | undefined {
     // A restoring card takes priority as the action target. With several cards
-    // restoring at once (e.g. two fast restores), the target is the one NEAREST
-    // the active card — the topmost, most-recently-restored card the user sees —
-    // NOT whichever happens to come first in `records` insertion order.
+    // restoring at once (e.g. two fast restores), the target is the TOPMOST card
+    // the user sees — the one with the highest z-index.
+    //
+    // z-index of animating cards follows `records` INSERTION order (see the
+    // stack template: animating cards render in `transitionList` / `records`
+    // order, later ones on top). Restores run back-to-front (descending array
+    // index), so the LAST-inserted restoring record — the last one iterated, NOT
+    // the highest array index — is the one on top. Picking by array index would
+    // swipe the card UNDERNEATH the one the user is looking at.
     let target: string | number | undefined
-    let targetIdx = -1
     for (const [id, rec] of records) {
-      if (rec.state !== 'restoring')
-        continue
-      const idx = indexOfId(id)
-      if (idx > targetIdx) {
-        targetIdx = idx
-        target = id
-      }
+      if (rec.state === 'restoring')
+        target = id // keep overwriting → ends on the last (topmost) one
     }
     if (target !== undefined)
       return swipeCard(target, type)

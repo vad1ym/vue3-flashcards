@@ -35,3 +35,5 @@ coverage/
 test-results.xml
 *.lcov
 .env
+# Playwright MCP debug artifacts
+.playwright-mcp/

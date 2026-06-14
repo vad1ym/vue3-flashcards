@@ -1,9 +1,12 @@
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import type { AnimationContext } from '../../src/utils/animationKeyframes'
+import { computed, ref } from 'vue'
 import FlashCards from '../../src/FlashCards.vue'
 import TransitionCard from './TransitionCard.vue'
 
-const selectedTransition = ref('fast-rotate')
+type TransitionName = 'fast-rotate' | 'scale-out' | 'flip-3d' | 'elastic-bounce'
+
+const selectedTransition = ref<TransitionName>('fast-rotate')
 
 const cards = [
   { id: 1, title: 'Fast Rotate', description: 'Cards spin rapidly while exiting', color: '#FF6B6B' },
@@ -12,6 +15,47 @@ const cards = [
   { id: 4, title: 'Elastic Bounce', description: 'Cards bounce with elastic effect', color: '#FFA726' },
   { id: 5, title: 'Custom Effects', description: 'Combine multiple animations', color: '#AB47BC' },
 ]
+
+/**
+ * Horizontal exit offset, signed by direction. Cards only swipe left/right in
+ * this demo, so we build the off-screen X from the action type.
+ */
+function exitX(type: AnimationContext['type']): number {
+  return type === 'left' ? -300 : 300
+}
+
+/**
+ * Each transition describes ONLY the fly-out (the off-screen end frame), from
+ * center. The library starts it from the drag-release point and plays it
+ * reversed for restore — we don't write either here.
+ */
+const transitions: Record<TransitionName, (ctx: AnimationContext) => Keyframe> = {
+  'fast-rotate': (ctx) => {
+    const deg = ctx.type === 'left' ? -360 : 360
+    return { transform: `translateX(${exitX(ctx.type)}px) rotate(${deg}deg)`, opacity: 0 }
+  },
+  'scale-out': ctx => ({ transform: `translateX(${exitX(ctx.type)}px) scale(0)`, opacity: 0 }),
+  'flip-3d': (ctx) => {
+    const y = ctx.type === 'left' ? -180 : 180
+    return { transform: `translateX(${exitX(ctx.type)}px) rotateY(${y}deg) rotateX(45deg)`, opacity: 0 }
+  },
+  'elastic-bounce': (ctx) => {
+    const deg = ctx.type === 'left' ? -15 : 15
+    return { transform: `translateX(${exitX(ctx.type)}px) scale(1.3) rotate(${deg}deg)`, opacity: 0 }
+  },
+}
+
+// Per-transition timing/easing, applied alongside the keyframes.
+const timing: Record<TransitionName, { duration: number, easing: string }> = {
+  'fast-rotate': { duration: 400, easing: 'linear' },
+  'scale-out': { duration: 300, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' },
+  'flip-3d': { duration: 500, easing: 'ease-in-out' },
+  'elastic-bounce': { duration: 600, easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)' },
+}
+
+const animationKeyframes = computed(() => transitions[selectedTransition.value])
+const animationDuration = computed(() => timing[selectedTransition.value].duration)
+const animationEasing = computed(() => timing[selectedTransition.value].easing)
 </script>
 
 <template>
@@ -69,7 +113,9 @@ const cards = [
     <div class="h-96 w-full relative">
       <FlashCards
         :items="cards"
-        :class="selectedTransition"
+        :animation-keyframes="animationKeyframes"
+        :animation-duration="animationDuration"
+        :animation-easing="animationEasing"
         loop
       >
         <template #default="{ item }">
@@ -79,49 +125,3 @@ const cards = [
     </div>
   </div>
 </template>
-
-<style>
-/* Fast Rotate Animation */
-.fast-rotate .flash-card-animation--right { animation: fast-rotate-right 0.4s linear forwards !important; transform-origin: 50% 50% !important; }
-.fast-rotate .flash-card-animation--left { animation: fast-rotate-left 0.4s linear forwards !important; transform-origin: 50% 50% !important; }
-.fast-rotate .flash-card-animation--right-restore { animation: fast-rotate-restore-right 0.4s linear forwards !important; transform-origin: 50% 50% !important; }
-.fast-rotate .flash-card-animation--left-restore { animation: fast-rotate-restore-left 0.4s linear forwards !important; transform-origin: 50% 50% !important; }
-
-@keyframes fast-rotate-right { 0%{opacity:1;} 100%{transform:translateX(300px) rotate(360deg);opacity:0;} }
-@keyframes fast-rotate-left { 0%{opacity:1;} 100%{transform:translateX(-300px) rotate(-360deg);opacity:0;} }
-@keyframes fast-rotate-restore-right { 0%{transform:translateX(300px) rotate(360deg);opacity:0;} 100%{transform:translateX(0) rotate(0deg);opacity:1;} }
-@keyframes fast-rotate-restore-left { 0%{transform:translateX(-300px) rotate(-360deg);opacity:0;} 100%{transform:translateX(0) rotate(0deg);opacity:1;} }
-
-/* Scale Out Animation */
-.scale-out .flash-card-animation--right { animation: scale-out-right 0.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards !important; }
-.scale-out .flash-card-animation--left { animation: scale-out-left 0.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards !important; }
-.scale-out .flash-card-animation--right-restore { animation: scale-out-restore-right 0.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards !important; }
-.scale-out .flash-card-animation--left-restore { animation: scale-out-restore-left 0.3s cubic-bezier(0.25,0.46,0.45,0.94) forwards !important; }
-
-@keyframes scale-out-right { 0%{opacity:1;} 100%{transform:translateX(300px) scale(0);opacity:0;} }
-@keyframes scale-out-left { 0%{opacity:1;} 100%{transform:translateX(-300px) scale(0);opacity:0;} }
-@keyframes scale-out-restore-right { 0%{transform:translateX(300px) scale(0);opacity:0;} 100%{transform:translateX(0) scale(1);opacity:1;} }
-@keyframes scale-out-restore-left { 0%{transform:translateX(-300px) scale(0);opacity:0;} 100%{transform:translateX(0) scale(1);opacity:1;} }
-
-/* 3D Flip Animation */
-.flip-3d .flash-card-animation--right { animation: flip-3d-right 0.5s ease-in-out forwards !important; }
-.flip-3d .flash-card-animation--left { animation: flip-3d-left 0.5s ease-in-out forwards !important; }
-.flip-3d .flash-card-animation--right-restore { animation: flip-3d-restore-right 0.5s ease-in-out forwards !important; }
-.flip-3d .flash-card-animation--left-restore { animation: flip-3d-restore-left 0.5s ease-in-out forwards !important; }
-
-@keyframes flip-3d-right { 0%{opacity:1;} 100%{transform:translateX(300px) rotateY(180deg) rotateX(45deg);opacity:0;} }
-@keyframes flip-3d-left { 0%{opacity:1;} 100%{transform:translateX(-300px) rotateY(-180deg) rotateX(45deg);opacity:0;} }
-@keyframes flip-3d-restore-right { 0%{transform:translateX(300px) rotateY(180deg) rotateX(45deg);opacity:0;} 100%{transform:translateX(0) rotateY(0deg) rotateX(0deg);opacity:1;} }
-@keyframes flip-3d-restore-left { 0%{transform:translateX(-300px) rotateY(-180deg) rotateX(45deg);opacity:0;} 100%{transform:translateX(0) rotateY(0deg) rotateX(0deg);opacity:1;} }
-
-/* Elastic Bounce Animation */
-.elastic-bounce .flash-card-animation--right { animation: elastic-bounce-right 0.6s cubic-bezier(0.68,-0.55,0.265,1.55) forwards !important; }
-.elastic-bounce .flash-card-animation--left { animation: elastic-bounce-left 0.4s cubic-bezier(0.55,0.055,0.675,0.19) forwards !important; }
-.elastic-bounce .flash-card-animation--right-restore { animation: elastic-bounce-restore-right 0.6s cubic-bezier(0.68,-0.55,0.265,1.55) forwards !important; }
-.elastic-bounce .flash-card-animation--left-restore { animation: elastic-bounce-restore-left 0.4s cubic-bezier(0.55,0.055,0.675,0.19) forwards !important; }
-
-@keyframes elastic-bounce-right { 0%{opacity:1;} 100%{transform:translateX(300px) scale(1.3) rotate(15deg);opacity:0;} }
-@keyframes elastic-bounce-left { 0%{opacity:1;} 100%{transform:translateX(-300px) scale(1.3) rotate(-15deg);opacity:0;} }
-@keyframes elastic-bounce-restore-right { 0%{transform:translateX(300px) scale(1.3) rotate(15deg);opacity:0;} 100%{transform:translateX(0) scale(1) rotate(0deg);opacity:1;} }
-@keyframes elastic-bounce-restore-left { 0%{transform:translateX(-300px) scale(1.3) rotate(-15deg);opacity:0;} 100%{transform:translateX(0) scale(1) rotate(0deg);opacity:1;} }
-</style>
