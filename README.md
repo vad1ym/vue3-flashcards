@@ -19,6 +19,7 @@
 ## ✨ Features
 
 - **🎯 Tinder-style interactions** - Intuitive swipe gestures with smooth animations
+- **💨 Velocity-aware swiping** - A quick flick completes a swipe even below the distance threshold (enabled by default, fully configurable)
 - **🔄 Card flipping** - Two-sided cards with beautiful flip animations
 - **⚡ Zero dependencies** - Lightweight and performant, built purely with Vue 3 and CSS
 - **🎨 Smooth animations** - Hardware-accelerated CSS transitions for 60fps performance
@@ -229,6 +230,8 @@ For complete documentation, visit **[documentation](https://vad1ym.github.io/vue
 | `maxRotation` | `number` | `20` | Maximum rotation angle in degrees |
 | `swipeThreshold` | `number` | `150` | Swipe swipeThreshold in pixels |
 | `dragThreshold` | `number` | `5` | Minimum drag distance to start swiping |
+| `swipeVelocityEnabled` | `boolean` | `true` | Complete a swipe on a fast flick even if released before `swipeThreshold`. Set to `false` to require the distance threshold only |
+| `swipeVelocityThreshold` | `number` | `0.5` | Minimum pointer speed in px/ms (≈500 px/s) along the dominant axis at release to trigger a flick swipe |
 | `swipeDirection` | `'horizontal' \| 'vertical' \| ('left' \| 'right' \| 'top' \| 'bottom')[]` | `'horizontal'` | Direction of swiping: preset modes (`'horizontal'` for left/right, `'vertical'` for up/down) or custom array of directions (e.g., `['left', 'right', 'top']` for Tinder-like UX). Affects swipe detection, default transform, and exit animations |
 | `maxDragY` | `number \| null` | `null` | Maximum Y dragging distance in pixels (null = unlimited) |
 | `maxDragX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |

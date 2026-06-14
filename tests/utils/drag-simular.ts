@@ -54,6 +54,43 @@ export class DragSimulator {
     })
   }
 
+  /**
+   * Simulate a fast "flick": move through a sequence of points with a fixed
+   * real-time delay between each pointermove so the composable measures a high
+   * release velocity. Ends with a pointerup at the final point.
+   *
+   * @param target - Final offset from the drag start (x and/or y, in px)
+   * @param target.x - Final horizontal offset in px
+   * @param target.y - Final vertical offset in px
+   * @param options - Flick timing options
+   * @param options.steps - Number of intermediate pointermove events
+   * @param options.stepDelayMs - Real delay (ms) between moves; lower = faster flick
+   */
+  async flick(
+    target: { x?: number, y?: number },
+    options: { steps?: number, stepDelayMs?: number } = {},
+  ) {
+    const { steps = 5, stepDelayMs = 4 } = options
+    const targetX = target.x ?? 0
+    const targetY = target.y ?? 0
+
+    // Listeners attach on mount via nextTick; let any pending microtasks flush
+    // so pointerdown is actually observed by the composable.
+    await Promise.resolve()
+
+    this.dragStart()
+
+    for (let i = 1; i <= steps; i++) {
+      const fraction = i / steps
+      this.dragMove([{ x: targetX * fraction, y: targetY * fraction }])
+      await new Promise(resolve => setTimeout(resolve, stepDelayMs))
+    }
+
+    this.dragEnd()
+
+    return this
+  }
+
   dragStart(position: DragPosition = { x: '50%', y: '50%' }) {
     const rect = this.element.getBoundingClientRect()
 

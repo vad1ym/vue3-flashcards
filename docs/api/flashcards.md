@@ -33,6 +33,33 @@ The main component for creating swipeable card interfaces.
 - **Default:** `5`
 - **Description:** Minimum distance in pixels the card must be dragged to start swiping. Helps prevent false positives from small movements like clicks.
 
+### `swipeVelocityEnabled`
+
+- **Type:** `boolean`
+- **Default:** `true`
+- **Description:** Enable velocity-based ("flick") swipe completion. When enabled, a fast flick completes the swipe even if the card is released before reaching `swipeThreshold` — matching the feel of native mobile card UIs where a quick toss is enough. The flick must point the same way the card was already moving, so a brief jitter never flings the card the wrong direction. Set to `false` to require the distance threshold only.
+
+**Example:**
+```vue
+<!-- Distance threshold only, no flick completion -->
+<FlashCards :items="cards" :swipe-velocity-enabled="false" />
+```
+
+### `swipeVelocityThreshold`
+
+- **Type:** `number`
+- **Default:** `0.5`
+- **Description:** Minimum pointer speed (pixels per millisecond) along the dominant axis at the moment of release required to trigger a flick swipe. The default of `0.5` px/ms (≈500 px/s) is a comfortable mid-range flick: deliberate enough to avoid accidental swipes, light enough not to require force. Lower values make the cards easier to flick away; higher values demand a faster gesture. Only applies when `swipeVelocityEnabled` is `true`.
+
+**Example:**
+```vue
+<!-- Require a faster flick -->
+<FlashCards :items="cards" :swipe-velocity-threshold="0.8" />
+
+<!-- Very easy to flick away -->
+<FlashCards :items="cards" :swipe-velocity-threshold="0.3" />
+```
+
 ### `swipeDirection`
 
 - **Type:** `'horizontal' | 'vertical' | ('left' | 'right' | 'top' | 'bottom')[]`

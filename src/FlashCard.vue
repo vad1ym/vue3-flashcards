@@ -48,6 +48,9 @@ const {
   animationDuration = 400,
   animationEasing = 'cubic-bezier(0.4, 0, 0.2, 1)',
   direction = ['left', 'right'], // Default to horizontal
+  // Opt-out boolean: Vue coerces an absent boolean prop to `false`, so we must
+  // declare the default here for velocity-based ("flick") swiping to stay on.
+  swipeVelocityEnabled = true,
   ...otherProps
 } = defineProps<FlashCardProps>()
 
@@ -105,6 +108,7 @@ const {
 } = useDragSetup(el, () => ({
   ...otherProps,
   direction,
+  swipeVelocityEnabled,
   ...animation,
   onDragStart() {
     emit('dragstart')

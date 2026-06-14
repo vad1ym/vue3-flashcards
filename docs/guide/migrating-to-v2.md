@@ -177,6 +177,38 @@ function animationKeyframes(ctx: AnimationContext): Keyframe {
 > the drag-release point, is documented in
 > [Transition Effects](../advanced/transition-effects.md).
 
+## New in v2: velocity-aware swiping
+
+v2 adds **flick-to-swipe**. A card now completes a swipe on a fast flick even
+when it is released before reaching `swipeThreshold` — the same feel as native
+mobile card UIs, where a quick toss is enough. Previously a swipe only completed
+once the card was dragged past the distance threshold.
+
+This is **enabled by default** and tuned with sensible defaults, so most apps get
+the better feel for free. Two props control it:
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `swipeVelocityEnabled` | `boolean` | `true` | Turn flick-to-swipe on/off |
+| `swipeVelocityThreshold` | `number` | `0.5` | Minimum release speed in px/ms (≈500 px/s) to trigger a flick |
+
+If you relied on swipes completing **only** at the distance threshold (for
+example, a deliberate "drag all the way across" interaction), opt out:
+
+```vue
+<!-- ❌ Restore the old distance-only behavior -->
+<FlashCards :items="cards" :swipe-velocity-enabled="false" />
+```
+
+Or tune how hard the flick must be:
+
+```vue
+<!-- Require a faster flick before a short drag completes -->
+<FlashCards :items="cards" :swipe-velocity-threshold="0.8" />
+```
+
+See the [API Reference](/api/flashcards#swipevelocityenabled) for full details.
+
 ## Deprecated API
 
 The following APIs are **removed in v2**. They are listed here for reference

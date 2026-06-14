@@ -48,6 +48,15 @@ export interface DragSetupParams {
 
   // Strength of resistance (0-1, where 1 is maximum resistance)
   resistanceStrength?: number
+
+  // Complete a swipe based on the speed of a quick flick, in addition to the
+  // distance threshold. A fast flick completes the swipe even if the card was
+  // released before reaching `swipeThreshold`. Enabled by default.
+  swipeVelocityEnabled?: boolean
+
+  // Minimum pointer speed (pixels per millisecond) along the dominant axis at
+  // release that triggers a velocity-based ("flick") swipe completion.
+  swipeVelocityThreshold?: number
 }
 
 export interface DragSetupCallbacks {
@@ -98,6 +107,44 @@ function getDirectionFromPosition(
   return null
 }
 
+// Resolve the swipe direction implied by a fast flick at release. Unlike
+// `getDirectionFromPosition` (distance-based), this looks at the pointer
+// velocity along each axis: a quick flick completes the swipe even when the card
+// was released short of `swipeThreshold`. The flick must point the same way the
+// card was already dragged (sign of velocity matches sign of offset) so a brief
+// jitter in the opposite direction never flings the card the wrong way.
+function getDirectionFromVelocity(
+  x: number,
+  y: number,
+  vx: number,
+  vy: number,
+  enabledDirections: Direction[],
+  velocityThreshold: number,
+): Direction | null {
+  const absVX = Math.abs(vx)
+  const absVY = Math.abs(vy)
+
+  // Dominant axis is whichever the flick is faster along.
+  if (absVX >= absVY) {
+    if (absVX < velocityThreshold)
+      return null
+    if (enabledDirections.includes('right') && vx > 0 && x > 0)
+      return 'right'
+    if (enabledDirections.includes('left') && vx < 0 && x < 0)
+      return 'left'
+  }
+  else {
+    if (absVY < velocityThreshold)
+      return null
+    if (enabledDirections.includes('top') && vy < 0 && y < 0)
+      return 'top'
+    if (enabledDirections.includes('bottom') && vy > 0 && y > 0)
+      return 'bottom'
+  }
+
+  return null
+}
+
 // For nested components to notify about dragging state
 export const IsDraggingStateInjectionKey = Symbol('is-dragging-key') as InjectionKey<Readonly<Ref<boolean>>>
 
@@ -128,6 +175,8 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   const resistanceEffect = computed(() => options.value.resistanceEffect ?? flashCardsDefaults.resistanceEffect)
   const resistanceThreshold = computed(() => options.value.resistanceThreshold ?? flashCardsDefaults.resistanceThreshold)
   const resistanceStrength = computed(() => options.value.resistanceStrength ?? flashCardsDefaults.resistanceStrength)
+  const swipeVelocityEnabled = computed(() => options.value.swipeVelocityEnabled ?? flashCardsDefaults.swipeVelocityEnabled)
+  const swipeVelocityThreshold = computed(() => options.value.swipeVelocityThreshold ?? flashCardsDefaults.swipeVelocityThreshold)
 
   // Is drag started
   const isDragStarted = ref(false)
@@ -140,6 +189,45 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
 
   let startX = 0
   let startY = 0
+
+  // Recent pointer samples (position + timestamp) used to estimate release
+  // velocity for flick detection. We keep a short trailing window so the
+  // velocity reflects the final motion, not the whole gesture.
+  const VELOCITY_SAMPLE_WINDOW = 100 // ms
+  // Minimum time the samples must span before we trust a velocity reading.
+  // Below this, a few near-instant moves (e.g. a synthetic/programmatic jump)
+  // would read as an implausibly high speed, so we treat velocity as zero.
+  const MIN_VELOCITY_INTERVAL = 5 // ms
+  let samples: { x: number, y: number, t: number }[] = []
+
+  function now() {
+    return typeof performance !== 'undefined' ? performance.now() : Date.now()
+  }
+
+  function recordSample(x: number, y: number) {
+    const t = now()
+    samples.push({ x, y, t })
+    // Drop samples older than the trailing window (keep at least one fallback).
+    while (samples.length > 1 && t - samples[0].t > VELOCITY_SAMPLE_WINDOW)
+      samples.shift()
+  }
+
+  // Velocity (px/ms) along each axis from the oldest in-window sample to the last.
+  function getVelocity() {
+    if (samples.length < 2)
+      return { vx: 0, vy: 0 }
+
+    const first = samples[0]
+    const last = samples[samples.length - 1]
+    const dt = last.t - first.t
+    if (dt < MIN_VELOCITY_INTERVAL)
+      return { vx: 0, vy: 0 }
+
+    return {
+      vx: (last.x - first.x) / dt,
+      vy: (last.y - first.y) / dt,
+    }
+  }
 
   // Provide dragging state to nested components
   provide(IsDraggingStateInjectionKey, readonly(isDragging))
@@ -180,6 +268,9 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
 
     startX = event.clientX - position.x
     startY = event.clientY - position.y
+
+    samples = []
+    recordSample(position.x, position.y)
 
     onDragStart()
   }
@@ -259,6 +350,8 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     position.delta = delta
     position.type = currentDirection
 
+    recordSample(limitedX, limitedY)
+
     onDragMove(position.type, position.delta)
   }
 
@@ -272,12 +365,28 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     activePointerId.value = null
 
     // Determine if swipe completion threshold is reached
-    const completedDirection = getDirectionFromPosition(
+    let completedDirection = getDirectionFromPosition(
       position.x,
       position.y,
       enabledDirections.value || [],
       swipeThreshold.value,
     )
+
+    // Fall back to velocity-based ("flick") completion: a quick release short of
+    // the distance threshold still completes the swipe if it was fast enough.
+    if (!completedDirection && swipeVelocityEnabled.value) {
+      const { vx, vy } = getVelocity()
+      completedDirection = getDirectionFromVelocity(
+        position.x,
+        position.y,
+        vx,
+        vy,
+        enabledDirections.value || [],
+        swipeVelocityThreshold.value,
+      )
+    }
+
+    samples = []
 
     if (completedDirection) {
       onDragComplete(completedDirection)
