@@ -1,3 +1,7 @@
+---
+outline: [2, 3]
+---
+
 # FlipCard API
 
 A standalone component for creating flippable cards with front and back content.

@@ -18,34 +18,25 @@
 
 ## ✨ Features
 
-- **🎯 Tinder-style interactions** - Intuitive swipe gestures with smooth animations
-- **💨 Velocity-aware swiping** - A quick flick completes a swipe even below the distance threshold (enabled by default, fully configurable)
-- **🔄 Card flipping** - Two-sided cards with beautiful flip animations
-- **⚡ Zero dependencies** - Lightweight and performant, built purely with Vue 3 and CSS
-- **🎨 Smooth animations** - Hardware-accelerated CSS transitions for 60fps performance
-- **🔧 Highly customizable** - Extensive API with props, slots, events, and custom transforms
-- **📱 Touch & Mouse support** - Works seamlessly on desktop and mobile devices
-- **♾️ Loop mode** - Loop through cards endlessly for continuous swiping
-- **🎯 Stack visualization** - Show multiple cards stacked with customizable depth and direction
-- **⚙️ Virtual rendering** - Efficient rendering for large datasets with render limit
-- **🔄 Restore functionality** - Undo swipes and bring cards back to the stack
+- **🎯 Tinder-style swiping** — intuitive drag gestures with smooth animations
+- **🔄 Card flipping** — two-sided cards with a flip animation
+- **⚡ Zero dependencies** — built purely with Vue 3 and CSS
+- **📱 Touch & mouse** — works on desktop and mobile
+- **🎨 Bring your own styles** — the library ships no CSS for card content; you style it however you like
+- **🔧 Customizable** — props, slots, events, custom transforms and animations
+- **♾️ Loop mode**, **🃏 stacked cards**, **↩️ restore (undo)**, and **⚙️ virtual rendering** for large decks
 
 ## 📦 Installation
 
 ```bash
-# npm
 npm install vue3-flashcards
-
-# yarn
-yarn add vue3-flashcards
-
-# pnpm
-pnpm add vue3-flashcards
+# or: yarn add vue3-flashcards · pnpm add vue3-flashcards
 ```
 
 ## 🚀 Quick Start
 
-### Basic Usage
+A minimal swipeable deck. The library handles the gestures and animations — you
+provide the card content and its styling (plain CSS here):
 
 ```vue
 <script setup>
@@ -57,349 +48,63 @@ const cards = ref([
   { id: 2, title: 'Second Card' },
   { id: 3, title: 'Third Card' },
 ])
+
+function onSwipeRight(item) {
+  console.log('liked', item)
+}
+function onSwipeLeft(item) {
+  console.log('passed', item)
+}
 </script>
 
 <template>
   <FlashCards
     :items="cards"
-    #="{ item }"
-  >
-    <div class="card">
-      <h2>{{ item.title }}</h2>
-    </div>
-  </FlashCards>
-</template>
-```
-
-### Advanced Usage with Multi-Directional Swipe
-
-```vue
-<template>
-  <FlashCards
-    :items="cards"
-    :swipe-direction="['left', 'right', 'top']"
-    :resistance-effect="true"
-    :resistance-threshold="100"
-    :resistance-strength="0.5"
-    :swipe-threshold="150"
-    :stack="3"
-    :loop="true"
-    @swipe-left="onLeft"
-    @swipe-right="onRight"
-    @swipe-top="onTop"
+    @swipe-right="onSwipeRight"
+    @swipe-left="onSwipeLeft"
   >
     <template #default="{ item }">
       <div class="card">
         <h2>{{ item.title }}</h2>
-        <p>{{ item.description }}</p>
-      </div>
-    </template>
-
-    <template #left="{ delta }">
-      <div class="indicator" :style="{ opacity: delta }">
-        ❌ Nope
-      </div>
-    </template>
-
-    <template #right="{ delta }">
-      <div class="indicator" :style="{ opacity: delta }">
-        ❤️ Like
-      </div>
-    </template>
-
-    <template #top="{ delta }">
-      <div class="indicator" :style="{ opacity: delta }">
-        ⭐ Super Like
       </div>
     </template>
   </FlashCards>
 </template>
-```
 
-### Vue Plugin (Global Configuration)
-
-Install the plugin to register components globally and set default configuration:
-
-```typescript
-// main.ts
-import { createApp } from 'vue'
-import { FlashCardsPlugin } from 'vue3-flashcards'
-import App from './App.vue'
-
-const app = createApp(App)
-
-app.use(FlashCardsPlugin, {
-  flashCards: {
-    // Global defaults for FlashCards components
-    stack: 3,
-    stackOffset: 25,
-    swipeThreshold: 150,
-    loop: true,
-  },
-  flipCard: {
-    // Global defaults for FlipCard components
-    flipAxis: 'x',
-    waitAnimationEnd: false,
-  }
-})
-
-app.mount('#app')
-```
-
-Now components are globally available without imports:
-
-```vue
-<template>
-  <!-- No imports needed! -->
-  <FlashCards :items="cards">
-    <template #default="{ item }">
-      <div>{{ item.title }}</div>
-    </template>
-  </FlashCards>
-
-  <FlipCard>
-    <template #front>
-      Front
-    </template>
-    <template #back>
-      Back
-    </template>
-  </FlipCard>
-</template>
-```
-
-### Nuxt Module
-
-For Nuxt applications, use the dedicated module:
-
-```typescript
-// nuxt.config.ts
-export default defineNuxtConfig({
-  modules: ['vue3-flashcards/nuxt'],
-
-  // Global configuration
-  flashcards: {
-    stack: 3,
-    stackOffset: 25,
-    swipeThreshold: 150,
-    loop: true,
-  }
-})
-```
-
-Components are auto-imported and globally available:
-
-```vue
-<template>
-  <!-- Auto-imported, no imports needed! -->
-  <FlashCards :items="cards">
-    <template #default="{ item }">
-      <div>{{ item.title }}</div>
-    </template>
-  </FlashCards>
-
-  <FlipCard>
-    <template #front>
-      Front
-    </template>
-    <template #back>
-      Back
-    </template>
-  </FlipCard>
-</template>
-```
-
-**Features:**
-- ✅ **SSR Compatible** - Works perfectly with server-side rendering
-- ✅ **Auto-import** - Components available without imports
-- ✅ **Global Config** - Set defaults for all components
-- ✅ **TypeScript** - Full IntelliSense in `nuxt.config.ts`
-
----
-
-## 📖 API Reference
-
-For complete documentation, visit **[documentation](https://vad1ym.github.io/vue3-flashcards)**
-
-### FlashCards Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `items` | `T[]` | **required** | Array of items to display as cards |
-| `itemKey` | `string \| number` | `id` | Property to track items by. When provided, items will be tracked by this property instead of their index. Should be unique for each item. This is recommended to use when you modify items array in runtime. |
-| `maxRotation` | `number` | `20` | Maximum rotation angle in degrees |
-| `swipeThreshold` | `number` | `150` | Swipe swipeThreshold in pixels |
-| `dragThreshold` | `number` | `5` | Minimum drag distance to start swiping |
-| `swipeVelocityEnabled` | `boolean` | `true` | Complete a swipe on a fast flick even if released before `swipeThreshold`. Set to `false` to require the distance threshold only |
-| `swipeVelocityThreshold` | `number` | `0.5` | Minimum pointer speed in px/ms (≈500 px/s) along the dominant axis at release to trigger a flick swipe |
-| `swipeDirection` | `'horizontal' \| 'vertical' \| ('left' \| 'right' \| 'top' \| 'bottom')[]` | `'horizontal'` | Direction of swiping: preset modes (`'horizontal'` for left/right, `'vertical'` for up/down) or custom array of directions (e.g., `['left', 'right', 'top']` for Tinder-like UX). Affects swipe detection, default transform, and exit animations |
-| `maxDragY` | `number \| null` | `null` | Maximum Y dragging distance in pixels (null = unlimited) |
-| `maxDragX` | `number \| null` | `null` | Maximum X dragging distance in pixels (null = unlimited) |
-| `disableDrag` | `boolean` | `false` | Completely disable dragging functionality. Manual methods and slot actions still work |
-| `resistanceEffect` | `boolean` | `false` | Enable resistance when dragging beyond threshold |
-| `resistanceThreshold` | `number` | `150` | Distance threshold for resistance effect to activate |
-| `resistanceStrength` | `number` | `0.3` | Strength of resistance (0-1, where 1 is maximum resistance) |
-| `loop` | `boolean` | `false` | Enable loop swiping mode (cards loop endlessly) |
-| `renderLimit` | `number` | `3` | Cards to render. Can't be lower than 1. |
-| `stack` | `number` | `0` | Number of cards to show stacked behind the active card. When stack is greater than renderLimit, renderLimit is automatically increased to stack + 2. |
-| `stackOffset` | `number` | `20` | Offset in pixels between stacked cards. |
-| `stackScale` | `number` | `0.05` | Scale reduction factor for stacked cards. Each card behind is scaled down by this amount × depth. |
-| `stackDirection` | `'top' \| 'bottom' \| 'left' \| 'right'` | `'bottom'` | Direction where stacked cards appear relative to the active card. |
-| `waitAnimationEnd` | `boolean` | `false` | Wait for animation to end before performing next action |
-| `transformStyle` | `(position: DragPosition) => string \| null` | `null` | Custom transform function for card movement during drag |
-| `animationKeyframes` | `(ctx: AnimationContext) => Keyframe \| Keyframe[]` | built-in fly-out | Custom fly-out animation (Web Animations API). Returns the off-screen end frame; the library starts it from the release point and reverses it for restore (see below) |
-| `animationDuration` | `number` | `400` | Duration (ms) of the swipe-out / restore animation |
-| `animationEasing` | `string` | `cubic-bezier(0.4, 0, 0.2, 1)` | Easing of the swipe-out / restore animation |
-
-#### Transform Style Function
-
-The `transformStyle` prop allows you to customize how cards transform during drag interactions. It receives a `DragPosition` object with `x`, `y`, and `delta` properties.
-
-**Default behavior:**
-```javascript
-function defaultTransform(position) {
-  return `transform: rotate(${position.delta * maxRotation}deg)`
+<style scoped>
+.card {
+  width: 300px;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
+</style>
 ```
 
-**Custom examples:**
-```javascript
-// Scale effect
-function scaleTransform(position) {
-  return `transform: rotate(${position.delta * 15}deg) scale(${1 - Math.abs(position.delta) * 0.1})`
-}
+That's the whole basic usage. Everything below is optional.
 
-// Blur effect
-function blurTransform(position) {
-  return `transform: rotate(${position.delta * 20}deg); filter: blur(${Math.abs(position.delta) * 3}px)`
-}
-```
+> [!NOTE]
+> **Styling is up to you.** The library provides the swipe / flip / stack
+> mechanics but no visual styles for your card content. The examples use plain
+> CSS; you can use any approach (CSS Modules, UnoCSS, Tailwind, a UI kit, etc.).
 
-#### Custom Swipe Animations
+## 📖 Learn more
 
-> Since **v2**, swipe-out and restore animations use the [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API) instead of CSS keyframes. Override them with the `animationKeyframes` prop. The old `.flash-card-animation--*` CSS classes are removed.
+The full documentation has guides, runnable examples, and the complete API:
 
-The callback describes **only how the card flies out**, from center — the
-off-screen end frame (or an array of frames for a multi-step exit). The library
-builds the rest:
+- **[Getting Started](https://vad1ym.github.io/vue3-flashcards/guide/getting-started)** — install and build your first deck
+- **[Essentials](https://vad1ym.github.io/vue3-flashcards/essentials/)** — swipe directions, card content, events, actions, flip cards
+- **[Advanced](https://vad1ym.github.io/vue3-flashcards/advanced/)** — stacks, loop mode, drag limits, custom transforms & transitions, virtual rendering
+- **[Examples](https://vad1ym.github.io/vue3-flashcards/examples/)** — Tinder-style, flip cards, custom actions, and more
+- **[API Reference](https://vad1ym.github.io/vue3-flashcards/api/flashcards)** — every prop, slot, event, and method
+- **[Migrating to v2](https://vad1ym.github.io/vue3-flashcards/guide/migrating-to-v2)** — upgrading from v1 / v0.x
 
-- **swipe-out** — starts the card at the drag-release point (so a manual swipe
-  continues from the finger, not from center) → your fly-out frames.
-- **restore** — plays your fly-out frames **in reverse**, ending at center. You
-  never write the restore animation; it's the mirror of the swipe.
+Using Nuxt or want global defaults? See [Installation](https://vad1ym.github.io/vue3-flashcards/guide/installation) for the Vue plugin and Nuxt module.
 
-```ts
-import type { AnimationContext } from 'vue3-flashcards'
+## License
 
-function animationKeyframes(ctx: AnimationContext): Keyframe {
-  // ctx: { type, direction, maxRotation } — just return the off-screen frame.
-  const x = ctx.type === 'left' ? -320 : 320
-  return { transform: `translateX(${x}px) rotate(15deg)`, opacity: 0 }
-}
-```
-
-```vue
-<FlashCards
-  :items="cards"
-  :animation-keyframes="animationKeyframes"
-  :animation-duration="400"
-  animation-easing="cubic-bezier(0.4, 0, 0.2, 1)"
-/>
-```
-
-The built-in `defaultAnimationKeyframes` is also exported for wrapping in partial
-overrides.
-
-### Key Slots
-
-| Slot Name | Props | Description |
-|-----------|-------|-------------|
-| default | `{ item: T, activeItemKey: number `\|` string }` | Main content of the card (front side) |
-| actions | `{ restore: () => void, swipeTop: () => void, swipeLeft: () => void, swipeRight: () => void, swipeBottom: () => void, skip: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean }` | Custom actions UI. `restore` returns to previous card, directional methods trigger swipe animations, `skip` moves to next without swiping, `reset` resets all cards |
-| top | `{ item: T, delta: number }` | Content shown when swiping up (indicator) |
-| left | `{ item: T, delta: number }` | Content shown when swiping left (indicator) |
-| right | `{ item: T, delta: number }` | Content shown when swiping right (indicator) |
-| bottom | `{ item: T, delta: number }` | Content shown when swiping down (indicator) |
-| empty | - | Content shown when all cards have been swiped |
-
-## Events
-
-| Event Name | Payload | Description |
-|------------|---------|-------------|
-| swipeTop | `item: T` | Emitted when a card is swiped up |
-| swipeLeft | `item: T` | Emitted when a card is swiped left |
-| swipeRight | `item: T` | Emitted when a card is swiped right |
-| swipeBottom | `item: T` | Emitted when a card is swiped down |
-| skip | `item: T` | Emitted when a card is skipped (skipped via actions) - moves to next card without swipe |
-| restore | `item: T` | Emitted when a card is restored (returned to the stack via restore action) |
-| loop | - | Emitted when a new loop cycle starts in loop mode (all cards have been swiped) |
-| dragstart | `item: T` | Emitted when user starts dragging a card |
-| dragmove | `item: T, type: SwipeAction \| null, delta: number` | Emitted during card dragging with movement details |
-| dragend | `item: T` | Emitted when user stops dragging a card |
-
-## Exposed
-| Method/Property | Type | Description |
-|----------------|------|-------------|
-| swipeTop | `() => void` | Triggers upward swipe on current card |
-| swipeLeft | `() => void` | Triggers left swipe on current card |
-| swipeRight | `() => void` | Triggers right swipe on current card |
-| swipeBottom | `() => void` | Triggers downward swipe on current card |
-| restore | `() => void` | Returns to the previous card if available |
-| skip | `() => void` | Triggers skip animation on current card - moves to next card without swipe |
-| reset | `(options?) => void` | Resets all cards to initial state. Options: `{ animated?: boolean, delay?: number }` |
-| canRestore | `boolean` | Whether there is a previous card to restore to |
-| isEnd | `boolean` | Whether all cards have been swiped |
-
-## FlipCard Component
-
-The `FlipCard` component provides card flipping functionality and can be used independently or within FlashCards.
-
-### Props
-
-| Prop Name | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| disabled | `boolean` | No | `false` | Disable card flipping functionality |
-| waitAnimationEnd | `boolean` | No | `true` | Wait for animation to end before allowing another flip |
-| flipAxis | `'x' \| 'y'` | No | `'y'` | Axis of rotation for the flip animation (x = horizontal, y = vertical) |
-
-### Slots
-
-| Slot Name | Props | Description |
-|-----------|-------|-------------|
-| front | `{ flip: () => void }` | Content shown on the front of the card. Receives `flip` method for programmatic flipping |
-| back | `{ flip: () => void }` | Content shown on the back of the card (optional). Receives `flip` method for programmatic flipping |
-
-### Events
-
-| Event Name | Payload | Description |
-|------------|---------|-------------|
-| flip | `isFlipped: boolean` | Emitted when the card is flipped. `true` when showing back side, `false` when showing front side |
-
-### Exposed Methods
-
-| Method | Type | Description |
-|--------|------|-------------|
-| flip | `() => void` | Programmatically flip the card. Respects `disabled` and `waitAnimationEnd` props |
-
-### FlipCard Usage Example
-
-```vue
-<script setup>
-import { FlipCard } from 'vue3-flashcards'
-</script>
-
-<template>
-  <FlipCard>
-    <template #front>
-      <div class="card-front">
-        Front Content
-      </div>
-    </template>
-    <template #back>
-      <div class="card-back">
-        Back Content
-      </div>
-    </template>
-  </FlipCard>
-</template>
-```
+[MIT](./LICENSE) © vad1ym

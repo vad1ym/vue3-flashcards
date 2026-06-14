@@ -8,11 +8,12 @@ Number of visible stacked cards:
 
 ```vue
 <FlashCards :stack="3" :items="cards">
-  <!-- Shows 3 cards stacked -->
+  <!-- Shows 3 cards behind the active card -->
 </FlashCards>
 ```
 
-Default: `1` (no stacking) | Range: `1-10`
+Default: `0` (no stacking). This is the number of cards shown _behind_ the
+active one.
 
 ## Stack Direction
 
@@ -38,27 +39,28 @@ Pixel distance between stacked cards:
 
 ## Stack Scale
 
-Scale factor for each stacked card:
+How much smaller each card behind the active one gets. This is a **reduction
+factor per depth**: a card at depth _n_ is scaled by `1 - stackScale × n`.
 
 ```vue
-<FlashCards :stack-scale="0.95" :items="cards">
-  <!-- Each card is 95% of previous -->
+<FlashCards :stack-scale="0.05" :items="cards">
+  <!-- 1st behind: 95%, 2nd behind: 90%, ... -->
 </FlashCards>
 ```
 
-Range: `0-1` (1 = no scaling)
+Default: `0.05`. Use `0` for no scaling (all cards the same size).
 
 ## Visual Effect
 
 ```
 ┌─────────────┐
 │             │
-|   Card 1    | ← active card (100%)
+|   Card 1    | ← active card (100%, offset 0)
 |             |
 ├─────────────┤
-│   Card 2    │ ← stackScale, offset × 1
+│   Card 2    │ ← scale 1 − stackScale×1, offset × 1
 ├─────────────┤
-│   Card 3    │ ← stackScale², offset × 2
+│   Card 3    │ ← scale 1 − stackScale×2, offset × 2
 └─────────────┘
 ```
 

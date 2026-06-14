@@ -29,23 +29,34 @@ function handleLeft(item: CardType) {
 
 ## Drag Events
 
-Track drag state in real-time:
+Track drag state in real-time. `dragstart` and `dragend` receive the item;
+`dragmove` receives the item, the current direction, and a normalized `delta`:
 
 ```vue
-<FlashCards
-  :items="cards"
-  @dragstart="isDragging = true"
-  @dragmove="handleDragMove"
-  @dragend="isDragging = false"
->
-  <!-- ... -->
-</FlashCards>
-```
+<script setup>
+import { ref } from 'vue'
 
-```typescript
-function handleDragMove(data: { item: CardType; delta: { x: number; y: number } }) {
-  // Update UI based on drag position
+const isDragging = ref(false)
+
+// type: 'left' | 'right' | 'top' | 'bottom' | null
+// delta: -1 to 1 (how far toward the swipe threshold)
+function handleDragMove(item, type, delta) {
+  console.log(`dragging ${item.id} toward ${type} (${delta.toFixed(2)})`)
 }
+</script>
+
+<template>
+  <FlashCards
+    :items="cards"
+    @dragstart="isDragging = true"
+    @dragmove="handleDragMove"
+    @dragend="isDragging = false"
+  >
+    <template #default="{ item }">
+      <!-- card content -->
+    </template>
+  </FlashCards>
+</template>
 ```
 
 ## Special Events

@@ -1,3 +1,7 @@
+---
+outline: [2, 3]
+---
+
 # FlashCards API
 
 The main component for creating swipeable card interfaces.
@@ -33,31 +37,23 @@ The main component for creating swipeable card interfaces.
 - **Default:** `5`
 - **Description:** Minimum distance in pixels the card must be dragged to start swiping. Helps prevent false positives from small movements like clicks.
 
-### `swipeVelocityEnabled`
+### `velocity`
 
-- **Type:** `boolean`
-- **Default:** `true`
-- **Description:** Enable velocity-based ("flick") swipe completion. When enabled, a fast flick completes the swipe even if the card is released before reaching `swipeThreshold` — matching the feel of native mobile card UIs where a quick toss is enough. The flick must point the same way the card was already moving, so a brief jitter never flings the card the wrong direction. Set to `false` to require the distance threshold only.
+- **Type:** `{ threshold?: number } | null`
+- **Default:** enabled (with default threshold `0.5`)
+- **Description:** Velocity-based ("flick") swipe completion. A fast flick completes the swipe even if the card is released before reaching `swipeThreshold` — matching the feel of native mobile card UIs where a quick toss is enough. The flick must point the same way the card was already moving, so a brief jitter never flings the card the wrong direction. It is **on by default**; pass `null` to require the distance threshold only, or an object to tune the threshold.
+  - **`threshold`** (`number`, default `0.5`): minimum pointer speed in px/ms (≈500 px/s) at release to trigger a flick. Lower = easier to flick away; higher = needs a faster gesture.
 
 **Example:**
 ```vue
 <!-- Distance threshold only, no flick completion -->
-<FlashCards :items="cards" :swipe-velocity-enabled="false" />
-```
+<FlashCards :items="cards" :velocity="null" />
 
-### `swipeVelocityThreshold`
-
-- **Type:** `number`
-- **Default:** `0.5`
-- **Description:** Minimum pointer speed (pixels per millisecond) along the dominant axis at the moment of release required to trigger a flick swipe. The default of `0.5` px/ms (≈500 px/s) is a comfortable mid-range flick: deliberate enough to avoid accidental swipes, light enough not to require force. Lower values make the cards easier to flick away; higher values demand a faster gesture. Only applies when `swipeVelocityEnabled` is `true`.
-
-**Example:**
-```vue
 <!-- Require a faster flick -->
-<FlashCards :items="cards" :swipe-velocity-threshold="0.8" />
+<FlashCards :items="cards" :velocity="{ threshold: 0.8 }" />
 
 <!-- Very easy to flick away -->
-<FlashCards :items="cards" :swipe-velocity-threshold="0.3" />
+<FlashCards :items="cards" :velocity="{ threshold: 0.3 }" />
 ```
 
 ### `swipeDirection`
@@ -102,55 +98,29 @@ The main component for creating swipeable card interfaces.
 - **Default:** `false`
 - **Description:** Completely disable dragging functionality. When disabled, cards cannot be swiped with touch or mouse gestures. Manual methods (`swipeRight()`, `swipeLeft()`, `restore()`, etc.) and slot actions still work normally.
 
-### `resistanceEffect`
+### `resistance`
 
-- **Type:** `boolean`
-- **Default:** `false`
-- **Description:** Enable resistance effect when dragging beyond the resistance threshold. When enabled, cards become increasingly difficult to drag once they pass the `resistanceThreshold` distance, creating a "sticky" or "elastic" feel that provides visual and tactile feedback to users about the swipe progress.
-
-**Example:**
-```vue
-<FlashCards :items="cards" :resistance-effect="true" />
-```
-
-### `resistanceThreshold`
-
-- **Type:** `number`
-- **Default:** `150`
-- **Description:** Distance threshold in pixels for resistance effect to activate. Once the card is dragged beyond this distance, resistance begins to apply. This works independently of `swipeThreshold` - you can have resistance start before or after the swipe completion threshold.
-
-**Example:**
-```vue
-<!-- Resistance starts at 100px, swipe completes at 150px -->
-<FlashCards
-  :items="cards"
-  :resistance-effect="true"
-  :resistance-threshold="100"
-  :swipe-threshold="150"
-/>
-```
-
-### `resistanceStrength`
-
-- **Type:** `number`
-- **Default:** `0.3`
-- **Description:** Strength of resistance effect (0-1, where 1 is maximum resistance). Higher values create stronger resistance, making cards harder to drag beyond the threshold. A value of 0 effectively disables resistance, while 1 creates very strong resistance.
+- **Type:** `{ threshold?: number, strength?: number } | null`
+- **Default:** `null` (disabled)
+- **Description:** Rubber-band "resistance" when dragging beyond a threshold. Once the card passes `threshold` it becomes increasingly hard to drag, creating a "sticky" / elastic feel that signals swipe progress. Pass an object to enable it (use `{}` for defaults), or `null` to disable.
+  - **`threshold`** (`number`, default `150`): distance in px the card moves freely before resistance starts. Independent of `swipeThreshold`.
+  - **`strength`** (`number` 0–1, default `0.3`): how hard it resists past the threshold. `1` is the strongest; near `0` is barely noticeable.
 
 **Examples:**
 ```vue
-<!-- Light resistance -->
+<!-- Enable with defaults -->
+<FlashCards :items="cards" :resistance="{}" />
+
+<!-- Resistance starts at 100px, swipe completes at 150px -->
 <FlashCards
   :items="cards"
-  :resistance-effect="true"
-  :resistance-strength="0.2"
+  :resistance="{ threshold: 100 }"
+  :swipe-threshold="150"
 />
 
-<!-- Strong resistance -->
-<FlashCards
-  :items="cards"
-  :resistance-effect="true"
-  :resistance-strength="0.8"
-/>
+<!-- Light vs strong resistance -->
+<FlashCards :items="cards" :resistance="{ strength: 0.2 }" />
+<FlashCards :items="cards" :resistance="{ strength: 0.8 }" />
 ```
 
 **Resistance Effect Behavior:**
@@ -268,6 +238,35 @@ function blurTransform(position) {
 }
 </script>
 ```
+
+### `animation`
+
+- **Type:** `{ keyframes?, duration?, easing? }`
+- **Default:** built-in Tinder-style fly-out
+- **Description:** Customizes the swipe-out / restore animation (driven by the [Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API)). All three fields are optional — omit the prop to keep the defaults.
+  - **`keyframes`** (`(ctx: AnimationContext) => Keyframe | Keyframe[]`): the off-screen end frame the card flies out to, from center. The library starts it from the drag-release point and plays it reversed for restore.
+  - **`duration`** (`number`, default `400`): fly-out / restore duration in ms.
+  - **`easing`** (`string`, default `cubic-bezier(0.4, 0, 0.2, 1)`): any CSS easing string.
+
+**Example:**
+```vue
+<script setup>
+const animation = {
+  duration: 300,
+  easing: 'ease-out',
+  keyframes: (ctx) => {
+    const x = ctx.type === 'left' ? -320 : 320
+    return { transform: `translateX(${x}px) rotate(15deg)`, opacity: 0 }
+  },
+}
+</script>
+
+<template>
+  <FlashCards :items="cards" :animation="animation" />
+</template>
+```
+
+See [Transition Effects](../advanced/transition-effects.md) for the full guide.
 
 ## Slots
 

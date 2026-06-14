@@ -62,6 +62,5 @@ function handleSwipeRight(item) {
 ## Next Steps
 
 - **[Installation](./installation.md)** - npm, yarn, pnpm, Vue plugin, Nuxt module
-- **[Basic Concepts](./basic-concepts.md)** - Items array, card lifecycle, events
 - **[Essentials](../essentials/)** - Core features: swipe directions, events, actions
 - **[Examples](../examples/)** - Interactive demos

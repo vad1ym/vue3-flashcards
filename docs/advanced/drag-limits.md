@@ -54,17 +54,22 @@ Limit how far cards can be dragged:
 
 ## With Resistance
 
-Combine with `resistanceEffect` for physical feedback:
+Add a rubber-band "resistance" effect with the `resistance` prop. Pass an object
+to enable it (or `{}` for defaults); `null` keeps it off.
 
 ```vue
 <FlashCards
   :max-drag-x="150"
   :max-drag-y="0"
-  :resistance-effect="true"
-  resistance-threshold="0.8"
+  :resistance="{ threshold: 100, strength: 0.5 }"
 >
-  <!-- Resists at limit -->
+  <!-- Drags freely up to `threshold` px, then resists -->
 </FlashCards>
 ```
+
+| Field | Type | Default | What it does |
+|---|---|---|---|
+| `threshold` | `number` (px) | `150` | How far the card moves freely before resistance kicks in |
+| `strength` | `number` (0–1) | `0.3` | How hard it resists past the threshold (1 = strongest) |
 
 **See:** [Examples - Drag Limits](../examples/drag-limits.md)
