@@ -1,6 +1,7 @@
 import type { MaybeRefOrGetter } from 'vue'
 import type { DragPosition, SwipeAction } from './useDragSetup'
 import { computed, reactive, ref, toValue, watch } from 'vue'
+import { devWarn } from './devWarn'
 
 /**
  * Lifecycle of a single card, modelled as an explicit state machine.
@@ -60,7 +61,7 @@ export interface StackListOptions<T> {
   items: T[]
   loop?: boolean
   renderLimit: number
-  itemKey?: keyof T | 'id'
+  itemKey?: keyof T
   waitAnimationEnd?: boolean
   onLoop?: () => void
 }
@@ -101,6 +102,37 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
 
     const trackKey = options.value.itemKey || 'id'
     return item[trackKey as keyof T] as string | number ?? index
+  }
+
+  // -------------------------------------------------------------------------
+  // Dev-only sanity checks. Identity tracking is the silent footgun here: when
+  // `itemKey` is omitted and items have no `id`, `getId` falls back to the array
+  // INDEX. That's fine for a static deck, but the moment `items` is mutated (or
+  // `loop` rewinds), index-based ids reassign cards to the wrong history/flight
+  // records — cards flicker, restore the wrong one, or get stuck. Warn so the
+  // cause isn't a mystery. All stripped from production builds.
+  // -------------------------------------------------------------------------
+  if (import.meta.env.DEV) {
+    watch(
+      () => {
+        const { items, itemKey } = options.value
+        return { len: items.length, sample: items[0], itemKey }
+      },
+      ({ sample, itemKey }) => {
+        if (itemKey || !sample)
+          return
+        if (!(typeof sample === 'object' && sample !== null && 'id' in sample)) {
+          devWarn(
+            'missing-item-key',
+            'No `itemKey` set and items have no `id` field, so cards are tracked '
+            + 'by array index. This breaks `loop` and any runtime mutation of '
+            + '`items` (cards may flicker or restore the wrong one). Pass '
+            + '`itemKey` pointing to a stable unique field.',
+          )
+        }
+      },
+      { immediate: true },
+    )
   }
 
   /**

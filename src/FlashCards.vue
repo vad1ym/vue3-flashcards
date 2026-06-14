@@ -7,6 +7,7 @@ import type { StackDirection } from './utils/useStackTransform'
 import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { flashCardsDefaults } from './config/flashcards.config'
 import FlashCard from './FlashCard.vue'
+import { devWarn } from './utils/devWarn'
 import { directionForKey, useA11y } from './utils/useA11y'
 import { useFlashCardsConfig } from './utils/useConfig'
 import { SwipeAction } from './utils/useDragSetup'
@@ -49,9 +50,13 @@ export interface FlashCardsProps<Item> extends Omit<FlashCardProps, 'direction'>
    */
   stackDirection?: StackDirection
   /**
-   * Key to track items by (is required if you are going to modify items array)
+   * Key to track items by — a field on your item holding a stable, unique value.
+   * Required if you are going to modify the `items` array at runtime or use
+   * `loop`. Defaults to `'id'` at runtime; if your items use a differently named
+   * key, set this (e.g. `itemKey="uuid"`). When omitted and there's no `id`
+   * field, cards fall back to array-index tracking — a dev-only warning fires.
    */
-  itemKey?: keyof Item | 'id'
+  itemKey?: keyof Item
 
   /**
    * Wait for animation to end before performing next action
@@ -138,6 +143,15 @@ const effectiveSwipeDirection = computed(() => {
     return ['top', 'bottom'] as Direction[]
   }
   if (Array.isArray(props.swipeDirection)) {
+    if (import.meta.env.DEV && props.swipeDirection.length === 0) {
+      devWarn(
+        'empty-swipe-direction',
+        '`swipeDirection` is an empty array, so the card can\'t be swiped in any '
+        + 'direction (drag and arrow keys will do nothing). Pass at least one of '
+        + '\'left\' / \'right\' / \'top\' / \'bottom\', or a \'horizontal\' / '
+        + '\'vertical\' preset.',
+      )
+    }
     return props.swipeDirection as Direction[]
   }
 
@@ -152,7 +166,17 @@ const effectiveSwipeDirection = computed(() => {
  * If stack is not 0, it can be used to override limit if it's lower than stack + 2
  * IMPORTANT: We add 2 to stack value to account for the current card and hidden transition card
  */
-const renderLimit = computed(() => Math.max(config.value.stack > 0 ? config.value.stack + 2 : config.value.renderLimit, 1))
+const renderLimit = computed(() => {
+  const base = config.value.stack > 0 ? config.value.stack + 2 : config.value.renderLimit
+  if (import.meta.env.DEV && config.value.stack <= 0 && base < 1) {
+    devWarn(
+      'render-limit-too-low',
+      `\`renderLimit\` is ${base}, but it can't be less than 1 — clamping to 1. `
+      + 'Pass a positive integer.',
+    )
+  }
+  return Math.max(base, 1)
+})
 
 /**
  * STACK LIST
