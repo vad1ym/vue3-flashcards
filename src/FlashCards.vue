@@ -1,11 +1,13 @@
 <script lang="ts" setup generic="T extends Record<string, unknown>">
 import type { FlashCardProps } from './FlashCard.vue'
+import type { A11yProp } from './utils/useA11y'
 import type { Direction, DragPosition } from './utils/useDragSetup'
 import type { ResetOptions } from './utils/useStackList'
 import type { StackDirection } from './utils/useStackTransform'
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { flashCardsDefaults } from './config/flashcards.config'
 import FlashCard from './FlashCard.vue'
+import { directionForKey, useA11y } from './utils/useA11y'
 import { useFlashCardsConfig } from './utils/useConfig'
 import { SwipeAction } from './utils/useDragSetup'
 import { useStackList } from './utils/useStackList'
@@ -55,6 +57,14 @@ export interface FlashCardsProps<Item> extends Omit<FlashCardProps, 'direction'>
    * Wait for animation to end before performing next action
    */
   waitAnimationEnd?: boolean
+
+  /**
+   * Accessibility options. ON by default — keyboard navigation, ARIA roles, a
+   * live-region announcer and focus management all work out of the box. Pass an
+   * object to tune labels / behavior, or `false` to opt out entirely and supply
+   * your own a11y. See `A11yOptions`.
+   */
+  a11y?: A11yProp
 }
 
 const props = withDefaults(defineProps<FlashCardsProps<T>>(), {
@@ -107,7 +117,7 @@ defineSlots<{
 
 // Extract props that should be passed to FlashCard (excluding ones we handle specially)
 const otherProps = computed(() => {
-  const { items, swipeDirection, loop, renderLimit, stack, stackOffset, stackScale, stackDirection, itemKey, waitAnimationEnd, ...rest } = props
+  const { items, swipeDirection, loop, renderLimit, stack, stackOffset, stackScale, stackDirection, itemKey, waitAnimationEnd, a11y, ...rest } = props
   return rest
 })
 
@@ -181,6 +191,21 @@ const {
 }))
 
 /**
+ * ACCESSIBILITY
+ * Resolves the `a11y` prop, builds live-region announcements and card labels.
+ * Kept as one object (not destructured) so the template reads `a11y.enabled`,
+ * `a11y.labels.card`, etc. instead of a dozen loose refs.
+ */
+const a11y = useA11y(() => props.a11y)
+const { announce } = a11y
+
+// Remaining cards (active card + everything after it not yet swiped).
+const remaining = computed(() => Math.max(props.items.length - currentIndex.value, 0))
+
+// The deck container — focus target and keydown host.
+const deckEl = useTemplateRef<HTMLElement>('deck')
+
+/**
  * PEEK
  * A ref to the active FlashCard, set in the template only for the active card,
  * so its exposed `peek()` can be driven programmatically (hints, etc).
@@ -231,8 +256,24 @@ function emitSwipeEvents(action: SwipeAction, swipedCard: T) {
  */
 function handleCardSwipe(itemId: string | number, action: SwipeAction, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
   const swipedCard = swipeCard(itemId, action, position)
-  if (swipedCard)
+  if (swipedCard) {
     emitSwipeEvents(action, swipedCard)
+    announceAfterSwipe(action)
+  }
+}
+
+/**
+ * After a swipe settles, announce it to assistive tech and (if the deck just
+ * emptied) the empty state. Runs on `nextTick` so `remaining`/`isEnd` reflect
+ * the advanced cursor.
+ */
+function announceAfterSwipe(action: SwipeAction) {
+  nextTick(() => {
+    if (isEnd.value)
+      announce('empty', remaining.value)
+    else
+      announce('swipe', remaining.value, action)
+  })
 }
 
 /**
@@ -248,8 +289,10 @@ function handleDragMove(item: T, type: SwipeAction | null, delta: number) {
  */
 function performCardAction(type: SwipeAction) {
   const swipedCard = swipeActive(type)
-  if (swipedCard)
+  if (swipedCard) {
     emitSwipeEvents(type, swipedCard)
+    announceAfterSwipe(type)
+  }
 }
 
 /**
@@ -262,7 +305,11 @@ function restore() {
   }
 
   const restoredItem = restoreCard()
-  return restoredItem && emit('restore', restoredItem)
+  if (restoredItem) {
+    emit('restore', restoredItem)
+    nextTick(() => announce('restore', remaining.value))
+  }
+  return restoredItem
 }
 
 /**
@@ -288,6 +335,109 @@ function peek(percent: number, direction: Direction) {
   activeCardRef.value?.peek(percent, direction)
 }
 
+// -------------------------------------------------------------------------
+// Keyboard navigation. An arrow key maps to an enabled swipe direction; Enter /
+// Space triggers the primary positive action; Backspace / "z" restores.
+//
+// With `confirmOnKey`, the first arrow press peeks the card to its full
+// pre-swipe pose and remembers the pending direction — a second matching press
+// or Enter/Space confirms it, Escape (or a different arrow) cancels.
+// -------------------------------------------------------------------------
+const pendingDirection = ref<Direction | null>(null)
+
+/** The "primary" positive direction for Enter/Space (right, else first enabled). */
+const primaryDirection = computed<Direction>(() => {
+  const enabled = effectiveSwipeDirection.value
+  return enabled.includes('right') ? 'right' : enabled[0] ?? 'right'
+})
+
+function cancelPending() {
+  if (pendingDirection.value) {
+    peek(0, pendingDirection.value)
+    pendingDirection.value = null
+  }
+}
+
+function handleKeydown(event: KeyboardEvent) {
+  if (!a11y.keyboard.value || isEnd.value)
+    return
+
+  const dir = directionForKey(event.key, effectiveSwipeDirection.value)
+
+  // Restore keys.
+  if (event.key === 'Backspace' || event.key === 'z' || event.key === 'Z') {
+    if (canRestore.value) {
+      event.preventDefault()
+      cancelPending()
+      restore()
+    }
+    return
+  }
+
+  // Cancel a pending confirm.
+  if (event.key === 'Escape') {
+    if (pendingDirection.value) {
+      event.preventDefault()
+      cancelPending()
+    }
+    return
+  }
+
+  // Confirm keys.
+  if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+    event.preventDefault()
+    const target = pendingDirection.value ?? primaryDirection.value
+    pendingDirection.value = null
+    performCardAction(target as SwipeAction)
+    return
+  }
+
+  // Directional arrow keys.
+  if (dir) {
+    event.preventDefault()
+    if (a11y.confirmOnKey.value) {
+      if (pendingDirection.value === dir) {
+        // Second press of the same arrow confirms.
+        pendingDirection.value = null
+        performCardAction(dir as SwipeAction)
+      }
+      else {
+        // Switch the peek to the new direction and await confirmation.
+        pendingDirection.value = dir
+        peek(1, dir)
+      }
+    }
+    else {
+      performCardAction(dir as SwipeAction)
+    }
+  }
+}
+
+// -------------------------------------------------------------------------
+// Focus management. After a keyboard-driven swipe, move focus to the next active
+// card so the user keeps a focus anchor; if the deck emptied, focus the deck
+// container (which holds the empty state). Only runs when the deck currently
+// holds focus, so we never steal it from elsewhere on the page.
+// -------------------------------------------------------------------------
+function deckHasFocus() {
+  return !!deckEl.value && deckEl.value.contains(document.activeElement)
+}
+
+function focusActiveCard() {
+  if (!a11y.manageFocus.value || !deckHasFocus())
+    return
+  nextTick(() => {
+    const el = deckEl.value?.querySelector<HTMLElement>('[data-active-card="true"]')
+    if (el)
+      el.focus()
+    else
+      deckEl.value?.focus()
+  })
+}
+
+// Re-focus whenever the active card changes (a swipe/restore advanced it).
+watch(currentItemId, () => focusActiveCard())
+
 defineExpose({
   // Directional swipe methods
   swipeTop,
@@ -308,7 +458,32 @@ defineExpose({
 
 <template>
   <div>
-    <div class="flashcards" :style="{ height: containerHeight ? `${containerHeight}px` : 'auto' }">
+    <div
+      ref="deck"
+      class="flashcards"
+      :style="{ height: containerHeight ? `${containerHeight}px` : 'auto' }"
+      :role="a11y.enabled.value ? 'group' : undefined"
+      :aria-roledescription="a11y.enabled.value ? a11y.labels.value.deck : undefined"
+      :aria-label="a11y.enabled.value ? a11y.labels.value.deck : undefined"
+      :tabindex="a11y.enabled.value && a11y.keyboard.value ? 0 : undefined"
+      :aria-keyshortcuts="a11y.enabled.value && a11y.keyboard.value ? 'ArrowLeft ArrowRight ArrowUp ArrowDown Enter' : undefined"
+      @keydown="handleKeydown"
+    >
+      <!-- Visually-hidden live region: screen readers announce swipes / restores
+           / the empty state. -->
+      <div
+        v-if="a11y.enabled.value"
+        class="flashcards__sr-only"
+        :aria-live="a11y.liveMode.value"
+        aria-atomic="true"
+        role="status"
+      >
+        {{ a11y.announcement.value }}
+      </div>
+      <!-- Visually-hidden keyboard instructions. -->
+      <div v-if="a11y.enabled.value && a11y.keyboard.value" class="flashcards__sr-only">
+        {{ a11y.labels.value.instructions }}
+      </div>
       <div
         v-if="!loop && currentIndex >= items.length - 1"
         key="empty-state"
@@ -323,6 +498,7 @@ defineExpose({
         v-for="({ item, itemId, stackIndex, isAnimating, flight }, domIndex) in stackList"
         :key="`card-${itemId}`"
         :data-item-id="itemId"
+        :data-active-card="a11y.enabled.value && itemId === currentItemId && !isAnimating ? 'true' : undefined"
         class="flashcards__card-wrapper"
         :class="{ 'flashcards__card-wrapper--animating': isAnimating }"
         :style="[
@@ -333,6 +509,11 @@ defineExpose({
           },
           getCardStyle(stackIndex),
         ]"
+        :role="a11y.enabled.value ? 'group' : undefined"
+        :aria-roledescription="a11y.enabled.value ? a11y.labels.value.card : undefined"
+        :aria-label="a11y.enabled.value ? a11y.cardLabel(currentIndex, items.length) : undefined"
+        :aria-hidden="a11y.enabled.value && !(itemId === currentItemId && !isAnimating) ? 'true' : undefined"
+        :tabindex="a11y.enabled.value && itemId === currentItemId && !isAnimating ? -1 : undefined"
       >
         <FlashCard
           :ref="(instance) => setActiveCardRef(itemId, isAnimating, instance)"
@@ -408,4 +589,19 @@ defineExpose({
 }
 .flashcards__card--active { pointer-events: all; }
 .flashcards-empty-state { grid-area:1/1; display:flex;align-items:center;justify-content:center; }
+/* Keep keyboard focus from drawing a box around the whole deck. */
+.flashcards:focus { outline: none; }
+.flashcards:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
+/* Visually hidden, still read by assistive tech (live region & instructions). */
+.flashcards__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 </style>

@@ -6,6 +6,7 @@ import ApproveIcon from './components/icons/ApproveIcon.vue'
 import RejectIcon from './components/icons/RejectIcon.vue'
 import { defaultAnimationKeyframes, restFrame } from './utils/animationKeyframes'
 import { SwipeAction, useDragSetup } from './utils/useDragSetup'
+import { useReducedMotion } from './utils/useReducedMotion'
 
 export interface FlashCardProps extends DragSetupParams {
   // Completely disable dragging feature
@@ -94,8 +95,14 @@ defineSlots<{
 // Resolved fly-out / restore animation settings. The grouped `animation` prop
 // is optional and each field falls back to a default.
 const animationKeyframes = animation?.keyframes ?? defaultAnimationKeyframes
-const animationDuration = animation?.duration ?? 400
 const animationEasing = animation?.easing ?? 'cubic-bezier(0.4, 0, 0.2, 1)'
+
+// When the user prefers reduced motion, fly-out / restore animations collapse to
+// a near-instant snap (1ms, not 0, so WAAPI still fires `finished`). The skip
+// "wave" shimmer is suppressed entirely via this flag in the template.
+const prefersReducedMotion = useReducedMotion()
+const baseAnimationDuration = animation?.duration ?? 400
+const animationDuration = computed(() => (prefersReducedMotion.value ? 1 : baseAnimationDuration))
 
 // Current card element ref
 const el = useTemplateRef('flash-card')
@@ -236,7 +243,7 @@ function runAnimation(flight: NonNullable<FlashCardProps['flight']>) {
   }
 
   const anim = el.value.animate(keyframes, {
-    duration: animationDuration,
+    duration: animationDuration.value,
     easing: animationEasing,
     fill: 'forwards',
   })
@@ -303,7 +310,7 @@ onBeforeUnmount(() => {
 // Skip's signature "wave" shimmer is a decorative pseudo-element sweep, NOT a
 // card transform — it stays in CSS (independent of the WAAPI fly-out) and is
 // gated by this flag while a skip flight is active.
-const isSkipping = computed(() => flight?.type === SwipeAction.SKIP)
+const isSkipping = computed(() => flight?.type === SwipeAction.SKIP && !prefersReducedMotion.value)
 const isSkipRestoring = computed(() => isSkipping.value && !!flight?.isRestoring)
 
 defineExpose({

@@ -74,6 +74,7 @@ export default defineConfig({
             { text: 'Events', link: '/essentials/events' },
             { text: 'Actions', link: '/essentials/actions' },
             { text: 'Flip Cards', link: '/essentials/flip-cards' },
+            { text: 'Accessibility', link: '/essentials/accessibility' },
           ],
         },
         {
@@ -119,6 +120,7 @@ export default defineConfig({
             { text: 'Events', link: '/essentials/events' },
             { text: 'Actions', link: '/essentials/actions' },
             { text: 'Flip Cards', link: '/essentials/flip-cards' },
+            { text: 'Accessibility', link: '/essentials/accessibility' },
           ],
         },
       ],
@@ -188,6 +190,7 @@ export default defineConfig({
             { text: 'Events', link: '/essentials/events' },
             { text: 'Actions', link: '/essentials/actions' },
             { text: 'Flip Cards', link: '/essentials/flip-cards' },
+            { text: 'Accessibility', link: '/essentials/accessibility' },
           ],
         },
         {

@@ -211,6 +211,63 @@ Or tune how hard the flick must be:
 
 See the [API Reference](/api/flashcards#velocity) for full details.
 
+## New in v2: accessibility on by default
+
+v2 ships built-in accessibility, and it is **enabled by default**. With no extra
+configuration the deck now provides:
+
+- **Keyboard navigation** — arrow keys swipe in the enabled directions, Enter /
+  Space triggers the primary swipe, and Backspace (or `z`) restores.
+- **ARIA roles & labels** — the deck and active card are exposed as labelled
+  groups so screen readers can describe them.
+- **A live-region announcer** — swipes, restores, and the empty state are read
+  out (e.g. *"Card swiped right, 4 remaining"*).
+- **`prefers-reduced-motion`** — fly-out / restore animations collapse to an
+  instant snap when the OS asks for reduced motion.
+- **Focus management** — focus follows the active card after a keyboard swipe.
+
+All of this is controlled by a single grouped `a11y` prop. **For most apps there
+is nothing to do** — it just works.
+
+### What might change for you
+
+Because the deck is now keyboard-focusable and emits a few hidden ARIA nodes,
+there are two things to be aware of:
+
+- The deck root gains `tabindex="0"`, `role="group"`, and `aria-*` attributes.
+- A visually-hidden live region and keyboard-instructions node are rendered
+  inside the deck.
+
+If you have snapshot tests or very specific DOM/CSS selectors on the deck root,
+update them accordingly.
+
+### Opting out or customizing
+
+Pass `:a11y="false"` to disable **all** built-in accessibility wiring (roles,
+live region, keyboard, focus) — for example if you provide your own:
+
+```vue
+<!-- Disable all built-in a11y -->
+<FlashCards :items="cards" :a11y="false" />
+```
+
+Or pass an object to tune individual pieces (every field is optional):
+
+```vue
+<FlashCards
+  :items="cards"
+  :a11y="{
+    keyboard: false,            // keep ARIA + announcer, drop key handling
+    confirmOnKey: true,         // arrow peeks the card, Enter confirms
+    liveMode: 'assertive',      // announcer politeness
+    labels: { deck: 'Колода', card: 'Карточка', right: 'вправо', left: 'влево' },
+  }"
+/>
+```
+
+See the [Accessibility guide](../essentials/accessibility.md) and the
+[API Reference](/api/flashcards#a11y) for the full option list.
+
 ## Grouped props
 
 v2 collapses several related flat props into single object props. The behavior is
@@ -222,6 +279,8 @@ fall back to the same defaults as before.
 | `animationKeyframes`, `animationDuration`, `animationEasing` | `animation` `{ keyframes?, duration?, easing? }` |
 | `resistanceEffect`, `resistanceThreshold`, `resistanceStrength` | `resistance` `{ threshold?, strength? } \| null` |
 | `swipeVelocityEnabled`, `swipeVelocityThreshold` | `velocity` `{ threshold? } \| null` |
+
+`a11y` is also a grouped prop (`{ enabled?, keyboard?, confirmOnKey?, manageFocus?, liveMode?, labels?, announce? }`), but it is **new in v2** — there's no v1 flat equivalent to migrate from. See [accessibility on by default](#new-in-v2-accessibility-on-by-default) above.
 
 ```vue
 <!-- ❌ v1 -->

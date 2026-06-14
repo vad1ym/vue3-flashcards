@@ -268,6 +268,38 @@ const animation = {
 
 See [Transition Effects](../advanced/transition-effects.md) for the full guide.
 
+### `a11y`
+
+- **Type:** `boolean | A11yOptions`
+- **Default:** enabled
+- **Description:** Accessibility configuration. **On by default** — keyboard navigation, ARIA roles, a live-region announcer, `prefers-reduced-motion` support, and focus management all work out of the box. Pass `false` to disable everything, or an object to tune individual pieces (every field optional):
+  - **`enabled`** (`boolean`, default `true`): master switch. `false` removes all roles, the live region, keyboard handling, and focus management.
+  - **`keyboard`** (`boolean`, default `true`): arrow keys swipe in enabled directions, Enter / Space triggers the primary swipe, Backspace / `z` restores.
+  - **`confirmOnKey`** (`boolean`, default `false`): when `true`, an arrow key first [`peek`](#peek-percent-direction)s the card to its full pre-swipe pose and waits for Enter / Space (or a second matching arrow) to confirm; Escape cancels.
+  - **`manageFocus`** (`boolean`, default `true`): move focus to the next active card after a keyboard swipe (only when the deck already holds focus).
+  - **`liveMode`** (`'polite' | 'assertive'`, default `'polite'`): `aria-live` politeness of the announcer.
+  - **`labels`** (`Partial<A11yLabels>`): override the built-in English labels for localization (`deck`, `card`, `top`, `left`, `right`, `bottom`, `skip`, `restore`, `empty`, `instructions`).
+  - **`announce`** (`(event: A11yAnnounceEvent) => string | null`): build the live-region message yourself; return `null` / `''` to stay silent for an event.
+
+**Example — disable everything:**
+```vue
+<FlashCards :items="cards" :a11y="false" />
+```
+
+**Example — localize and tune:**
+```vue
+<FlashCards
+  :items="cards"
+  :a11y="{
+    confirmOnKey: true,
+    liveMode: 'assertive',
+    labels: { deck: 'Колода', card: 'Карточка', right: 'вправо', left: 'влево' },
+  }"
+/>
+```
+
+See the [Accessibility guide](../essentials/accessibility.md) for the full walkthrough.
+
 ## Slots
 
 ### `default`

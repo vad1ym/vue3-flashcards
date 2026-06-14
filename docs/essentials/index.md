@@ -51,6 +51,7 @@ From here, each page below adds one capability.
 - [Events](./events.md) - Handling swipe events
 - [Actions](./actions.md) - Manual controls and buttons
 - [Flip Cards](./flip-cards.md) - Two-sided flip cards
+- [Accessibility](./accessibility.md) - Keyboard, ARIA, announcements, reduced motion
 
 ## Learning Path
 
