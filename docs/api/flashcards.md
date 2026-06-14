@@ -573,6 +573,12 @@ function programmaticSkip() {
   flashcardsRef.value.skip()
 }
 
+function hintSwipe() {
+  // Nudge the card to hint a swipe, then settle it back.
+  flashcardsRef.value.peek(0.15, 'right')
+  setTimeout(() => flashcardsRef.value.peek(0, 'right'), 250)
+}
+
 function animatedReset() {
   flashcardsRef.value.reset({ animated: true, delay: 300 })
 }
@@ -591,6 +597,9 @@ function animatedReset() {
   </button>
   <button @click="programmaticSkip">
     Skip
+  </button>
+  <button @click="hintSwipe">
+    Hint
   </button>
   <button @click="animatedReset">
     Animated Reset
@@ -627,6 +636,19 @@ function animatedReset() {
 
 - **Type:** `() => void`
 - **Description:** Triggers skip animation on the current card - moves to next card without swiping in any direction.
+
+### `peek(percent, direction)`
+
+- **Type:** `(percent: number, direction: 'top' | 'left' | 'right' | 'bottom') => void`
+- **Description:** Moves the active card toward `direction` to `percent` (a `0`–`1` fraction of [`swipeThreshold`](#swipethreshold)) **without** completing the swipe — the same rotation/scale ([`transformStyle`](#transformstyle)) and directional indicators react exactly as they do mid-drag. Useful for hints (nudge the card to invite a swipe) and for building a "confirm before swiping" flow.
+  - `percent` is clamped to `0`–`1`. `peek(0, direction)` settles the card back to center.
+  - `direction` is required. A direction that is not enabled is ignored, so `peek` can never reveal a pose the user could not reach by dragging.
+
+**Example — wobble the card as a hint, then settle:**
+```javascript
+flashcardsRef.value.peek(0.15, 'right') // nudge ~15% to the right
+setTimeout(() => flashcardsRef.value.peek(0, 'right'), 250) // settle back
+```
 
 ### `reset(options?)`
 

@@ -272,6 +272,72 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     })
   }
 
+  /**
+   * Programmatically move the card to `percent` (0-1) of the swipe threshold
+   * along `direction`, WITHOUT completing the swipe. The same `position` the
+   * drag drives is updated, so `transformStyle` (rotation/scale) and the
+   * directional indicators react exactly as they do mid-drag. Because dragging
+   * is not active, the card's CSS transition animates the move smoothly.
+   *
+   * Useful for hints ("wobble" the card with `peek(0.1, 'right')` then
+   * `peek(0, 'right')`) and for keyboard-driven swiping: `peek(1, 'left')` shows
+   * the full pre-swipe pose while we wait for the user to confirm.
+   *
+   * A direction that is not enabled is ignored (the card stays put) so peek can
+   * never reveal a pose the user could not reach by dragging.
+   */
+  function peek(percent: number, direction: Direction) {
+    const enabled = enabledDirections.value || []
+    if (!enabled.includes(direction))
+      return
+
+    const dir = direction
+
+    // Clamp to [0, 1] then map onto the swipe threshold distance. A peek of 0
+    // is a reset to center.
+    const p = Math.max(0, Math.min(1, percent))
+    if (p === 0) {
+      restore()
+      return
+    }
+
+    let distance = p * swipeThreshold.value
+    const horizontal = dir === 'left' || dir === 'right'
+
+    if (horizontal && maxDragX.value !== null)
+      distance = Math.min(distance, maxDragX.value)
+    if (!horizontal && maxDragY.value !== null)
+      distance = Math.min(distance, maxDragY.value)
+
+    let x = 0
+    let y = 0
+    switch (dir) {
+      case 'right':
+        x = distance
+        break
+      case 'left':
+        x = -distance
+        break
+      case 'bottom':
+        y = distance
+        break
+      case 'top':
+        y = -distance
+        break
+    }
+
+    // delta carries the swipe sign the transform/indicators expect: positive for
+    // right/top, negative for left/bottom (matching `handleDragEnd`).
+    const sign = dir === 'right' || dir === 'top' ? 1 : -1
+
+    Object.assign(position, {
+      x,
+      y,
+      delta: sign * p,
+      type: dir,
+    })
+  }
+
   function getDominantAxis(absX: number, absY: number, enabled: Direction[]) {
     const hasH = enabled.includes('left') || enabled.includes('right')
     const hasV = enabled.includes('top') || enabled.includes('bottom')
@@ -505,6 +571,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     position,
     isDragging,
     restore,
+    peek,
     getDominantAxis,
   }
 }

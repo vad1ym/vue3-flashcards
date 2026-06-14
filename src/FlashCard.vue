@@ -106,6 +106,7 @@ const {
   setupInteract,
   cleanupInteract,
   getDominantAxis,
+  peek,
 } = useDragSetup(el, () => ({
   ...otherProps,
   direction,
@@ -307,6 +308,7 @@ const isSkipRestoring = computed(() => isSkipping.value && !!flight?.isRestoring
 
 defineExpose({
   position,
+  peek,
 })
 </script>
 

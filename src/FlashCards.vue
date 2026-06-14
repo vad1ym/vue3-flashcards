@@ -181,6 +181,20 @@ const {
 }))
 
 /**
+ * PEEK
+ * A ref to the active FlashCard, set in the template only for the active card,
+ * so its exposed `peek()` can be driven programmatically (hints, etc).
+ */
+const activeCardRef = ref<{ peek: (percent: number, direction: Direction) => void } | null>(null)
+
+// Capture the active card's instance (set from the template only for the active,
+// non-animating card) so `peek()` can drive it.
+function setActiveCardRef(itemId: string | number, isAnimating: boolean | undefined, instance: any) {
+  if (itemId === currentItemId.value && !isAnimating)
+    activeCardRef.value = instance
+}
+
+/**
  * Determines if drag should be disabled on cards
  *
  * Drag is disabled when:
@@ -264,6 +278,16 @@ const swipeBottom = () => performCardAction(SwipeAction.BOTTOM)
  */
 const skip = () => performCardAction(SwipeAction.SKIP)
 
+/**
+ * Peek the active card to `percent` (0-1) of the swipe threshold along
+ * `direction`, applying the live `transformStyle`/indicators without completing
+ * the swipe. `peek(0, dir)` settles back to center. Handy for hint "wobbles" and
+ * for building a confirm-before-swipe flow.
+ */
+function peek(percent: number, direction: Direction) {
+  activeCardRef.value?.peek(percent, direction)
+}
+
 defineExpose({
   // Directional swipe methods
   swipeTop,
@@ -275,6 +299,7 @@ defineExpose({
   // Other methods
   restore,
   reset,
+  peek,
   canRestore,
   isEnd,
   isStart,
@@ -310,6 +335,7 @@ defineExpose({
         ]"
       >
         <FlashCard
+          :ref="(instance) => setActiveCardRef(itemId, isAnimating, instance)"
           v-bind="otherProps"
           :direction="effectiveSwipeDirection"
           class="flashcards__card"
