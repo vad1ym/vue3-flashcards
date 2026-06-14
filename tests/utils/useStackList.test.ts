@@ -358,6 +358,38 @@ describe('useStackList', () => {
   })
 
   describe('animation lifecycle', () => {
+    // Regression: FlashCard.vue watches `animation` by reference to drive its
+    // ghost animation. If a sibling card entering transition rebuilds the
+    // existing card's StackItem/animation object, that watcher falsely cancels
+    // the in-flight animation (last animating card vanishes). The transition
+    // StackItem identity must stay stable while its record is unchanged.
+    it('keeps animation object identity stable when a sibling card starts animating', async () => {
+      const options = ref<StackListOptions<TestItem>>({
+        items: createTestItems(4),
+        loop: false,
+        renderLimit: 3,
+        itemKey: 'id',
+      })
+
+      const stackList = useStackList(options)
+
+      // Swipe card 1 (starts animating)
+      stackList.swipeCard(1, SwipeAction.RIGHT)
+      const anim1Before = stackList.cardsInTransition.value.find(c => c.itemId === 1)?.animation
+      expect(anim1Before).toBeDefined()
+
+      // A second card starts animating while the first is still in flight
+      stackList.swipeCard(2, SwipeAction.LEFT)
+      const anim1After = stackList.cardsInTransition.value.find(c => c.itemId === 1)?.animation
+      // Card 1's animation object must be the SAME reference (not rebuilt)
+      expect(anim1After).toBe(anim1Before)
+
+      // And a restore of yet another card must not disturb card 1 either
+      stackList.restoreCard()
+      const anim1AfterRestore = stackList.cardsInTransition.value.find(c => c.itemId === 1)?.animation
+      expect(anim1AfterRestore).toBe(anim1Before)
+    })
+
     it('should remove card from animating list when animation completes', async () => {
       const options = ref<StackListOptions<TestItem>>({
         items: createTestItems(3),

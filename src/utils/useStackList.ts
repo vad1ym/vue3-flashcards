@@ -1,6 +1,45 @@
 import type { MaybeRefOrGetter } from 'vue'
 import type { DragPosition } from './useDragSetup'
-import { computed, reactive, ref, shallowReactive, toValue, watch } from 'vue'
+import { computed, reactive, ref, toValue, watch } from 'vue'
+
+/**
+ * Lifecycle of a single card, modelled as an explicit state machine.
+ *
+ * A card is never simply "in the deck" or "gone" — the swipe/restore gestures
+ * are animated, so a card spends time in transient states where it's visually
+ * moving but not yet logically committed. Modelling this as an explicit state
+ * machine (rather than an ad-hoc mix of a history map + a transition map + an
+ * `isRestoring` flag) is what makes the tricky gestures correct and readable:
+ *
+ *   pending ──swipe──▶ swiping ──animationEnd──▶ swiped
+ *      ▲                  │                         │
+ *      │              restore                   restore
+ *      │                  ▼                         ▼
+ *      └──animationEnd── restoring ◀───────────────┘
+ *                         │
+ *                  swipe (restore→next): restoring ──▶ swiping
+ *
+ * Where each state lives (see the two structures inside the composable):
+ * - `pending`   : no record anywhere — absence IS the pending state.
+ * - `swiping`   : a `records` entry. Animating off-screen, NOT yet committed.
+ *                 A restore can still catch it (fast swipe → restore).
+ * - `restoring` : a `records` entry. Animating back in; counts as not-active so
+ *                 the active card does NOT jump (restore isn't "active" until
+ *                 its animation finishes). A new swipe overwrites it, so
+ *                 restore → fast next just cancels the restore.
+ * - `swiped`    : a `history` entry (NOT in `records`). Committed and consumed.
+ *
+ * Splitting swiped (history) from in-flight (records) keeps `records` tiny —
+ * bounded by overlapping animations, never by deck size — so its iterations
+ * stay cheap as the deck grows.
+ */
+export type CardState = 'swiping' | 'restoring'
+
+export interface CardRecord {
+  state: CardState
+  action: string // swipe direction / type
+  initialPosition?: DragPosition
+}
 
 export interface StackItem<T> {
   item: T
@@ -31,12 +70,26 @@ export interface ResetOptions {
 export function useStackList<T extends Record<string, unknown>>(_options: MaybeRefOrGetter<StackListOptions<T>>) {
   const options = computed(() => toValue(_options))
 
-  // Swiping history
-  const history = reactive<Map<string | number, string>>(new Map())
+  // -------------------------------------------------------------------------
+  // Card lifecycle, split across two structures for performance — but driven by
+  // ONE explicit state machine (see CardState docs):
+  //
+  //   records : only IN-FLIGHT cards (`swiping` / `restoring`). Always small
+  //             (bounded by how many animations overlap), so every iteration
+  //             over it is cheap regardless of deck size.
+  //   history : committed (`swiped`) cards. Grows with the deck, but is only
+  //             ever touched by O(1) get/has/set/delete — never iterated on the
+  //             hot path.
+  //
+  // A card's state is the union: in `records` => its record.state; else in
+  // `history` => `swiped`; else `pending`. The transition functions keep the
+  // two in lock-step so this union is always consistent.
+  // -------------------------------------------------------------------------
+  const records = reactive(new Map<string | number, CardRecord>())
+  const history = reactive(new Map<string | number, string>())
 
-  // Cards that are currently animating (using Map for O(1) operations)
-  const cardsInTransition = shallowReactive(new Map<string | number, StackItem<T>>())
-  const hasCardsInTransition = computed(() => cardsInTransition.size > 0)
+  // True while any card is animating (swiping out or restoring back in).
+  const hasCardsInTransition = computed(() => records.size > 0)
 
   // Generate ID for card
   function getId(item: T, index: number): string | number {
@@ -48,12 +101,8 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
   }
 
   /**
-   * Map of itemId -> index in the source array.
-   * Rebuilt only when `items` actually changes (reference/length/content),
-   * NOT on every swipe. This turns the repeated `items.findIndex(...)` calls
-   * scattered across this composable into O(1) lookups, removing the
-   * O(renderLimit * n) work in generateStackItems and the linear scans in
-   * removeAnimatingCard / findRestorableCard.
+   * Map of itemId -> index in the source array. Rebuilt only when `items`
+   * actually changes, turning the scattered `findIndex` scans into O(1) lookups.
    */
   const idToIndex = computed(() => {
     const { items } = options.value
@@ -68,41 +117,23 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
   }
 
   /**
-   * Is this card "consumed" for the purpose of finding the active card?
-   * A card is consumed if it's in history or currently swiping away (not restoring).
+   * A card is "consumed" (no longer the active card) when it's committed
+   * (`swiped`, in history) or animating away (`swiping`). A `restoring` card is
+   * NOT consumed, but it sits behind the cursor so the forward scan skips it.
+   * O(1): two map lookups.
    */
   function isConsumed(itemId: string | number): boolean {
-    if (history.has(itemId))
-      return true
-    const card = cardsInTransition.get(itemId)
-    return !!card && !card.animation?.isRestoring
+    return history.has(itemId) || records.get(itemId)?.state === 'swiping'
   }
 
-  /**
-   * CURSOR (id-based active pointer).
-   *
-   * Instead of re-scanning the whole array from index 0 on every change
-   * (which is O(scroll-position) per swipe => O(n^2) over a session when
-   * history is never cleared), we keep the active card as an id and advance
-   * it forward incrementally.
-   *
-   * The cursor is resilient to runtime mutations of `items`:
-   * - cards inserted BEFORE the cursor do NOT steal focus (we follow the card,
-   *   not the index) — the user's current card stays put under their finger;
-   * - cards appended after the cursor don't disturb it;
-   * - if the cursor card is removed from `items`, we recompute from its last
-   *   known position.
-   *
-   * It stores the id of a card at or before the active card, used purely as a
-   * scan start hint. `null` = "scan from the beginning".
-   */
+  // -------------------------------------------------------------------------
+  // Active-card cursor (O(1) amortized lookups). `cursorId` is a forward-scan
+  // start hint, moved explicitly on swipe/restore/reset/loop. Resilient to
+  // runtime mutations of `items`: cards inserted before the cursor never steal
+  // focus (we only scan forward); a removed cursor card restarts from 0.
+  // -------------------------------------------------------------------------
   const cursorId = ref<string | number | null>(null)
 
-  /**
-   * Scan forward from `startIndex`, returning the index of the first
-   * non-consumed card, or items.length if none remain. Forward-only; the start
-   * hint lets us skip the already-consumed prefix instead of re-walking it.
-   */
   function resolveActiveIndex(startIndex: number): number {
     const { items } = options.value
     for (let i = Math.max(0, startIndex); i < items.length; i++) {
@@ -112,90 +143,129 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
     return items.length
   }
 
-  /**
-   * Current index — position of the active card (first non-consumed) in the
-   * source array, or items.length at end-of-deck.
-   *
-   * The cursor (`cursorId`) is a start hint moved explicitly by swipe / restore
-   * / reset. On the happy path the scan starts right at the active card and
-   * returns immediately (amortized O(1) per swipe). The hint is resilient to
-   * runtime mutations: if its card was removed we restart from 0; cards
-   * inserted before it never steal focus because we only ever scan FORWARD
-   * from the hint, never re-evaluate the consumed prefix.
-   */
+  // Position of the active card (first non-consumed), or items.length at end.
   const currentIndex = computed(() => {
     const hintIdx = cursorId.value === null ? 0 : indexOfId(cursorId.value)
     return resolveActiveIndex(hintIdx === -1 ? 0 : hintIdx)
   })
 
-  // ID of the current card — derived from currentIndex exactly as the original
-  // implementation did, so the public activeItemKey contract is unchanged
-  // (a real id, or the number items.length at end-of-deck).
+  // ID of the active card (a real id, or the number items.length at end-of-deck
+  // — unchanged public activeItemKey contract).
   const currentItemId = computed<string | number>(() => {
     const { items } = options.value
     return getId(items[currentIndex.value], currentIndex.value)
   })
 
-  /**
-   * Advance the cursor hint to the current active card after a swipe, so the
-   * next scan skips the just-consumed card instead of re-walking the prefix.
-   */
+  // Advance the cursor hint to the active card after a transition.
   function syncCursor() {
     const { items } = options.value
     const idx = currentIndex.value
     cursorId.value = idx < items.length ? getId(items[idx], idx) : null
   }
 
-  /**
-   * Point the cursor hint at a specific card (used by restore, which moves the
-   * active card BACKWARD to the just-restored item).
-   */
-  function moveCursorTo(itemId: string | number) {
-    cursorId.value = itemId
+  // -------------------------------------------------------------------------
+  // Derived view preserving the original public shape: `cardsInTransition`
+  // looks like the old list of animating StackItems. (`history` is the Map
+  // declared above — consumers read history.get/has/size directly.)
+  //
+  // IMPORTANT: StackItem objects (and their nested `animation` object) must keep
+  // a STABLE identity for as long as the underlying record is unchanged.
+  // FlashCard.vue watches `animation` by reference to drive its ghost animation
+  // and treats a new reference as "animation replaced" — so rebuilding these
+  // objects on every recompute would falsely cancel in-flight animations when a
+  // sibling card starts animating (e.g. fast swipe → fast restore). We cache by
+  // itemId and only rebuild when the record's meaningful fields change.
+  // -------------------------------------------------------------------------
+  const stackItemCache = new Map<string | number, { rec: CardRecord, stackItem: StackItem<T> }>()
+
+  function getTransitionStackItem(itemId: string | number, rec: CardRecord): StackItem<T> {
+    const cached = stackItemCache.get(itemId)
+    if (
+      cached
+      && cached.rec.state === rec.state
+      && cached.rec.action === rec.action
+      && cached.rec.initialPosition === rec.initialPosition
+    ) {
+      return cached.stackItem
+    }
+
+    const idx = indexOfId(itemId)
+    const stackItem: StackItem<T> = {
+      item: options.value.items[idx] as T,
+      itemId,
+      stackIndex: 0,
+      isAnimating: true,
+      animation: {
+        type: rec.action,
+        isRestoring: rec.state === 'restoring',
+        initialPosition: rec.initialPosition,
+      },
+    }
+    stackItemCache.set(itemId, { rec, stackItem })
+    return stackItem
   }
 
-  // Expected index after restoring animation, to better handle isStart & isEnd
-  const expectedIndex = computed(() => {
-    const restoreCount = Array.from(cardsInTransition.values()).filter(card =>
-      card.animation?.isRestoring,
-    ).length
-    return currentIndex.value - restoreCount
+  // Cards currently animating in the DOM. `records` holds ONLY in-flight cards
+  // (swiping/restoring), so this is bounded by overlapping animations, not deck
+  // size.
+  const transitionList = computed<StackItem<T>[]>(() => {
+    const result: StackItem<T>[] = []
+    for (const [id, rec] of records) {
+      if (indexOfId(id) !== -1)
+        result.push(getTransitionStackItem(id, rec))
+    }
+    // Drop cache entries for cards that left transition, so they rebuild fresh
+    // if they animate again later.
+    if (stackItemCache.size > records.size) {
+      for (const id of stackItemCache.keys()) {
+        if (!records.has(id))
+          stackItemCache.delete(id)
+      }
+    }
+    return result
   })
 
-  // For loop mode reset history on new cycle (when index points outside of source array)
+  // Number of cards currently restoring (used to look ahead for isStart/isEnd).
+  const restoringCount = computed(() => {
+    let n = 0
+    for (const rec of records.values()) {
+      if (rec.state === 'restoring')
+        n++
+    }
+    return n
+  })
+
+  // Expected index once in-flight restores settle — keeps isStart/isEnd stable.
+  const expectedIndex = computed(() => currentIndex.value - restoringCount.value)
+
+  // -------------------------------------------------------------------------
+  // Loop mode: on a completed cycle, clear committed cards and rewind.
+  // -------------------------------------------------------------------------
   watch(expectedIndex, (ci) => {
     const { loop, items, onLoop } = options.value
     if (loop && ci === items.length) {
+      // Drop all committed cards; leave in-flight animations to finish naturally.
       history.clear()
-      // New cycle: reset the cursor so the active card resolves to the first item.
       cursorId.value = null
-      // Don't clear cardsInTransition here - let animations finish naturally
-      // But we need to prevent restore from finding cards from previous cycle
-      // And also we need to prevent last animating cards to appear in next cycle history
-      onLoop?.() // New loop cycle started
+      onLoop?.()
     }
   })
 
-  // Generate stack items with unified logic for loop and non-loop modes
+  // -------------------------------------------------------------------------
+  // Stack generation (animating cards first, then the forward window).
+  // -------------------------------------------------------------------------
   function generateStackItems(startIndex: number, limit: number, items: T[], loop: boolean): StackItem<T>[] {
     const result: StackItem<T>[] = []
     const len = items.length
-    const animatingCardsAdded = new Set<string | number>()
+    const animatingAdded = new Set<string | number>()
 
-    // First, add animating cards
-    for (const [itemId, card] of cardsInTransition.entries()) {
-      const originalIndex = indexOfId(itemId)
-      if (originalIndex >= 0) {
-        result.push({
-          ...card,
-          stackIndex: 0,
-          isAnimating: true,
-        })
-        animatingCardsAdded.add(itemId)
-      }
+    // Animating cards (swiping/restoring) render on top.
+    for (const card of transitionList.value) {
+      result.push(card)
+      animatingAdded.add(card.itemId)
     }
 
-    // Then add regular stack items
+    // Then the regular forward window.
     for (let i = 0; i < limit; i++) {
       const index = loop ? (startIndex + i + len) % len : startIndex + i
       if (!loop && index >= len)
@@ -204,20 +274,14 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
       const item = items[index]
       const itemId = getId(item, index)
 
-      if (!animatingCardsAdded.has(itemId)) {
-        result.push({
-          item,
-          itemId,
-          stackIndex: i, // Use i directly - it represents position in stack (0, 1, 2, ...)
-          isAnimating: false,
-        })
+      if (!animatingAdded.has(itemId)) {
+        result.push({ item, itemId, stackIndex: i, isAnimating: false })
       }
     }
 
     return result
   }
 
-  // Stack generation for rendering (unified list with all cards including animating)
   const stackList = computed(() => {
     const { renderLimit, items, loop = false } = options.value
     if (!items.length)
@@ -226,209 +290,182 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
     return generateStackItems(currentIndex.value, renderLimit, items, loop)
   })
 
-  // Is start is true if current index is 0
   const isStart = computed(() => expectedIndex.value === 0)
-
-  // Is end is true if current index is greater or equal to items length
   const isEnd = computed(() => expectedIndex.value >= options.value.items.length)
 
-  // Can restore is true if there is at least one completed card before current index
-  // Also check animating card
+  /**
+   * Can restore if there's a committed-or-swiping card before the active one.
+   * (A `swiping` card counts — fast swipe → restore must be able to catch it.)
+   */
   const canRestore = computed(() => {
     if (options.value.items.length <= 1 || expectedIndex.value === 0)
       return false
 
     const { items } = options.value
-
-    // Check both history and cards currently being swiped (not restoring)
     for (let i = expectedIndex.value - 1; i >= 0; i--) {
       const id = getId(items[i], i)
-      const card = cardsInTransition.get(id)
-      const isSwipingCard = card && !card.animation?.isRestoring
-
-      if (history.has(id) || isSwipingCard)
+      // committed (history) or still swiping away — both are restorable.
+      if (history.has(id) || records.get(id)?.state === 'swiping')
         return true
     }
     return false
   })
 
-  // Helper function to add or replace card in transition
-  function addOrReplaceCard(transitionCard: StackItem<T>) {
-    const existing = cardsInTransition.get(transitionCard.itemId)
+  // -------------------------------------------------------------------------
+  // Transitions
+  // -------------------------------------------------------------------------
 
-    // If card is already animating, update animation but keep it
-    if (existing) {
-      cardsInTransition.set(transitionCard.itemId, {
-        ...existing,
-        animation: transitionCard.animation,
-      })
-    }
-    else {
-      cardsInTransition.set(transitionCard.itemId, transitionCard)
-    }
-  }
-
-  // Remove animating card and optionally clear from history
-  function removeAnimatingCard(itemId: string | number) {
-    const card = cardsInTransition.get(itemId)
-    if (!card)
-      return
-
-    // If card was restored - remove card from history
-    if (card.animation?.isRestoring) {
-      history.delete(itemId)
-      // Restore completed: the restored card becomes the active one again.
-      // It sits BEHIND the cursor, which the forward-only resolver can't reach,
-      // so point the cursor at it explicitly (then syncCursor below is a no-op
-      // since the card is now the first non-consumed one).
-      moveCursorTo(itemId)
-    }
-    else if (card.animation) {
-      // Card finished swiping animation - add to history only if we're still in the same cycle
-      const { loop } = options.value
-      if (loop) {
-        // In loop mode, check if card belongs to current cycle
-        const cardIndex = indexOfId(itemId)
-        // Only add to history if card index is before current index (belongs to current cycle)
-        if (cardIndex !== -1 && cardIndex < currentIndex.value) {
-          history.set(itemId, card.animation.type)
-        }
-      }
-      else {
-        // In non-loop mode, always add to history
-        history.set(itemId, card.animation.type)
-      }
-    }
-
-    // Remove card from transitions
-    cardsInTransition.delete(itemId)
-
-    // The just-finished card is now consumed (history) or freed (restore);
-    // pull the cursor to the new active card so the next resolve is O(1).
-    syncCursor()
-  }
-
-  // -------------------
-  // Swiping functions
-  // -------------------
+  /**
+   * swipe: pending/swiped/restoring ──▶ swiping
+   * Overwriting an existing record is intentional: restore → fast next lands
+   * here and simply cancels the in-flight restore by switching it to swiping.
+   */
   function swipeCard(itemId: string | number, type: string, initialPosition?: DragPosition): T | undefined {
     const { items, waitAnimationEnd } = options.value
 
-    // If some cards are in animation and waitAnimationEnd is true, prevent action
-    if (hasCardsInTransition.value && waitAnimationEnd) {
+    // Block new actions while something animates, if requested.
+    if (hasCardsInTransition.value && waitAnimationEnd)
       return
-    }
 
-    // Check if current item still exist in source items array
     const idx = indexOfId(itemId)
-    if (idx === -1) {
+    if (idx === -1)
       return
-    }
     const item = items[idx]
 
-    addOrReplaceCard({
-      item,
-      itemId,
-      stackIndex: 0, // Will be recalculated in generateStackItems
-      animation: {
-        type,
-        isRestoring: false,
-        initialPosition,
-      },
-    })
-
-    // Don't update history yet - will be done after animation completes
-    // This keeps currentIndex stable during animation
-    // history.set(itemId, type)
-
-    // The swiped card is now consumed (animating away); advance the cursor to
-    // the next active card so subsequent lookups stay O(1).
+    // Card is now in-flight again; it lives in `records`, not `history`
+    // (covers restore → fast next: a restoring card that was still committed).
+    records.set(itemId, { state: 'swiping', action: type, initialPosition })
+    history.delete(itemId)
+    // The swiped card is now consumed; advance the cursor.
     syncCursor()
 
     return item
   }
 
-  // -------------------
-  // Restore helpers
-  // -------------------
-  function isCardRestoring(itemId: string | number): boolean {
-    return cardsInTransition.get(itemId)?.animation?.isRestoring ?? false
-  }
-
-  function findRestorableCard(): { item: T, itemId: string | number, action: string } | null {
-    const { items } = options.value
-
-    // Find the last swiped card by highest index in items array
-    // Check both history and cards in transition
-    // In loop mode, only search before currentIndex to avoid finding cards from previous cycle
-    const searchLimit = expectedIndex.value
-
-    for (let i = searchLimit - 1; i >= 0; i--) {
-      const item = items[i]
-      const itemId = getId(item, i)
-
-      if (isCardRestoring(itemId))
+  /**
+   * Swipe whatever card is "active" for a button-triggered action.
+   *
+   * Normally that's the current card. But if a restore is mid-animation, the
+   * intent of pressing next/swipe is to act on the card being restored (restore
+   * → fast next cancels the restore and sends it back out). This encapsulates
+   * that target-selection so consumers don't need to know about the state
+   * machine — they just call swipeActive(type).
+   */
+  function swipeActive(type: string): T | undefined {
+    // A restoring card takes priority as the action target. With several cards
+    // restoring at once (e.g. two fast restores), the target is the one NEAREST
+    // the active card — the topmost, most-recently-restored card the user sees —
+    // NOT whichever happens to come first in `records` insertion order.
+    let target: string | number | undefined
+    let targetIdx = -1
+    for (const [id, rec] of records) {
+      if (rec.state !== 'restoring')
         continue
-
-      // Get action from history OR from currently swiping card
-      const card = cardsInTransition.get(itemId)
-      const action = history.get(itemId) || (card && !card.animation?.isRestoring ? card.animation?.type : null)
-
-      if (action) {
-        return { item, itemId, action }
+      const idx = indexOfId(id)
+      if (idx > targetIdx) {
+        targetIdx = idx
+        target = id
       }
     }
-
-    return null
+    if (target !== undefined)
+      return swipeCard(target, type)
+    // Otherwise act on the current active card, if it's not already animating.
+    const id = currentItemId.value
+    if (indexOfId(id) !== -1 && !records.has(id))
+      return swipeCard(id, type)
+    return undefined
   }
 
-  // -------------------
-  // Restore
-  // -------------------
+  /**
+   * restore: finds the most recent committed (`swiped`) or in-flight (`swiping`)
+   * card before the active one and moves it to `restoring`. The active card does
+   * NOT change yet — the restored card only becomes active when its animation
+   * finishes (so restore → fast next can cancel it cleanly).
+   */
   function restoreCard(): T | undefined {
     if (!canRestore.value)
       return
 
-    const restorableCard = findRestorableCard()
-    if (!restorableCard)
-      return
+    const { items } = options.value
+    // Search backward from the active card for something to restore.
+    for (let i = expectedIndex.value - 1; i >= 0; i--) {
+      const itemId = getId(items[i], i)
+      const rec = records.get(itemId)
 
-    const { item, itemId, action } = restorableCard
+      if (rec?.state === 'restoring')
+        continue // already on its way back
 
-    addOrReplaceCard({
-      item,
-      itemId,
-      stackIndex: 0, // Will be recalculated in generateStackItems
-      animation: {
-        // If we have running swipe transition, restore should revert it
-        type: cardsInTransition.get(itemId)?.animation?.type || action,
-        isRestoring: true,
-      },
-    })
+      // The action is whatever it was swiped as — from the in-flight record if
+      // it's still swiping, otherwise from committed history.
+      const action = rec?.state === 'swiping' ? rec.action : history.get(itemId)
+      if (action) {
+        records.set(itemId, { state: 'restoring', action, initialPosition: rec?.initialPosition })
+        return items[i]
+      }
+    }
 
-    return item
+    return undefined
   }
 
-  // -------------------
-  // Reset
-  // -------------------
-  async function reset(options?: ResetOptions) {
-    // Reset with cascading effect
-    if (options?.animate) {
-      const completedCards = [...history.entries()]
-      for (let i = 0; i < completedCards.length; i++) {
-        if (restoreCard()) {
-          // Delay before next card to make cascading effect
-          await new Promise(resolve => setTimeout(resolve, options?.delay ?? 90))
-        }
+  /**
+   * animationEnd: resolve a transient state to its committed form.
+   *   swiping   ──▶ swiped   (commit; in loop mode only if it belongs to cycle)
+   *   restoring ──▶ pending  (delete record; card returns to the deck)
+   */
+  function removeAnimatingCard(itemId: string | number) {
+    const rec = records.get(itemId)
+    if (!rec)
+      return
+
+    if (rec.state === 'restoring') {
+      records.delete(itemId)
+      history.delete(itemId)
+      // Restored card sits behind the cursor; point the cursor at it directly.
+      moveCursorTo(itemId)
+    }
+    else if (rec.state === 'swiping') {
+      const { loop } = options.value
+      if (loop) {
+        // Only commit if the card belongs to the current cycle (before active).
+        const cardIndex = indexOfId(itemId)
+        if (cardIndex !== -1 && cardIndex < currentIndex.value)
+          commit(itemId, rec)
+        else
+          records.delete(itemId)
       }
-      // History will be cleared by removeAnimatingCard when restore animations finish
+      else {
+        commit(itemId, rec)
+      }
+      syncCursor()
+    }
+  }
+
+  // swiping ──▶ swiped: drop the in-flight record, commit to history.
+  function commit(itemId: string | number, rec: CardRecord) {
+    records.delete(itemId)
+    history.set(itemId, rec.action)
+  }
+
+  function moveCursorTo(itemId: string | number) {
+    cursorId.value = itemId
+  }
+
+  // -------------------------------------------------------------------------
+  // Reset
+  // -------------------------------------------------------------------------
+  async function reset(resetOptions?: ResetOptions) {
+    if (resetOptions?.animate) {
+      // Cascade: restore committed cards one by one for a fanning effect.
+      const committed = [...history.keys()]
+      for (let i = 0; i < committed.length; i++) {
+        if (restoreCard())
+          await new Promise(resolve => setTimeout(resolve, resetOptions?.delay ?? 90))
+      }
+      // Records clear themselves as restore animations finish.
     }
     else {
-      // No animation - clear everything immediately
+      records.clear()
       history.clear()
-      cardsInTransition.clear()
-      // Reset the cursor so the active card resolves back to the first item.
       cursorId.value = null
     }
   }
@@ -441,11 +478,12 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
     canRestore,
     stackList,
     swipeCard,
+    swipeActive,
     restoreCard,
     removeAnimatingCard,
     reset,
     hasCardsInTransition,
     currentItemId,
-    cardsInTransition: computed(() => Array.from(cardsInTransition.values())),
+    cardsInTransition: transitionList,
   }
 }

@@ -184,9 +184,9 @@ const {
   isStart,
   canRestore,
   stackList,
-  cardsInTransition,
   hasCardsInTransition,
   swipeCard,
+  swipeActive,
   restoreCard,
   removeAnimatingCard,
   reset,
@@ -222,16 +222,10 @@ const {
 const isDragDisabled = computed(() => props.disableDrag || (config.value.waitAnimationEnd && hasCardsInTransition.value))
 
 /**
- * Handles card swipe completion
- * Emits both new directional events AND old approve/reject events for backward compatibility
+ * Emits directional swipe events (plus deprecated approve/reject aliases) for a
+ * card that has just been swiped.
  */
-function handleCardSwipe(itemId: string | number, action: SwipeAction, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
-  const swipedCard = swipeCard(itemId, action, position)
-
-  if (!swipedCard)
-    return
-
-  // Always emit new directional events
+function emitSwipeEvents(action: SwipeAction, swipedCard: T) {
   if (action === SwipeAction.TOP) {
     emit('swipeTop', swipedCard)
     emit('approve', swipedCard) // Backward compatibility
@@ -254,6 +248,15 @@ function handleCardSwipe(itemId: string | number, action: SwipeAction, position:
 }
 
 /**
+ * Handles card swipe completion from a drag gesture (the card id is known).
+ */
+function handleCardSwipe(itemId: string | number, action: SwipeAction, position: DragPosition = { x: 0, y: 0, delta: 0, type: null }) {
+  const swipedCard = swipeCard(itemId, action, position)
+  if (swipedCard)
+    emitSwipeEvents(action, swipedCard)
+}
+
+/**
  * Handles drag move events
  * Emits both new directional types AND old approve/reject types for backward compatibility
  */
@@ -273,14 +276,13 @@ function handleDragMove(item: T, type: SwipeAction | null, delta: number) {
 }
 
 /**
- * Helper to perform card action
+ * Performs a button-triggered swipe. The core picks the right target (the
+ * current card, or a mid-restore card so restore → next cancels cleanly).
  */
 function performCardAction(type: SwipeAction) {
-  // If there's a card currently restoring, target that card instead of current card
-  const restoringCard = cardsInTransition.value.filter(card => card.animation?.isRestoring).pop()
-  const targetCard = restoringCard || stackList.value.find(item => !item.isAnimating && item.itemId === currentItemId.value)
-
-  return targetCard && handleCardSwipe(targetCard.itemId, type)
+  const swipedCard = swipeActive(type)
+  if (swipedCard)
+    emitSwipeEvents(type, swipedCard)
 }
 
 /**
