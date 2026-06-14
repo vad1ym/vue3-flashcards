@@ -1,6 +1,6 @@
 import type { MaybeRefOrGetter } from 'vue'
 import type { DragPosition } from './useDragSetup'
-import { computed, reactive, shallowReactive, toValue, watch } from 'vue'
+import { computed, reactive, ref, shallowReactive, toValue, watch } from 'vue'
 
 export interface StackItem<T> {
   item: T
@@ -47,26 +47,112 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
     return item[trackKey as keyof T] as string | number ?? index
   }
 
-  // Current index - first uncompleted card
-  // It is the pointer for the first card in the stack, to detect current active card
-  const currentIndex = computed(() => {
+  /**
+   * Map of itemId -> index in the source array.
+   * Rebuilt only when `items` actually changes (reference/length/content),
+   * NOT on every swipe. This turns the repeated `items.findIndex(...)` calls
+   * scattered across this composable into O(1) lookups, removing the
+   * O(renderLimit * n) work in generateStackItems and the linear scans in
+   * removeAnimatingCard / findRestorableCard.
+   */
+  const idToIndex = computed(() => {
     const { items } = options.value
-    const idx = items.findIndex((item, index) => {
-      const itemId = getId(item, index)
-      // Skip if in history OR currently animating (not restoring)
-      const isInHistory = history.has(itemId)
-      const isAnimating = cardsInTransition.has(itemId)
-      return !isInHistory && !isAnimating
-    })
-    const result = idx === -1 ? items.length : idx
-    return result
+    const map = new Map<string | number, number>()
+    for (let i = 0; i < items.length; i++)
+      map.set(getId(items[i], i), i)
+    return map
   })
 
-  // ID of the current card
-  const currentItemId = computed(() => {
-    const { items = [] } = options.value
+  function indexOfId(itemId: string | number): number {
+    return idToIndex.value.get(itemId) ?? -1
+  }
+
+  /**
+   * Is this card "consumed" for the purpose of finding the active card?
+   * A card is consumed if it's in history or currently swiping away (not restoring).
+   */
+  function isConsumed(itemId: string | number): boolean {
+    if (history.has(itemId))
+      return true
+    const card = cardsInTransition.get(itemId)
+    return !!card && !card.animation?.isRestoring
+  }
+
+  /**
+   * CURSOR (id-based active pointer).
+   *
+   * Instead of re-scanning the whole array from index 0 on every change
+   * (which is O(scroll-position) per swipe => O(n^2) over a session when
+   * history is never cleared), we keep the active card as an id and advance
+   * it forward incrementally.
+   *
+   * The cursor is resilient to runtime mutations of `items`:
+   * - cards inserted BEFORE the cursor do NOT steal focus (we follow the card,
+   *   not the index) — the user's current card stays put under their finger;
+   * - cards appended after the cursor don't disturb it;
+   * - if the cursor card is removed from `items`, we recompute from its last
+   *   known position.
+   *
+   * It stores the id of a card at or before the active card, used purely as a
+   * scan start hint. `null` = "scan from the beginning".
+   */
+  const cursorId = ref<string | number | null>(null)
+
+  /**
+   * Scan forward from `startIndex`, returning the index of the first
+   * non-consumed card, or items.length if none remain. Forward-only; the start
+   * hint lets us skip the already-consumed prefix instead of re-walking it.
+   */
+  function resolveActiveIndex(startIndex: number): number {
+    const { items } = options.value
+    for (let i = Math.max(0, startIndex); i < items.length; i++) {
+      if (!isConsumed(getId(items[i], i)))
+        return i
+    }
+    return items.length
+  }
+
+  /**
+   * Current index — position of the active card (first non-consumed) in the
+   * source array, or items.length at end-of-deck.
+   *
+   * The cursor (`cursorId`) is a start hint moved explicitly by swipe / restore
+   * / reset. On the happy path the scan starts right at the active card and
+   * returns immediately (amortized O(1) per swipe). The hint is resilient to
+   * runtime mutations: if its card was removed we restart from 0; cards
+   * inserted before it never steal focus because we only ever scan FORWARD
+   * from the hint, never re-evaluate the consumed prefix.
+   */
+  const currentIndex = computed(() => {
+    const hintIdx = cursorId.value === null ? 0 : indexOfId(cursorId.value)
+    return resolveActiveIndex(hintIdx === -1 ? 0 : hintIdx)
+  })
+
+  // ID of the current card — derived from currentIndex exactly as the original
+  // implementation did, so the public activeItemKey contract is unchanged
+  // (a real id, or the number items.length at end-of-deck).
+  const currentItemId = computed<string | number>(() => {
+    const { items } = options.value
     return getId(items[currentIndex.value], currentIndex.value)
   })
+
+  /**
+   * Advance the cursor hint to the current active card after a swipe, so the
+   * next scan skips the just-consumed card instead of re-walking the prefix.
+   */
+  function syncCursor() {
+    const { items } = options.value
+    const idx = currentIndex.value
+    cursorId.value = idx < items.length ? getId(items[idx], idx) : null
+  }
+
+  /**
+   * Point the cursor hint at a specific card (used by restore, which moves the
+   * active card BACKWARD to the just-restored item).
+   */
+  function moveCursorTo(itemId: string | number) {
+    cursorId.value = itemId
+  }
 
   // Expected index after restoring animation, to better handle isStart & isEnd
   const expectedIndex = computed(() => {
@@ -81,6 +167,8 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
     const { loop, items, onLoop } = options.value
     if (loop && ci === items.length) {
       history.clear()
+      // New cycle: reset the cursor so the active card resolves to the first item.
+      cursorId.value = null
       // Don't clear cardsInTransition here - let animations finish naturally
       // But we need to prevent restore from finding cards from previous cycle
       // And also we need to prevent last animating cards to appear in next cycle history
@@ -96,7 +184,7 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
 
     // First, add animating cards
     for (const [itemId, card] of cardsInTransition.entries()) {
-      const originalIndex = items.findIndex((item, idx) => getId(item, idx) === itemId)
+      const originalIndex = indexOfId(itemId)
       if (originalIndex >= 0) {
         result.push({
           ...card,
@@ -189,15 +277,20 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
     // If card was restored - remove card from history
     if (card.animation?.isRestoring) {
       history.delete(itemId)
+      // Restore completed: the restored card becomes the active one again.
+      // It sits BEHIND the cursor, which the forward-only resolver can't reach,
+      // so point the cursor at it explicitly (then syncCursor below is a no-op
+      // since the card is now the first non-consumed one).
+      moveCursorTo(itemId)
     }
     else if (card.animation) {
       // Card finished swiping animation - add to history only if we're still in the same cycle
-      const { items, loop } = options.value
+      const { loop } = options.value
       if (loop) {
         // In loop mode, check if card belongs to current cycle
-        const cardIndex = items.findIndex((item, idx) => getId(item, idx) === itemId)
+        const cardIndex = indexOfId(itemId)
         // Only add to history if card index is before current index (belongs to current cycle)
-        if (cardIndex < currentIndex.value) {
+        if (cardIndex !== -1 && cardIndex < currentIndex.value) {
           history.set(itemId, card.animation.type)
         }
       }
@@ -209,6 +302,10 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
 
     // Remove card from transitions
     cardsInTransition.delete(itemId)
+
+    // The just-finished card is now consumed (history) or freed (restore);
+    // pull the cursor to the new active card so the next resolve is O(1).
+    syncCursor()
   }
 
   // -------------------
@@ -223,10 +320,11 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
     }
 
     // Check if current item still exist in source items array
-    const item = items.find((item, index) => getId(item, index) === itemId)
-    if (!item) {
+    const idx = indexOfId(itemId)
+    if (idx === -1) {
       return
     }
+    const item = items[idx]
 
     addOrReplaceCard({
       item,
@@ -242,6 +340,10 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
     // Don't update history yet - will be done after animation completes
     // This keeps currentIndex stable during animation
     // history.set(itemId, type)
+
+    // The swiped card is now consumed (animating away); advance the cursor to
+    // the next active card so subsequent lookups stay O(1).
+    syncCursor()
 
     return item
   }
@@ -326,6 +428,8 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
       // No animation - clear everything immediately
       history.clear()
       cardsInTransition.clear()
+      // Reset the cursor so the active card resolves back to the first item.
+      cursorId.value = null
     }
   }
 
