@@ -644,6 +644,11 @@ function animatedReset() {
 - **Type:** `() => void`
 - **Description:** Returns to the previous card if available.
 
+### `swipe(direction)`
+
+- **Type:** `(direction: 'top' | 'left' | 'right' | 'bottom') => void`
+- **Description:** Declarative swipe — `swipe('left')` is equivalent to `swipeLeft()`. Handy when the direction is dynamic.
+
 ### `swipeTop()`
 
 - **Type:** `() => void`

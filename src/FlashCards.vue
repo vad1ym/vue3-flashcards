@@ -321,6 +321,12 @@ const swipeRight = () => performCardAction(SwipeAction.RIGHT)
 const swipeBottom = () => performCardAction(SwipeAction.BOTTOM)
 
 /**
+ * Declarative swipe — `swipe('left')` is the same as `swipeLeft()`. Handy when
+ * the direction is dynamic.
+ */
+const swipe = (direction: Direction) => performCardAction(direction as SwipeAction)
+
+/**
  * Skips card - moves to end without swiping in any direction
  */
 const skip = () => performCardAction(SwipeAction.SKIP)
@@ -440,6 +446,7 @@ watch(currentItemId, () => focusActiveCard())
 
 defineExpose({
   // Directional swipe methods
+  swipe,
   swipeTop,
   swipeLeft,
   swipeRight,
