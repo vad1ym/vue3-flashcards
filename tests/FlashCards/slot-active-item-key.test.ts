@@ -124,9 +124,10 @@ describe('[slot] activeItemKey', () => {
     loopWrapper.vm.swipeRight()
     await loopWrapper.vm.$nextTick()
 
-    // After all cards are swiped in loop mode, current index points to length
-    // which means activeItemKey is undefined (no current card until loop resets)
-    expect(loopWrapper.find('.active-key').text()).toBe('3')
+    // Swiping the last card completes the cycle: the deck rewinds immediately and
+    // the active card loops back to the first one — even while the last card's
+    // fly-out is still in flight (it now belongs to the previous, stale cycle).
+    expect(loopWrapper.find('.active-key').text()).toBe('1')
   })
 
   it('should show activeItemKey for last card when all cards are processed (no loop)', async () => {

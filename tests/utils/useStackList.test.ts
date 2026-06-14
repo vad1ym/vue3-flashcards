@@ -208,6 +208,46 @@ describe('useStackList', () => {
       expect(stackList.history.size).toBe(0)
     })
 
+    it('keeps a valid active card when a fly-out outlives a loop rewind', async () => {
+      // Fast-swipe regression: swipe every card without waiting for any fly-out
+      // to finish, so the last card's `swiping` record is still present when the
+      // cycle rewinds. The stale record must NOT block the fresh active card
+      // (id 1) — previously it kept the card "consumed", leaving no active card.
+      const items = createTestItems(3)
+      const options = ref<StackListOptions<TestItem>>({
+        items,
+        loop: true,
+        renderLimit: 3,
+        itemKey: 'id',
+      })
+
+      const stackList = useStackList(options)
+
+      // Swipe all three without resolving a single animationend.
+      await stackList.swipeCard(1, SwipeAction.RIGHT)
+      await stackList.swipeCard(2, SwipeAction.RIGHT)
+      await stackList.swipeCard(3, SwipeAction.RIGHT)
+      await nextTick()
+
+      // Cycle rewound: the deck is back at the first card even though all three
+      // fly-outs are still in flight.
+      expect(stackList.currentIndex.value).toBe(0)
+      expect(stackList.currentItemId.value).toBe(1)
+      expect(stackList.isEnd.value).toBe(false)
+
+      // The fresh active card renders as a live (non-animating) card.
+      const active = stackList.stackList.value.find(s => s.itemId === 1)
+      expect(active).toBeTruthy()
+      expect(active!.isAnimating).toBeFalsy()
+
+      // Late-landing fly-outs from the old cycle don't commit into the new one.
+      stackList.removeAnimatingCard(1)
+      stackList.removeAnimatingCard(2)
+      stackList.removeAnimatingCard(3)
+      expect(stackList.history.size).toBe(0)
+      expect(stackList.currentItemId.value).toBe(1)
+    })
+
     it('should handle cycling with different currentIndex positions', async () => {
       const items = createTestItems(4)
       const options = ref<StackListOptions<TestItem>>({

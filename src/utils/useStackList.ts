@@ -40,6 +40,11 @@ export interface CardRecord {
   state: CardState
   action: SwipeAction // swipe direction / type
   initialPosition?: DragPosition
+  // In loop mode, the cycle this record was created in. A `swiping` card that
+  // outlives a loop rewind (its fly-out finishes AFTER the deck cycled back)
+  // belongs to a stale cycle: it must NOT count as consumed in the new cycle and
+  // must NOT commit to `history` when it lands. Undefined outside loop mode.
+  cycle?: number
 }
 
 export interface StackItem<T> {
@@ -91,6 +96,12 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
   // -------------------------------------------------------------------------
   const records = reactive(new Map<string | number, CardRecord>())
   const history = reactive(new Map<string | number, SwipeAction>())
+
+  // Monotonic loop-cycle counter. Bumped every time the deck rewinds (loop
+  // mode). Records stamped with an older cycle are "stale" — they belong to a
+  // deck that no longer exists, so they're ignored by the active-card scan and
+  // never committed when their fly-out finally lands. (Stays 0 outside loop.)
+  const cycle = ref(0)
 
   // True while any card is animating (swiping out or restoring back in).
   const hasCardsInTransition = computed(() => records.size > 0)
@@ -156,9 +167,22 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
    * (`swiped`, in history) or animating away (`swiping`). A `restoring` card is
    * NOT consumed, but it sits behind the cursor so the forward scan skips it.
    * O(1): two map lookups.
+   *
+   * A `swiping` record left over from a previous loop cycle is NOT consumed: in
+   * the new cycle that same card is a fresh, active card again, even though its
+   * old fly-out animation hasn't finished yet. Honouring it would make the deck
+   * skip (or hide) a live card on the cycle boundary.
    */
   function isConsumed(itemId: string | number): boolean {
-    return history.has(itemId) || records.get(itemId)?.state === 'swiping'
+    if (history.has(itemId))
+      return true
+    const rec = records.get(itemId)
+    return rec?.state === 'swiping' && !isStale(rec)
+  }
+
+  // A record is stale once the deck has cycled past the cycle it was stamped in.
+  function isStale(rec: CardRecord): boolean {
+    return rec.cycle !== undefined && rec.cycle !== cycle.value
   }
 
   // -------------------------------------------------------------------------
@@ -247,6 +271,14 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
   const transitionList = computed<StackItem<T>[]>(() => {
     const result: StackItem<T>[] = []
     for (const [id, rec] of records) {
+      // A stale swiping record (its fly-out outlived a loop rewind) keeps
+      // animating off-screen — UNLESS the same item has already become the live
+      // active card in the new cycle (fast-swipe wrapped all the way back to it).
+      // In that one case rendering it as an animating ghost would duplicate the
+      // vnode key and steal the active card, so skip it: the deck renders the
+      // fresh live card instead (its FlashCard cancels the leftover fly-out).
+      if (isStale(rec) && id === currentItemId.value)
+        continue
       if (indexOfId(id) !== -1)
         result.push(getTransitionStackItem(id, rec))
     }
@@ -280,9 +312,13 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
   watch(expectedIndex, (ci) => {
     const { loop, items, onLoop } = options.value
     if (loop && ci === items.length) {
-      // Drop all committed cards; leave in-flight animations to finish naturally.
+      // Drop all committed cards and rewind. In-flight fly-outs are left running
+      // (they finish visually), but they now belong to the OLD cycle: bumping
+      // `cycle` marks their records stale so they neither block the fresh active
+      // card nor re-commit when they land. See `isStale` / `removeAnimatingCard`.
       history.clear()
       cursorId.value = null
+      cycle.value++
       onLoop?.()
     }
   })
@@ -340,8 +376,10 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
     const { items } = options.value
     for (let i = expectedIndex.value - 1; i >= 0; i--) {
       const id = getId(items[i], i)
+      const rec = records.get(id)
       // committed (history) or still swiping away — both are restorable.
-      if (history.has(id) || records.get(id)?.state === 'swiping')
+      // A stale swiping record (old loop cycle) is not part of this deck.
+      if (history.has(id) || (rec?.state === 'swiping' && !isStale(rec)))
         return true
     }
     return false
@@ -370,7 +408,7 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
 
     // Card is now in-flight again; it lives in `records`, not `history`
     // (covers restore → fast next: a restoring card that was still committed).
-    records.set(itemId, { state: 'swiping', action: type, initialPosition })
+    records.set(itemId, { state: 'swiping', action: type, initialPosition, cycle: cycle.value })
     history.delete(itemId)
     // The swiped card is now consumed; advance the cursor.
     syncCursor()
@@ -445,7 +483,7 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
 
   /**
    * animationEnd: resolve a transient state to its committed form.
-   *   swiping   ──▶ swiped   (commit; in loop mode only if it belongs to cycle)
+   *   swiping   ──▶ swiped   (commit; in loop mode only if it's still this cycle)
    *   restoring ──▶ pending  (delete record; card returns to the deck)
    */
   function removeAnimatingCard(itemId: string | number) {
@@ -460,18 +498,14 @@ export function useStackList<T extends Record<string, unknown>>(_options: MaybeR
       moveCursorTo(itemId)
     }
     else if (rec.state === 'swiping') {
-      const { loop } = options.value
-      if (loop) {
-        // Only commit if the card belongs to the current cycle (before active).
-        const cardIndex = indexOfId(itemId)
-        if (cardIndex !== -1 && cardIndex < currentIndex.value)
-          commit(itemId, rec)
-        else
-          records.delete(itemId)
-      }
-      else {
+      // A fly-out that outlived a loop rewind belongs to the old cycle: just drop
+      // its record. Committing it would mark a card the new cycle treats as fresh
+      // as already-swiped (a phantom gap). The card is already pending again, so
+      // dropping is all that's needed.
+      if (isStale(rec))
+        records.delete(itemId)
+      else
         commit(itemId, rec)
-      }
       syncCursor()
     }
   }

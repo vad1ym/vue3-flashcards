@@ -521,15 +521,21 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     }
   }
 
-  function setupInteract() {
-    // Set initial position
-    const initialPos = options.value.initialPosition
-    Object.assign(position, {
-      x: initialPos?.x || 0,
-      y: initialPos?.y || 0,
-      delta: initialPos?.delta || 0,
-      type: initialPos?.type ?? inferDirectionFromPosition(initialPos?.x ?? 0, initialPos?.y ?? 0),
-    })
+  function setupInteract({ applyInitialPosition = true }: { applyInitialPosition?: boolean } = {}) {
+    // Apply the initial position ONLY when asked (on mount / explicit setup). The
+    // `disableDrag` watcher re-runs setup just to (de)attach listeners — it must
+    // NOT re-stamp `initialPosition`, or a card that finished swiping and is being
+    // reused (loop mode) would snap back to its old release offset. See the
+    // `disableDrag` watcher in FlashCard.vue.
+    if (applyInitialPosition) {
+      const initialPos = options.value.initialPosition
+      Object.assign(position, {
+        x: initialPos?.x || 0,
+        y: initialPos?.y || 0,
+        delta: initialPos?.delta || 0,
+        type: initialPos?.type ?? inferDirectionFromPosition(initialPos?.x ?? 0, initialPos?.y ?? 0),
+      })
+    }
 
     // Don't add event listeners if dragging is disabled
     if (options.value.disableDrag) {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { AnimationKeyframes } from './utils/animationKeyframes'
 import type { DragPosition, DragSetupParams } from './utils/useDragSetup'
-import { computed, onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import ApproveIcon from './components/icons/ApproveIcon.vue'
 import RejectIcon from './components/icons/RejectIcon.vue'
 import { defaultAnimationKeyframes, restFrame } from './utils/animationKeyframes'
@@ -114,6 +114,7 @@ const {
   cleanupInteract,
   getDominantAxis,
   peek,
+  restore: restorePosition,
 } = useDragSetup(el, () => ({
   ...otherProps,
   direction,
@@ -178,10 +179,13 @@ function getTransformStyle(position: DragPosition): string | null {
   return scale()
 }
 
-// Watch for disableDrag prop changes to resubscribe/unsubscribe
+// Watch for disableDrag prop changes to resubscribe/unsubscribe. Re-attach
+// listeners only — do NOT re-stamp `initialPosition` (that's a mount-time / fresh
+// fly-out concern; re-applying it here would snap a reused card back to its old
+// release offset in loop mode).
 watch(() => otherProps.disableDrag, () => {
   cleanupInteract()
-  setupInteract()
+  setupInteract({ applyInitialPosition: false })
 })
 
 // -------------------------------------------------------------------------
@@ -199,8 +203,27 @@ let currentAnim: Animation | null = null
 // mount hook and the watcher don't double-run the same flight.
 let animatedFlight: FlashCardProps['flight'] | null = null
 
+// While true the inner `.flash-card__transform` transition is disabled, so a
+// position reset (e.g. a reused loop card returning to rest) snaps instead of
+// tweening the leftover swipe rotation back to straight.
+const resetting = ref(false)
+
 function cancelAnim() {
   currentAnim?.cancel()
+  currentAnim = null
+}
+
+// Clear ANY lingering WAAPI animation on the element — even one we no longer
+// hold a reference to. A swipe-out's `fill: 'forwards'` deliberately outlives its
+// `.finished` (it must hold the card off-screen until the parent removes it). In
+// loop mode the parent does NOT remove it: the same vnode key is reused as a
+// background card next cycle, so that finished-but-still-filling animation would
+// keep the card off-screen and invisible. When `flight` clears we drop it.
+function clearLingeringAnims() {
+  if (!el.value)
+    return
+  for (const anim of el.value.getAnimations())
+    anim.cancel()
   currentAnim = null
 }
 
@@ -287,7 +310,31 @@ function syncAnimation() {
   }
   else {
     animatedFlight = null
-    cancelAnim()
+    // Drop any lingering fill — including a finished swipe-out the parent kept
+    // around (loop mode reuses the element as a background card). cancelAnim()
+    // alone wouldn't help: `currentAnim` is already null once `.finished` ran.
+    clearLingeringAnims()
+    // A completed swipe leaves `position` at the release point (so the fly-out
+    // could continue from the finger) AND `delta` at ±1, which rotates the inner
+    // `.flash-card__transform` by `maxRotation`. With no flight anymore the card
+    // is at rest, so clear that. But the inner element has a `transform 0.4s`
+    // transition, so resetting the rotation would visibly tween from the swiped
+    // angle back to straight when a loop card reappears in the background. Snap
+    // it instantly: suppress the transition for the frame we reset, then restore.
+    resetting.value = true
+    restorePosition()
+    // Re-enable the transition only AFTER the browser has painted the snapped
+    // (transition-less) frame. A microtask (`nextTick`) is too early — the style
+    // recalc would still batch the reset with the re-enable and tween. Two rAFs
+    // guarantee a painted frame in between. Falls back to nextTick where rAF is
+    // unavailable (SSR / tests).
+    const reenable = () => {
+      resetting.value = false
+    }
+    if (typeof requestAnimationFrame === 'function')
+      requestAnimationFrame(() => requestAnimationFrame(reenable))
+    else
+      nextTick(reenable)
   }
 }
 
@@ -325,6 +372,7 @@ defineExpose({
     class="flash-card"
     :class="{
       'flash-card--dragging': isDragging,
+      'flash-card--resetting': resetting,
       'flash-card--drag-disabled': otherProps.disableDrag,
     }"
     :style="{ transform: `translate3D(${position.x}px, ${position.y}px, 0)` }"
@@ -394,6 +442,15 @@ defineExpose({
 .flash-card:not(.flash-card--dragging),
 .flash-card:not(.flash-card--dragging) .flash-card__transform {
   transition: transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* While resetting (a card returning to rest, e.g. a reused loop card), snap the
+   transform instead of tweening the leftover swipe rotation back to straight.
+   `!important` beats the higher-specificity `:not(.flash-card--dragging)` rule
+   above without having to mirror its selector shape. */
+.flash-card--resetting,
+.flash-card--resetting .flash-card__transform {
+  transition: none !important;
 }
 
 .flash-card__indicator {
