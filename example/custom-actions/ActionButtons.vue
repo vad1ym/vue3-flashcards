@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineProps<{
-  approve: () => void
-  reject: () => void
+  swipeRight: () => void
+  swipeLeft: () => void
   restore: () => void
   reset: (options?: { animate?: boolean }) => void
   isStart: boolean
@@ -12,13 +12,13 @@ defineProps<{
   <div class="grid grid-cols-2 gap-4 mt-6">
     <button
       class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
-      @click="reject"
+      @click="swipeLeft"
     >
       ❌ Skip
     </button>
     <button
       class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
-      @click="approve"
+      @click="swipeRight"
     >
       ✅ Learn
     </button>

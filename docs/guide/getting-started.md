@@ -1,7 +1,7 @@
 # Getting Started
 
-::: tip Upgrading from v0.x?
-See the [Migration Guide](./migration-from-v0) for upgrading from previous versions.
+::: tip Upgrading?
+See the [Migrating to v2](./migrating-to-v2) guide for upgrading from previous versions.
 :::
 
 Quick start guide to building your first swipeable card interface.

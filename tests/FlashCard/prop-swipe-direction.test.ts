@@ -23,7 +23,7 @@ describe('[props] direction', () => {
     it('should emit complete when swiped horizontally beyond threshold', async () => {
       const cardElement = wrapper.element
 
-      new DragSimulator(cardElement).swipeApprove()
+      new DragSimulator(cardElement).swipeRightBeyondThreshold()
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
@@ -33,7 +33,7 @@ describe('[props] direction', () => {
     it('should not emit complete when swiped vertically beyond threshold', async () => {
       const cardElement = wrapper.element
 
-      new DragSimulator(cardElement).swipeApproveVertical()
+      new DragSimulator(cardElement).swipeUpBeyondThreshold()
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeFalsy()
@@ -70,7 +70,7 @@ describe('[props] direction', () => {
     it('should emit complete when swiped vertically up beyond threshold (top)', async () => {
       const cardElement = wrapper.element
 
-      new DragSimulator(cardElement).swipeApproveVertical()
+      new DragSimulator(cardElement).swipeUpBeyondThreshold()
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
@@ -80,7 +80,7 @@ describe('[props] direction', () => {
     it('should emit complete when swiped vertically down beyond threshold (bottom)', async () => {
       const cardElement = wrapper.element
 
-      new DragSimulator(cardElement).swipeRejectVertical()
+      new DragSimulator(cardElement).swipeDownBeyondThreshold()
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
@@ -90,7 +90,7 @@ describe('[props] direction', () => {
     it('should not emit complete when swiped horizontally beyond threshold', async () => {
       const cardElement = wrapper.element
 
-      new DragSimulator(cardElement).swipeApprove()
+      new DragSimulator(cardElement).swipeRightBeyondThreshold()
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeFalsy()
@@ -151,7 +151,7 @@ describe('[props] direction', () => {
 
       const cardElement = verticalWrapper.element
 
-      new DragSimulator(cardElement, { swipeThreshold: customThreshold }).swipeApproveVertical()
+      new DragSimulator(cardElement, { swipeThreshold: customThreshold }).swipeUpBeyondThreshold()
       await verticalWrapper.vm.$nextTick()
 
       expect(verticalWrapper.emitted('complete')).toBeTruthy()

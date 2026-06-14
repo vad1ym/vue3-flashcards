@@ -7,7 +7,7 @@ Welcome to the Vue3 Flashcards guide. Learn how to build Tinder-like card interf
 - [Getting Started](./getting-started.md) - Installation and first steps
 - [Installation](./installation.md) - npm, yarn, pnpm, CDN
 - [Basic Concepts](./basic-concepts.md) - Core library concepts
-- [Migration from v0.x](./migration-from-v0.md) - Upgrading from previous versions
+- [Migrating to v2](./migrating-to-v2.md) - Upgrading from previous versions
 
 ## Learning Path
 

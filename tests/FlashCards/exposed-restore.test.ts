@@ -40,8 +40,8 @@ describe('[exposed] restore', () => {
   })
 
   it('should restore last swiped card', async () => {
-    // Approve first card
-    wrapper.vm.approve()
+    // SwipeRight first card
+    wrapper.vm.swipeRight()
     await wrapper.vm.$nextTick()
 
     // Try to restore - in test environment, animations may not complete
@@ -58,10 +58,10 @@ describe('[exposed] restore', () => {
 
   it('should work after multiple swipes', async () => {
     // Swipe multiple cards
-    wrapper.vm.approve() // Card 1
+    wrapper.vm.swipeRight() // Card 1
     await wrapper.vm.$nextTick()
 
-    wrapper.vm.reject() // Card 2
+    wrapper.vm.swipeLeft() // Card 2
     await wrapper.vm.$nextTick()
 
     // Try to restore - focusing on method availability rather than full behavior
@@ -86,7 +86,7 @@ describe('[exposed] restore', () => {
     })
 
     // Even after approving, can't restore with single item
-    singleItemWrapper.vm.approve()
+    singleItemWrapper.vm.swipeRight()
     await singleItemWrapper.vm.$nextTick()
 
     singleItemWrapper.vm.restore()
@@ -106,7 +106,7 @@ describe('[exposed] restore', () => {
       global: { stubs: { Transition: false } },
     })
 
-    loopWrapper.vm.approve()
+    loopWrapper.vm.swipeRight()
     await loopWrapper.vm.$nextTick()
 
     // Test that restore method can be called without errors

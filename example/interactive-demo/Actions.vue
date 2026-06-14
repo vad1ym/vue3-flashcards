@@ -8,8 +8,8 @@ interface Props {
 
 interface Emits {
   (e: 'restore'): void
-  (e: 'reject'): void
-  (e: 'approve'): void
+  (e: 'swipeLeft'): void
+  (e: 'swipeRight'): void
   (e: 'skip'): void
   (e: 'reset', options?: { animate?: boolean }): void
 }
@@ -40,7 +40,7 @@ defineEmits<Emits>()
       <button
         class="btn btn-circle btn-error"
         :disabled="isEnd && !loop"
-        @click="$emit('reject')"
+        @click="$emit('swipeLeft')"
       >
         ✗
       </button>
@@ -61,7 +61,7 @@ defineEmits<Emits>()
       <button
         class="btn btn-circle btn-success"
         :disabled="isEnd && !loop"
-        @click="$emit('approve')"
+        @click="$emit('swipeRight')"
       >
         ✓
       </button>

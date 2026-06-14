@@ -10,7 +10,7 @@ import FlipUsage from '../../example/flip-usage/index.vue'
 
 <Badge type="tip">Beginner</Badge>
 
-Two-sided cards with flip animations. Click to flip, swipe to approve/reject.
+Two-sided cards with flip animations. Click to flip, swipe to dismiss.
 
 ## Demo
 

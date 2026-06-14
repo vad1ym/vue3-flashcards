@@ -72,13 +72,13 @@ describe('index exports', () => {
     })
 
     it('should allow DragPosition with valid type values', () => {
-      const approvePosition: DragPosition = { x: 100, y: 0, delta: 100, type: 'approve' }
-      const rejectPosition: DragPosition = { x: -100, y: 0, delta: -100, type: 'reject' }
+      const rightPosition: DragPosition = { x: 100, y: 0, delta: 100, type: 'right' }
+      const leftPosition: DragPosition = { x: -100, y: 0, delta: -100, type: 'left' }
 
-      expect(approvePosition.type).toBe('approve')
-      expect(rejectPosition.type).toBe('reject')
-      expect(approvePosition.delta).toBe(100)
-      expect(rejectPosition.delta).toBe(-100)
+      expect(rightPosition.type).toBe('right')
+      expect(leftPosition.type).toBe('left')
+      expect(rightPosition.delta).toBe(100)
+      expect(leftPosition.delta).toBe(-100)
     })
 
     it('should export FlashCardsGlobalConfig type', () => {

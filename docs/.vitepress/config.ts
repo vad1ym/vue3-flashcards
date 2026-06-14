@@ -62,7 +62,7 @@ export default defineConfig({
             { text: 'Getting Started', link: '/guide/getting-started' },
             { text: 'Installation', link: '/guide/installation' },
             { text: 'Basic Concepts', link: '/guide/basic-concepts' },
-            { text: 'Migration from v0.x', link: '/guide/migration-from-v0' },
+            { text: 'Migrating to v2', link: '/guide/migrating-to-v2' },
           ],
         },
         {

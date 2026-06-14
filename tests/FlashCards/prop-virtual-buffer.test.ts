@@ -74,7 +74,7 @@ describe('[props] renderLimit', () => {
     it('should update render limit window after swiping cards', async () => {
       // Swipe first card
       const activeCard = wrapper.find('.flashcards__card--active')
-      new DragSimulator(activeCard).swipeApprove()
+      new DragSimulator(activeCard).swipeRightBeyondThreshold()
       await wrapper.vm.$nextTick()
 
       // Should now show cards after swipe (window shifts to show next cards)
@@ -185,10 +185,10 @@ describe('[props] renderLimit', () => {
       for (let i = 0; i < testItems.length; i++) {
         const activeCard = wrapper.find('.flashcards__card--active')
         if (!activeCard.exists()) {
-          wrapper.vm.approve()
+          wrapper.vm.swipeRight()
         }
         else {
-          new DragSimulator(activeCard).swipeApprove()
+          new DragSimulator(activeCard).swipeRightBeyondThreshold()
         }
         await wrapper.vm.$nextTick()
       }

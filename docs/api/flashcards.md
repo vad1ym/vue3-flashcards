@@ -25,7 +25,7 @@ The main component for creating swipeable card interfaces.
 
 - **Type:** `number`
 - **Default:** `150`
-- **Description:** Threshold in pixels for swipe actions. Cards must be swiped beyond this distance to trigger approve/reject.
+- **Description:** Threshold in pixels for swipe actions. Cards must be swiped beyond this distance to trigger a directional swipe.
 
 ### `dragThreshold`
 
@@ -57,10 +57,6 @@ The main component for creating swipeable card interfaces.
 <FlashCards :items="cards" :swipe-direction="['left', 'right', 'top', 'bottom']" />
 ```
 
-::: tip Backward Compatibility
-The old `approve`/`reject` events and slots remain fully functional. When using preset modes (`'horizontal'` or `'vertical'`), the old API continues to work. However, for new projects or when using array mode, the directional API is recommended.
-:::
-
 ### `maxDragY`
 
 - **Type:** `number | null`
@@ -77,7 +73,7 @@ The old `approve`/`reject` events and slots remain fully functional. When using 
 
 - **Type:** `boolean`
 - **Default:** `false`
-- **Description:** Completely disable dragging functionality. When disabled, cards cannot be swiped with touch or mouse gestures. Manual methods (`approve()`, `reject()`, `restore()`) and slot actions still work normally.
+- **Description:** Completely disable dragging functionality. When disabled, cards cannot be swiped with touch or mouse gestures. Manual methods (`swipeRight()`, `swipeLeft()`, `restore()`, etc.) and slot actions still work normally.
 
 ### `resistanceEffect`
 
@@ -270,7 +266,7 @@ function blurTransform(position) {
 
 ### `actions`
 
-- **Props:** `{ restore: () => void, swipeTop: () => void, swipeLeft: () => void, swipeRight: () => void, swipeBottom: () => void, skip: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean, approve: () => void, reject: () => void }`
+- **Props:** `{ restore: () => void, swipeTop: () => void, swipeLeft: () => void, swipeRight: () => void, swipeBottom: () => void, skip: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean }`
 - **Description:** Custom actions UI for controlling card behavior programmatically.
 
 **Available actions:**
@@ -284,8 +280,6 @@ function blurTransform(position) {
 - `isEnd` - Boolean indicating if all cards have been swiped
 - `isStart` - Boolean indicating if at the first card (no cards to restore)
 - `canRestore` - Boolean indicating if there's a previous card to restore
-- `approve()` <Badge type="warning" text="deprecated" /> - Use `swipeRight()` or `swipeTop()` instead
-- `reject()` <Badge type="warning" text="deprecated" /> - Use `swipeLeft()` or `swipeBottom()` instead
 
 ```vue
 <template>
@@ -323,27 +317,6 @@ function blurTransform(position) {
   </FlashCards>
 </template>
 ```
-
-### `approve` <Badge type="warning" text="deprecated" />
-
-- **Props:** `{ item: T, delta: number }`
-- **Description:** Content shown when swiping right (approval indicator). Use `right` or `top` slot instead. The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the approval swipeThreshold.
-
-```vue
-<template #approve="{ item, delta }">
-  <div
-    class="approve-indicator"
-    :style="{ opacity: delta }"
-  >
-    ✅ Like
-  </div>
-</template>
-```
-
-### `reject` <Badge type="warning" text="deprecated" />
-
-- **Props:** `{ item: T, delta: number }`
-- **Description:** Content shown when swiping left (rejection indicator). Use `left` or `bottom` slot instead. The `delta` value ranges from 0 to 1, where 0 means the card is static and 1 means the card is at the rejection swipeThreshold.
 
 ### `top`
 
@@ -444,20 +417,10 @@ function blurTransform(position) {
 - **Payload:** `item: T`
 - **Description:** Emitted when a card is swiped down.
 
-### `approve` <Badge type="warning" text="deprecated" />
-
-- **Payload:** `item: T`
-- **Description:** Emitted when a card is approved (swiped right or up via preset modes). Use `swipeRight` or `swipeTop` event instead.
-
-### `reject` <Badge type="warning" text="deprecated" />
-
-- **Payload:** `item: T`
-- **Description:** Emitted when a card is rejected (swiped left or down via preset modes). Use `swipeLeft` or `swipeBottom` event instead.
-
 ### `skip`
 
 - **Payload:** `item: T`
-- **Description:** Emitted when a card is skipped (skipped via actions) - moves to next card without approve/reject.
+- **Description:** Emitted when a card is skipped (skipped via actions) - moves to next card without swiping in any direction.
 
 ### `restore`
 
@@ -477,7 +440,7 @@ function blurTransform(position) {
 ### `dragmove`
 
 - **Payload:** `item: T, type: SwipeAction | null, delta: number`
-- **Description:** Emitted during card dragging with real-time movement details. The `type` indicates the swipe direction (`'approve'` for right/up, `'reject'` for left/down, or `null` if within threshold). The `delta` is a normalized value (-1 to 1) representing drag progress relative to swipe threshold.
+- **Description:** Emitted during card dragging with real-time movement details. The `type` indicates the swipe direction (`'top'`, `'left'`, `'right'`, `'bottom'`, or `null` if within threshold). The `delta` is a normalized value (-1 to 1) representing drag progress relative to swipe threshold.
 
 ### `dragend`
 
@@ -634,20 +597,10 @@ function animatedReset() {
 - **Type:** `() => void`
 - **Description:** Triggers downward swipe animation on the current card.
 
-### `approve()` <Badge type="warning" text="deprecated" />
-
-- **Type:** `() => void`
-- **Description:** Triggers approval animation on the current card (works only with preset modes). Use `swipeRight()` or `swipeTop()` instead.
-
-### `reject()` <Badge type="warning" text="deprecated" />
-
-- **Type:** `() => void`
-- **Description:** Triggers rejection animation on the current card (works only with preset modes). Use `swipeLeft()` or `swipeBottom()` instead.
-
 ### `skip()`
 
 - **Type:** `() => void`
-- **Description:** Triggers skip animation on the current card - moves to next card without approve/reject.
+- **Description:** Triggers skip animation on the current card - moves to next card without swiping in any direction.
 
 ### `reset(options?)`
 

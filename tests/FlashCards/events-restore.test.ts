@@ -28,7 +28,7 @@ describe('[events] restore', () => {
 
   it('should emit restore event when card is restored programmatically', async () => {
     // First, swipe a card to have something to restore
-    wrapper.vm.approve()
+    wrapper.vm.swipeRight()
     await wrapper.vm.$nextTick()
 
     // Now restore it
@@ -50,7 +50,7 @@ describe('[events] restore', () => {
 
   it('should emit restore event with correct item data', async () => {
     // Swipe the first card
-    wrapper.vm.approve()
+    wrapper.vm.swipeRight()
     await wrapper.vm.$nextTick()
 
     // Restore it
@@ -71,10 +71,10 @@ describe('[events] restore', () => {
 
   it('should work after multiple swipes', async () => {
     // Swipe multiple cards
-    wrapper.vm.approve() // Card 1
+    wrapper.vm.swipeRight() // Card 1
     await wrapper.vm.$nextTick()
 
-    wrapper.vm.reject() // Card 2
+    wrapper.vm.swipeLeft() // Card 2
     await wrapper.vm.$nextTick()
 
     // Restore the last swiped card
@@ -115,7 +115,7 @@ describe('[events] restore', () => {
     })
 
     // Swipe a card in loop mode
-    loopWrapper.vm.approve()
+    loopWrapper.vm.swipeRight()
     await loopWrapper.vm.$nextTick()
 
     // Restore it
@@ -134,10 +134,10 @@ describe('[events] restore', () => {
 
   it('should handle multiple restore calls correctly', async () => {
     // Swipe two cards
-    wrapper.vm.approve() // Card 1
+    wrapper.vm.swipeRight() // Card 1
     await wrapper.vm.$nextTick()
 
-    wrapper.vm.reject() // Card 2
+    wrapper.vm.swipeLeft() // Card 2
     await wrapper.vm.$nextTick()
 
     // Restore first card
@@ -175,7 +175,7 @@ describe('[events] restore', () => {
     })
 
     // Swipe a card first
-    wrapperWithActions.vm.approve()
+    wrapperWithActions.vm.swipeRight()
     await wrapperWithActions.vm.$nextTick()
 
     // Click the restore button
@@ -207,7 +207,7 @@ describe('[events] restore', () => {
     })
 
     // Swipe and restore
-    complexWrapper.vm.approve()
+    complexWrapper.vm.swipeRight()
     await complexWrapper.vm.$nextTick()
 
     complexWrapper.vm.restore()

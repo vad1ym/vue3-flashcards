@@ -26,7 +26,7 @@ describe('[props] maxDragY', () => {
       const cardElement = wrapper.element
 
       // Should still be able to perform horizontal swipes normally
-      new DragSimulator(cardElement).swipeApprove()
+      new DragSimulator(cardElement).swipeRightBeyondThreshold()
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
@@ -87,7 +87,7 @@ describe('[props] maxDragY', () => {
       const cardElement = wrapper.element
 
       // Should be able to swipe horizontally
-      new DragSimulator(cardElement).swipeApprove()
+      new DragSimulator(cardElement).swipeRightBeyondThreshold()
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
@@ -112,7 +112,7 @@ describe('[props] maxDragY', () => {
     it('should allow normal card swiping behavior', async () => {
       const cardElement = wrapper.element
 
-      new DragSimulator(cardElement).swipeApprove()
+      new DragSimulator(cardElement).swipeRightBeyondThreshold()
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()

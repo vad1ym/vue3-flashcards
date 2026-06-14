@@ -34,10 +34,10 @@ const disableDrag = ref(false)
           <LearningCard :item="item" />
         </template>
 
-        <template #actions="{ approve, reject, restore, reset, isStart }">
+        <template #actions="{ swipeRight, swipeLeft, restore, reset, isStart }">
           <ActionButtons
-            :approve="approve"
-            :reject="reject"
+            :swipe-right="swipeRight"
+            :swipe-left="swipeLeft"
             :restore="restore"
             :reset="reset"
             :is-start="isStart"

@@ -196,33 +196,17 @@ export class DragSimulator {
   }
 
   /**
-   * Swipe right beyond swipeThreshold (complete cycle) - full approval swipe
+   * Swipe right beyond swipeThreshold (complete cycle) - full right swipe
    */
   swipeRightBeyondThreshold() {
     return this.dragAndRelease(1.1, this.options.swipeThreshold!) // 110% of swipeThreshold + dragEnd
   }
 
   /**
-   * Swipe left beyond swipeThreshold (complete cycle) - full rejection swipe
+   * Swipe left beyond swipeThreshold (complete cycle) - full left swipe
    */
   swipeLeftBeyondThreshold() {
     return this.dragAndRelease(-1.1, this.options.swipeThreshold!) // 110% of swipeThreshold + dragEnd
-  }
-
-  // --- ALIASES FOR BACKWARDS COMPATIBILITY ---
-
-  /**
-   * Alias for swipeRightBeyondThreshold - complete approval swipe
-   */
-  swipeApprove() {
-    return this.swipeRightBeyondThreshold()
-  }
-
-  /**
-   * Alias for swipeLeftBeyondThreshold - complete rejection swipe
-   */
-  swipeReject() {
-    return this.swipeLeftBeyondThreshold()
   }
 
   // --- VERTICAL SWIPE METHODS ---
@@ -244,14 +228,14 @@ export class DragSimulator {
   }
 
   /**
-   * Swipe up beyond swipeThreshold (complete cycle) - full approval swipe (vertical)
+   * Swipe up beyond swipeThreshold (complete cycle) - full up swipe (vertical)
    */
   swipeUpBeyondThreshold() {
     return this.dragUpToThreshold(1.1).dragEnd()
   }
 
   /**
-   * Swipe down beyond swipeThreshold (complete cycle) - full rejection swipe (vertical)
+   * Swipe down beyond swipeThreshold (complete cycle) - full down swipe (vertical)
    */
   swipeDownBeyondThreshold() {
     return this.dragDownToThreshold(1.1).dragEnd()
@@ -269,19 +253,5 @@ export class DragSimulator {
    */
   swipeDownBelowThreshold() {
     return this.dragDownToThreshold(0.9).dragEnd()
-  }
-
-  /**
-   * Alias for swipeUpBeyondThreshold - complete approval swipe (vertical)
-   */
-  swipeApproveVertical() {
-    return this.swipeUpBeyondThreshold()
-  }
-
-  /**
-   * Alias for swipeDownBeyondThreshold - complete rejection swipe (vertical)
-   */
-  swipeRejectVertical() {
-    return this.swipeDownBeyondThreshold()
   }
 }

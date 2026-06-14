@@ -35,26 +35,26 @@ describe('[props] loop', () => {
     })
 
     it('should emit events correctly in loop mode', async () => {
-      wrapper.vm.approve()
+      wrapper.vm.swipeRight()
       await wrapper.vm.$nextTick()
 
-      expect(wrapper.emitted('approve')).toBeTruthy()
-      expect(wrapper.emitted('approve')?.[0]).toEqual([testItems[0]])
+      expect(wrapper.emitted('swipeRight')).toBeTruthy()
+      expect(wrapper.emitted('swipeRight')?.[0]).toEqual([testItems[0]])
     })
 
     it('should handle multiple approvals in loop mode', async () => {
-      // Approve all cards
+      // SwipeRight all cards
       for (let i = 0; i < 3; i++) {
-        wrapper.vm.approve()
+        wrapper.vm.swipeRight()
         await wrapper.vm.$nextTick()
       }
 
-      // Should have emitted all approve events
-      const approveEvents = wrapper.emitted('approve')
-      expect(approveEvents).toHaveLength(3)
-      expect(approveEvents?.[0]).toEqual([testItems[0]])
-      expect(approveEvents?.[1]).toEqual([testItems[1]])
-      expect(approveEvents?.[2]).toEqual([testItems[2]])
+      // Should have emitted all swipeRight events
+      const swipeRightEvents = wrapper.emitted('swipeRight')
+      expect(swipeRightEvents).toHaveLength(3)
+      expect(swipeRightEvents?.[0]).toEqual([testItems[0]])
+      expect(swipeRightEvents?.[1]).toEqual([testItems[1]])
+      expect(swipeRightEvents?.[2]).toEqual([testItems[2]])
     })
   })
 
@@ -80,9 +80,9 @@ describe('[props] loop', () => {
     })
 
     it('should show empty state after all cards are processed', async () => {
-      // Approve all cards
+      // SwipeRight all cards
       for (let i = 0; i < 3; i++) {
-        wrapper.vm.approve()
+        wrapper.vm.swipeRight()
         await wrapper.vm.$nextTick()
       }
 

@@ -27,7 +27,7 @@ describe('[props] disableDrag', () => {
 
     it('should not respond to drag gestures when dragging is disabled', async () => {
       // Try to drag the card beyond swipeThreshold
-      new DragSimulator(cardElement).swipeApprove()
+      new DragSimulator(cardElement).swipeRightBeyondThreshold()
 
       await wrapper.vm.$nextTick()
 
@@ -38,7 +38,7 @@ describe('[props] disableDrag', () => {
 
     it('should not trigger complete event when dragging is disabled', async () => {
       // Try to swipe beyond swipeThreshold
-      new DragSimulator(cardElement).swipeApprove()
+      new DragSimulator(cardElement).swipeRightBeyondThreshold()
 
       await wrapper.vm.$nextTick()
 
@@ -52,16 +52,16 @@ describe('[props] disableDrag', () => {
 
       await wrapper.vm.$nextTick()
 
-      // Should not show approve/reject indicators (they exist but should not be visible)
-      const approveDiv = wrapper.find('[v-show="position.type === \'approve\'"]')
-      const rejectDiv = wrapper.find('[v-show="position.type === \'reject\'"]')
+      // Should not show directional indicators (they exist but should not be visible)
+      const rightDiv = wrapper.find('[v-show="position.type === \'right\'"]')
+      const leftDiv = wrapper.find('[v-show="position.type === \'left\'"]')
 
       // Since dragging is disabled, position.type should be null, so indicators should not be visible
-      if (approveDiv.exists()) {
-        expect(approveDiv.isVisible()).toBe(false)
+      if (rightDiv.exists()) {
+        expect(rightDiv.isVisible()).toBe(false)
       }
-      if (rejectDiv.exists()) {
-        expect(rejectDiv.isVisible()).toBe(false)
+      if (leftDiv.exists()) {
+        expect(leftDiv.isVisible()).toBe(false)
       }
     })
 

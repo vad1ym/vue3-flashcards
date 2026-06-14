@@ -83,15 +83,15 @@ describe('[events] loop event', () => {
       expect(wrapper.emitted('loop')!.length).toBeGreaterThanOrEqual(1)
     })
 
-    it('should work with both approve and reject swipes', async () => {
-      // Mix of approve and reject swipes
-      const swipes = ['approve', 'reject', 'approve'] as const
+    it('should work with both right and left swipes', async () => {
+      // Mix of right and left swipes
+      const swipes = ['right', 'left', 'right'] as const
 
       for (let i = 0; i < testCards.length; i++) {
         const activeCard = wrapper.find('.flashcards__card--active')
         const simulator = new DragSimulator(activeCard.element as HTMLElement)
 
-        if (swipes[i] === 'approve') {
+        if (swipes[i] === 'right') {
           simulator.swipeRightBeyondThreshold()
         }
         else {
@@ -108,13 +108,13 @@ describe('[events] loop event', () => {
     })
 
     it('should work with programmatic actions', async () => {
-      // Use programmatic approve/reject instead of swiping
+      // Use programmatic swipeRight/swipeLeft instead of swiping
       for (let i = 0; i < testCards.length; i++) {
         if (i % 2 === 0) {
-          wrapper.vm.approve()
+          wrapper.vm.swipeRight()
         }
         else {
-          wrapper.vm.reject()
+          wrapper.vm.swipeLeft()
         }
         await wrapper.vm.$nextTick()
         await wrapper.vm.$nextTick()
@@ -143,7 +143,7 @@ describe('[events] loop event', () => {
 
       // Swipe all cards vertically using programmatic method
       for (let i = 0; i < testCards.length; i++) {
-        wrapper.vm.approve() // Use programmatic approve for vertical
+        wrapper.vm.swipeTop() // Use programmatic swipeTop for vertical
         await wrapper.vm.$nextTick()
         await wrapper.vm.$nextTick()
       }
@@ -176,7 +176,7 @@ describe('[events] loop event', () => {
     it('should emit loop event after completing cycle with restores', async () => {
       // Swipe all cards
       for (let i = 0; i < testCards.length; i++) {
-        wrapper.vm.approve()
+        wrapper.vm.swipeRight()
         await wrapper.vm.$nextTick()
         await wrapper.vm.$nextTick()
       }
@@ -187,7 +187,7 @@ describe('[events] loop event', () => {
       // Restore and swipe again
       wrapper.vm.restore()
       await wrapper.vm.$nextTick()
-      wrapper.vm.approve()
+      wrapper.vm.swipeRight()
       await wrapper.vm.$nextTick()
       await wrapper.vm.$nextTick()
 
@@ -200,7 +200,7 @@ describe('[events] loop event', () => {
     it('should emit loop event when cycle completes', async () => {
       // Swipe all cards
       for (let i = 0; i < testCards.length; i++) {
-        wrapper.vm.approve()
+        wrapper.vm.swipeRight()
         await wrapper.vm.$nextTick()
         await wrapper.vm.$nextTick()
       }
@@ -256,7 +256,7 @@ describe('[events] loop event', () => {
       })
 
       // Swipe the single card using programmatic method
-      wrapper.vm.approve()
+      wrapper.vm.swipeRight()
       await wrapper.vm.$nextTick()
       await wrapper.vm.$nextTick()
 

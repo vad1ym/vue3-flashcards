@@ -36,10 +36,10 @@ describe('[exposed] reset', () => {
     expect(wrapper.vm.canRestore).toBe(false)
 
     // Swipe some cards
-    wrapper.vm.approve()
+    wrapper.vm.swipeRight()
     await wrapper.vm.$nextTick()
 
-    wrapper.vm.reject()
+    wrapper.vm.swipeLeft()
     await wrapper.vm.$nextTick()
 
     // Should be able to restore now
@@ -59,10 +59,10 @@ describe('[exposed] reset', () => {
 
   it('should reset state without clearing animating cards', async () => {
     // Start some animations
-    wrapper.vm.approve()
+    wrapper.vm.swipeRight()
     await wrapper.vm.$nextTick()
 
-    wrapper.vm.reject()
+    wrapper.vm.swipeLeft()
     await wrapper.vm.$nextTick()
 
     // Reset
@@ -89,13 +89,13 @@ describe('[exposed] reset', () => {
     })
 
     // Swipe through all cards in loop mode
-    loopWrapper.vm.approve()
+    loopWrapper.vm.swipeRight()
     await loopWrapper.vm.$nextTick()
 
-    loopWrapper.vm.approve()
+    loopWrapper.vm.swipeRight()
     await loopWrapper.vm.$nextTick()
 
-    loopWrapper.vm.approve()
+    loopWrapper.vm.swipeRight()
     await loopWrapper.vm.$nextTick()
 
     // In loop mode, canRestore depends on completed cards
@@ -119,7 +119,7 @@ describe('[exposed] reset', () => {
     expect(wrapper.vm.canRestore).toBe(false)
 
     // Swipe some cards
-    wrapper.vm.approve()
+    wrapper.vm.swipeRight()
     await wrapper.vm.$nextTick()
 
     // Reset again
@@ -149,8 +149,8 @@ describe('[exposed] reset', () => {
       global: { stubs: { Transition: false } },
     })
 
-    // Approve the only card
-    singleItemWrapper.vm.approve()
+    // SwipeRight the only card
+    singleItemWrapper.vm.swipeRight()
     await singleItemWrapper.vm.$nextTick()
 
     expect(singleItemWrapper.vm.isEnd).toBe(true)
@@ -167,13 +167,13 @@ describe('[exposed] reset', () => {
 
   it('should work after restore operations', async () => {
     // Swipe and restore some cards
-    wrapper.vm.approve()
+    wrapper.vm.swipeRight()
     await wrapper.vm.$nextTick()
 
     wrapper.vm.restore()
     await wrapper.vm.$nextTick()
 
-    wrapper.vm.reject()
+    wrapper.vm.swipeLeft()
     await wrapper.vm.$nextTick()
 
     // Should have some history
@@ -191,18 +191,18 @@ describe('[exposed] reset', () => {
 
   it('should emit no events when resetting', async () => {
     // Swipe some cards first
-    wrapper.vm.approve()
+    wrapper.vm.swipeRight()
     await wrapper.vm.$nextTick()
 
     // Clear previous events
-    wrapper.emitted().approve = undefined
+    wrapper.emitted().swipeRight = undefined
 
     // Reset - should not emit any events
     wrapper.vm.reset()
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.emitted('approve')).toBeFalsy()
-    expect(wrapper.emitted('reject')).toBeFalsy()
+    expect(wrapper.emitted('swipeRight')).toBeFalsy()
+    expect(wrapper.emitted('swipeLeft')).toBeFalsy()
     expect(wrapper.emitted('restore')).toBeFalsy()
   })
 })

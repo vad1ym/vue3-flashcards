@@ -34,16 +34,16 @@ describe('[slot] activeItemKey', () => {
     expect(activeKeyEl.text()).toBe('1')
   })
 
-  it('should update activeItemKey after approve', async () => {
-    wrapper.vm.approve()
+  it('should update activeItemKey after swipeRight', async () => {
+    wrapper.vm.swipeRight()
     await wrapper.vm.$nextTick()
 
     const activeKeyEl = wrapper.find('.active-key')
     expect(activeKeyEl.text()).toBe('2')
   })
 
-  it('should update activeItemKey after reject', async () => {
-    wrapper.vm.reject()
+  it('should update activeItemKey after swipeLeft', async () => {
+    wrapper.vm.swipeLeft()
     await wrapper.vm.$nextTick()
 
     const activeKeyEl = wrapper.find('.active-key')
@@ -51,7 +51,7 @@ describe('[slot] activeItemKey', () => {
   })
 
   it('should keep activeItemKey during restore animation', async () => {
-    wrapper.vm.approve()
+    wrapper.vm.swipeRight()
     await wrapper.vm.$nextTick()
 
     expect(wrapper.find('.active-key').text()).toBe('2')
@@ -88,7 +88,7 @@ describe('[slot] activeItemKey', () => {
 
     expect(customWrapper.find('.active-key').text()).toBe('a1')
 
-    customWrapper.vm.approve()
+    customWrapper.vm.swipeRight()
     await customWrapper.vm.$nextTick()
 
     expect(customWrapper.find('.active-key').text()).toBe('b2')
@@ -113,15 +113,15 @@ describe('[slot] activeItemKey', () => {
     expect(loopWrapper.find('.active-key').text()).toBe('1')
 
     // Swipe through all cards
-    loopWrapper.vm.approve()
+    loopWrapper.vm.swipeRight()
     await loopWrapper.vm.$nextTick()
     expect(loopWrapper.find('.active-key').text()).toBe('2')
 
-    loopWrapper.vm.approve()
+    loopWrapper.vm.swipeRight()
     await loopWrapper.vm.$nextTick()
     expect(loopWrapper.find('.active-key').text()).toBe('3')
 
-    loopWrapper.vm.approve()
+    loopWrapper.vm.swipeRight()
     await loopWrapper.vm.$nextTick()
 
     // After all cards are swiped in loop mode, current index points to length
@@ -130,9 +130,9 @@ describe('[slot] activeItemKey', () => {
   })
 
   it('should show activeItemKey for last card when all cards are processed (no loop)', async () => {
-    wrapper.vm.approve()
+    wrapper.vm.swipeRight()
     await wrapper.vm.$nextTick()
-    wrapper.vm.approve()
+    wrapper.vm.swipeRight()
     await wrapper.vm.$nextTick()
 
     // After processing 2 cards, we should be at card 3

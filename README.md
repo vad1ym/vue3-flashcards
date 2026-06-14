@@ -274,13 +274,11 @@ function blurTransform(position) {
 | Slot Name | Props | Description |
 |-----------|-------|-------------|
 | default | `{ item: T, activeItemKey: number `\|` string }` | Main content of the card (front side) |
-| actions | `{ restore: () => void, swipeTop: () => void, swipeLeft: () => void, swipeRight: () => void, swipeBottom: () => void, skip: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean }` | Custom actions UI. `restore` returns to previous card, directional methods trigger swipe animations, `skip` moves to next without approve/reject, `reset` resets all cards |
+| actions | `{ restore: () => void, swipeTop: () => void, swipeLeft: () => void, swipeRight: () => void, swipeBottom: () => void, skip: () => void, reset: (options?) => void, isEnd: boolean, isStart: boolean, canRestore: boolean }` | Custom actions UI. `restore` returns to previous card, directional methods trigger swipe animations, `skip` moves to next without swiping, `reset` resets all cards |
 | top | `{ item: T, delta: number }` | Content shown when swiping up (indicator) |
 | left | `{ item: T, delta: number }` | Content shown when swiping left (indicator) |
 | right | `{ item: T, delta: number }` | Content shown when swiping right (indicator) |
 | bottom | `{ item: T, delta: number }` | Content shown when swiping down (indicator) |
-| approve | `{ item: T, delta: number }` | ~~Content shown when swiping right~~ **Deprecated**: Use `right` or `top` slot instead |
-| reject | `{ item: T, delta: number }` | **Deprecated**: Use `left` or `bottom` slot instead |
 | empty | - | Content shown when all cards have been swiped |
 
 ## Events
@@ -297,8 +295,6 @@ function blurTransform(position) {
 | dragstart | `item: T` | Emitted when user starts dragging a card |
 | dragmove | `item: T, type: SwipeAction \| null, delta: number` | Emitted during card dragging with movement details |
 | dragend | `item: T` | Emitted when user stops dragging a card |
-| approve | `item: T` | **Deprecated**: Use `swipeRight` or `swipeTop` event instead |
-| reject | `item: T` | **Deprecated**: Use `swipeLeft` or `swipeBottom` event instead |
 
 ## Exposed
 | Method/Property | Type | Description |
@@ -312,8 +308,6 @@ function blurTransform(position) {
 | reset | `(options?) => void` | Resets all cards to initial state. Options: `{ animated?: boolean, delay?: number }` |
 | canRestore | `boolean` | Whether there is a previous card to restore to |
 | isEnd | `boolean` | Whether all cards have been swiped |
-| approve | `() => void` | **Deprecated**: Use `swipeRight()` or `swipeTop()` instead |
-| reject | `() => void` | **Deprecated**: Use `swipeLeft()` or `swipeBottom()` instead |
 
 ## FlipCard Component
 

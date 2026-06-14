@@ -46,7 +46,7 @@ describe('[events] multidirectional events', () => {
       })
     })
 
-    it('should emit right and approve events for right swipe', async () => {
+    it('should emit right event for right swipe', async () => {
       const firstCard = wrapper.find('.flashcards__card--active')
 
       new DragSimulator(firstCard.element as HTMLElement)
@@ -56,17 +56,13 @@ describe('[events] multidirectional events', () => {
 
       await wrapper.vm.$nextTick()
 
-      // Should emit both new directional and old compatibility events
       expect(wrapper.emitted('swipeRight')).toBeTruthy()
       expect(wrapper.emitted('swipeRight')![0]).toEqual([testCards[0]])
-      expect(wrapper.emitted('approve')).toBeTruthy()
-      expect(wrapper.emitted('approve')![0]).toEqual([testCards[0]])
 
-      // Should not emit left, top, bottom, or reject
+      // Should not emit left, top, or bottom
       expect(wrapper.emitted('swipeLeft')).toBeFalsy()
       expect(wrapper.emitted('swipeTop')).toBeFalsy()
       expect(wrapper.emitted('swipeBottom')).toBeFalsy()
-      expect(wrapper.emitted('reject')).toBeFalsy()
     })
 
     it('should not complete for left swipe (not allowed)', async () => {
@@ -82,8 +78,6 @@ describe('[events] multidirectional events', () => {
       // Should not emit any completion events for disallowed direction
       expect(wrapper.emitted('swipeLeft')).toBeFalsy()
       expect(wrapper.emitted('swipeRight')).toBeFalsy()
-      expect(wrapper.emitted('approve')).toBeFalsy()
-      expect(wrapper.emitted('reject')).toBeFalsy()
     })
   })
 
@@ -102,7 +96,7 @@ describe('[events] multidirectional events', () => {
       })
     })
 
-    it('should emit right and approve for right swipe', async () => {
+    it('should emit right event for right swipe', async () => {
       const firstCard = wrapper.find('.flashcards__card--active')
 
       new DragSimulator(firstCard.element as HTMLElement)
@@ -114,11 +108,9 @@ describe('[events] multidirectional events', () => {
 
       expect(wrapper.emitted('swipeRight')).toBeTruthy()
       expect(wrapper.emitted('swipeRight')![0]).toEqual([testCards[0]])
-      expect(wrapper.emitted('approve')).toBeTruthy()
-      expect(wrapper.emitted('approve')![0]).toEqual([testCards[0]])
     })
 
-    it('should emit left and reject for left swipe', async () => {
+    it('should emit left event for left swipe', async () => {
       const firstCard = wrapper.find('.flashcards__card--active')
 
       new DragSimulator(firstCard.element as HTMLElement)
@@ -130,8 +122,6 @@ describe('[events] multidirectional events', () => {
 
       expect(wrapper.emitted('swipeLeft')).toBeTruthy()
       expect(wrapper.emitted('swipeLeft')![0]).toEqual([testCards[0]])
-      expect(wrapper.emitted('reject')).toBeTruthy()
-      expect(wrapper.emitted('reject')![0]).toEqual([testCards[0]])
     })
 
     it('should not complete for vertical swipes', async () => {
@@ -165,7 +155,7 @@ describe('[events] multidirectional events', () => {
       })
     })
 
-    it('should emit top and approve for top swipe', async () => {
+    it('should emit top event for top swipe', async () => {
       const firstCard = wrapper.find('.flashcards__card--active')
 
       new DragSimulator(firstCard.element as HTMLElement)
@@ -177,8 +167,6 @@ describe('[events] multidirectional events', () => {
 
       expect(wrapper.emitted('swipeTop')).toBeTruthy()
       expect(wrapper.emitted('swipeTop')![0]).toEqual([testCards[0]])
-      expect(wrapper.emitted('approve')).toBeTruthy()
-      expect(wrapper.emitted('approve')![0]).toEqual([testCards[0]])
     })
 
     it('should not complete for bottom swipe (not allowed)', async () => {
@@ -192,11 +180,10 @@ describe('[events] multidirectional events', () => {
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('swipeBottom')).toBeFalsy()
-      expect(wrapper.emitted('reject')).toBeFalsy()
     })
   })
 
-  describe('drag events with backward compatibility', () => {
+  describe('drag events', () => {
     beforeEach(() => {
       wrapper = mount(FlashCards, {
         props: {
@@ -212,7 +199,7 @@ describe('[events] multidirectional events', () => {
       })
     })
 
-    it('should emit both directional and approve/reject dragmove events', async () => {
+    it('should emit directional dragmove events', async () => {
       const firstCard = wrapper.find('.flashcards__card--active')
 
       new DragSimulator(firstCard.element as HTMLElement)
@@ -221,14 +208,11 @@ describe('[events] multidirectional events', () => {
 
       await wrapper.vm.$nextTick()
 
-      // Should emit both types of events
       const dragmoveEvents = wrapper.emitted('dragmove')
       expect(dragmoveEvents).toBeTruthy()
 
-      // Should have events for both raw direction and backward compatibility types
       const eventTypes = dragmoveEvents!.map(event => event[1])
       expect(eventTypes).toContain('right')
-      expect(eventTypes).toContain('approve')
     })
   })
 })

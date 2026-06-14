@@ -80,7 +80,7 @@ describe('[events] drag events', () => {
       // Last dragmove event should contain movement details
       const lastEvent = dragMoveEvents[dragMoveEvents.length - 1]
       expect(lastEvent[0]).toEqual(testCards[0]) // item
-      expect(lastEvent[1]).toBe('approve') // type (right movement)
+      expect(lastEvent[1]).toBe('right') // type (right movement)
       expect(lastEvent[2]).toBeCloseTo(0.5, 1) // delta (50% of threshold)
     })
 
@@ -100,7 +100,7 @@ describe('[events] drag events', () => {
       }
     })
 
-    it('should emit dragmove with reject type for left movement', async () => {
+    it('should emit dragmove with left type for left movement', async () => {
       const firstCard = wrapper.find('.flashcards__card--active')
 
       new DragSimulator(firstCard.element as HTMLElement)
@@ -112,7 +112,7 @@ describe('[events] drag events', () => {
       expect(wrapper.emitted('dragmove')).toBeTruthy()
       const dragMoveEvents = wrapper.emitted('dragmove')!
       const lastEvent = dragMoveEvents[dragMoveEvents.length - 1]
-      expect(lastEvent[1]).toBe('reject') // type (left movement)
+      expect(lastEvent[1]).toBe('left') // type (left movement)
       expect(lastEvent[2]).toBeCloseTo(-0.5, 1) // negative delta
     })
 
@@ -230,11 +230,11 @@ describe('[events] drag events', () => {
       expect(wrapper.emitted('dragmove')).toBeTruthy()
       expect(wrapper.emitted('dragend')).toBeTruthy()
 
-      // dragmove should have approve type for upward movement
+      // dragmove should have top type for upward movement
       if (wrapper.emitted('dragmove')) {
         const dragMoveEvents = wrapper.emitted('dragmove')!
         const lastEvent = dragMoveEvents[dragMoveEvents.length - 1]
-        expect(lastEvent[1]).toBe('approve') // up = approve in vertical mode
+        expect(lastEvent[1]).toBe('top') // up = top in vertical mode
       }
     })
   })

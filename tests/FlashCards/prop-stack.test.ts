@@ -156,7 +156,7 @@ describe('[props] stack', () => {
 
       // Swipe the active card
       const activeCard = wrapper.find('.flashcards__card--active')
-      new DragSimulator(activeCard).swipeApprove()
+      new DragSimulator(activeCard).swipeRightBeyondThreshold()
       await wrapper.vm.$nextTick()
 
       // Card 2 should now be active
@@ -286,10 +286,10 @@ describe('[props] stack', () => {
         const activeCard = wrapper.find('.flashcards__card--active')
         if (!activeCard.exists()) {
           // If no active card found, use programmatic method
-          wrapper.vm.approve()
+          wrapper.vm.swipeRight()
         }
         else {
-          new DragSimulator(activeCard).swipeApprove()
+          new DragSimulator(activeCard).swipeRightBeyondThreshold()
         }
         await wrapper.vm.$nextTick()
       }
@@ -315,10 +315,10 @@ describe('[props] stack', () => {
       for (let i = 0; i < 4; i++) {
         const activeCard = wrapper.find('.flashcards__card--active')
         if (!activeCard.exists()) {
-          wrapper.vm.approve()
+          wrapper.vm.swipeRight()
         }
         else {
-          new DragSimulator(activeCard).swipeApprove()
+          new DragSimulator(activeCard).swipeRightBeyondThreshold()
         }
         await wrapper.vm.$nextTick()
       }

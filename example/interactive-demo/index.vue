@@ -12,7 +12,7 @@ import InteractiveCard from './InteractiveCard.vue'
 import ItemsManager from './ItemsManager.vue'
 
 interface Event {
-  type: 'approve' | 'reject' | 'restore' | 'skip'
+  type: 'right' | 'left' | 'restore' | 'skip'
   item: CardItem
   timestamp: string
 }
@@ -74,18 +74,18 @@ const items = ref<CardItem[]>([...defaultItems])
 let nextId = Math.max(...defaultItems.map(item => item.id)) + 1
 
 // Event handlers
-function onApprove(item: CardItem) {
+function onSwipeRight(item: CardItem) {
   events.value.push({
-    type: 'approve',
+    type: 'right',
     item,
     timestamp: new Date().toLocaleTimeString(),
   })
   eventsLogRef.value?.scrollToBottom()
 }
 
-function onReject(item: CardItem) {
+function onSwipeLeft(item: CardItem) {
   events.value.push({
-    type: 'reject',
+    type: 'left',
     item,
     timestamp: new Date().toLocaleTimeString(),
   })
@@ -219,8 +219,8 @@ function resetConfig() {
                       :resistance-effect="config.resistanceEffect"
                       :resistance-threshold="config.resistanceThreshold"
                       :resistance-strength="config.resistanceStrength"
-                      @approve="onApprove"
-                      @reject="onReject"
+                      @swipe-right="onSwipeRight"
+                      @swipe-left="onSwipeLeft"
                       @restore="onRestore"
                       @skip="onSkip"
                     >
@@ -228,7 +228,7 @@ function resetConfig() {
                         <InteractiveCard :item="item" />
                       </template>
 
-                      <template #approve="{ delta }">
+                      <template #right="{ delta }">
                         <div class="absolute inset-0 bg-green-500/20 flex items-center justify-center">
                           <div class="text-green-500 text-4xl font-bold" :style="{ opacity: Math.abs(delta) }">
                             ✓ LIKE
@@ -236,7 +236,7 @@ function resetConfig() {
                         </div>
                       </template>
 
-                      <template #reject="{ delta }">
+                      <template #left="{ delta }">
                         <div class="absolute inset-0 bg-red-500/20 flex items-center justify-center">
                           <div class="text-red-500 text-4xl font-bold" :style="{ opacity: Math.abs(delta) }">
                             ✗ PASS
@@ -244,15 +244,15 @@ function resetConfig() {
                         </div>
                       </template>
 
-                      <template #actions="{ restore, reject, approve, skip, reset, isEnd, isStart, canRestore }">
+                      <template #actions="{ restore, swipeLeft, swipeRight, skip, reset, isEnd, isStart, canRestore }">
                         <Actions
                           :is-end="isEnd"
                           :is-start="isStart"
                           :can-restore="canRestore"
                           :loop="config.loop"
                           @restore="restore"
-                          @reject="reject"
-                          @approve="approve"
+                          @swipe-left="swipeLeft"
+                          @swipe-right="swipeRight"
                           @skip="skip"
                           @reset="reset"
                         />

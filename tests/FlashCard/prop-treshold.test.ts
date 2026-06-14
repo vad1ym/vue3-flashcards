@@ -24,7 +24,7 @@ describe('[props] swipeThreshold', () => {
     it('should emit complete when swiped beyond swipeThreshold', async () => {
       const cardElement = wrapper.element
 
-      new DragSimulator(cardElement).swipeApprove()
+      new DragSimulator(cardElement).swipeRightBeyondThreshold()
       await wrapper.vm.$nextTick()
 
       expect(wrapper.emitted('complete')).toBeTruthy()
