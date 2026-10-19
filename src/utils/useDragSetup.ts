@@ -210,6 +210,11 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   // Track active pointer ID for multi-touch prevention
   const activePointerId = ref<number | null>(null)
 
+  // Set when a gesture that actually dragged is released, so the `click` the
+  // browser fires right after pointerup (the slot content moves with the card,
+  // so it's usually still under the pointer) doesn't trigger slot handlers.
+  let suppressClick = false
+
   let startX = 0
   let startY = 0
 
@@ -352,6 +357,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
   }
 
   function handleDragStart(event: PointerEvent) {
+    suppressClick = false
     isDragStarted.value = true
     activePointerId.value = event.pointerId
 
@@ -449,6 +455,15 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
       return
     }
 
+    if (isDragging.value) {
+      suppressClick = true
+      // The click (if any) is dispatched in the same task as pointerup; reset
+      // afterwards so a later keyboard-triggered click isn't swallowed.
+      setTimeout(() => {
+        suppressClick = false
+      }, 0)
+    }
+
     isDragStarted.value = false
     isDragging.value = false
     activePointerId.value = null
@@ -513,6 +528,17 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
     }
   }
 
+  // Swallow the click that follows a real drag (capture phase, so it never
+  // reaches handlers inside the slot)
+  function handleClick(event: MouseEvent) {
+    if (!suppressClick)
+      return
+
+    suppressClick = false
+    event.preventDefault()
+    event.stopPropagation()
+  }
+
   // Prevent wheel scroll while dragging
   function handleWheel(event: WheelEvent) {
     if (isDragging.value) {
@@ -544,6 +570,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
 
     // Touch events with passive optimization
     element.value?.addEventListener('pointerdown', handleDragStart, { passive: false })
+    element.value?.addEventListener('click', handleClick, { capture: true })
     window.addEventListener('pointermove', handleDragMove, { passive: false })
     window.addEventListener('pointerup', handleDragEnd, { passive: true })
 
@@ -559,6 +586,7 @@ export function useDragSetup(el: MaybeRefOrGetter<HTMLDivElement | null>, _optio
 
   function cleanupInteract() {
     element.value?.removeEventListener('pointerdown', handleDragStart)
+    element.value?.removeEventListener('click', handleClick, { capture: true })
     window.removeEventListener('pointermove', handleDragMove)
     window.removeEventListener('pointerup', handleDragEnd)
 
